@@ -1,0 +1,9 @@
+{
+    "template": "templates/asides/text.tpl",
+
+    "expand":
+    {
+        "Title": "about me",
+        "Text": "0_aboutme.md"
+    }
+}

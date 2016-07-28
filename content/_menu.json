@@ -1,0 +1,7 @@
+[
+    ["home",        "index.html"],
+    ["portfolio",   "portfolio.html"],
+    ["projects",    "projects.html"],
+    ["tutorials",   "tutorials.html"],
+    ["stuff",       "stuff.html"]
+]
