@@ -61,6 +61,7 @@
     },
     {
         "template": "templates/entries/blog.tpl",
+        "link_name": "new_dive_into_cpp_ep",
 
         "expand":
         {

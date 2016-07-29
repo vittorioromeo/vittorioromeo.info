@@ -7,7 +7,7 @@
                     <li class="menuButton"><a href="{{Link}}">{{Title}}</a></li>
                 {{/MenuItems}}
                 </ul>
-            </nav>                                      
-        </header> 
+            </nav>
+        </header>
     </div>
 </div>

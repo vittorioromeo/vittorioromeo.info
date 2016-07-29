@@ -1,7 +1,26 @@
 [
-    ["home",        "index.html"],
-    ["portfolio",   "portfolio.html"],
-    ["projects",    "projects.html"],
-    ["tutorials",   "tutorials.html"],
-    ["stuff",       "stuff.html"]
+    {
+        "label": "home",
+        "href": "index.html"
+    },
+   
+    {
+        "label": "portfolio",
+        "href": "portfolio.html"
+    },
+  
+    {
+        "label": "projects",
+        "href": "projects.html"
+    },
+   
+    {
+        "label": "tutorials",
+        "href": "tutorials.html"
+    },
+
+    {
+        "label": "stuff",
+        "href": "stuff.html"
+    }
 ]
