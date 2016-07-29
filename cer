@@ -4,6 +4,8 @@ g++ -std=c++14 \
         -I/home/vittorioromeo/OHWorkspace/vrm_pp/include \
         -I/home/vittorioromeo/OHWorkspace/vrm_core/include \
         -pedantic \
+        -g \
+        -fsanitize=address \
         -W \
         -Wall \
         -Wextra \

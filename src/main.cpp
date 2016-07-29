@@ -26,11 +26,22 @@ namespace utils
     auto resources_folder_path(sz_t depth)
     {
         ssvufs::Path result;
-        for(auto i(0u); i < depth; ++i) result += "../";
+
+        for(sz_t i(0); i < depth + 1; ++i)
+        {
+            result += "../";
+        }
+
         return result + "resources";
     }
 
-    auto expand_to_dictionary(const ssvufs::Path& wd, const ssvj::Val& mVal)
+    auto html_from_md(const ssvufs::Path& p)
+    {
+        return discountcpp::getHTMLFromMarkdownFile(p);
+    }
+
+    auto expand_to_dictionary(
+        const ssvufs::Path& working_directory, const ssvj::Val& mVal)
     {
         ssvu::TemplateSystem::Dictionary result;
 
@@ -38,8 +49,8 @@ namespace utils
         {
             if(ssvu::endsWith(p.value, ".md"))
             {
-                result[p.key] = discountcpp::getHTMLFromMarkdownFile(
-                    wd + ssvufs::Path{p.value});
+                result[p.key] =
+                    html_from_md(working_directory + ssvufs::Path{p.value});
             }
             else
             {
@@ -55,13 +66,36 @@ namespace utils
         auto p_parent = p.getParent();
         if(!p_parent.exists<ssvufs::Type::Folder>())
         {
-            createFolder(p_parent);
+            std::string cmd("mkdir -p "s + p_parent.getStr());
+            system(cmd.c_str());
         }
+
+        assert(p_parent.exists<ssvufs::Type::Folder>());
 
         std::ofstream o{p};
         o << s;
         o.flush();
         o.close();
+    }
+
+    template <typename TF>
+    void segmented_for(sz_t split_count, sz_t per_split, sz_t total, TF&& f)
+    {
+        assert(split_count > 0);
+
+        for(sz_t i_split = 0; i_split < split_count - 1; ++i_split)
+        {
+            auto i_begin = i_split * per_split;
+            auto i_end = (i_split + 1) * per_split;
+            f(i_split, i_begin, i_end);
+        }
+
+        {
+            auto i_split = split_count - 1;
+            auto i_begin = i_split * per_split;
+            auto i_end = total;
+            f(i_split, i_begin, i_end);
+        }
     }
 }
 
@@ -75,6 +109,7 @@ namespace archetype
         ssvu::TemplateSystem::Dictionary _expand;
         ssvufs::Path _output_path;
         page_id _parent_page;
+        std::optional<std::string> _link_name;
     };
 
     struct page
@@ -161,9 +196,16 @@ namespace structure
     */
 }
 
+
+
+constexpr const char* reserved_fld_pages = "_pages";
+constexpr const char* reserved_fld_entries = "_entries";
+constexpr const char* reserved_fld_asides = "_asides";
+
 constexpr const char* pages_path = "content/_pages/";
 constexpr const char* result_path = "result/";
 constexpr const char* page_json = "_page.json";
+
 
 using namespace ssvu::FileSystem;
 using namespace ssvu::TemplateSystem;
@@ -245,7 +287,7 @@ struct subpage_expansion
 {
     std::vector<std::string> _expanded_entries;
 
-    auto produce_result(const archetype::page& ap,
+    auto produce_result(const Path& output_path,
         const std::vector<std::string>& expanded_asides)
     {
         Dictionary dict;
@@ -264,8 +306,8 @@ struct subpage_expansion
             dict.getExpanded(Path{"templates/base/main.tpl"}.getContentsAsStr(),
                 Settings::MaintainUnexisting);
 
-        Path resourcesPath{utils::resources_folder_path(
-            utils::path_depth(ap._output_path) - 1)};
+        Path resourcesPath{
+            utils::resources_folder_path(utils::path_depth(output_path) - 1)};
 
         Dictionary dict2;
         // dict["MainMenu"] = mainMenu.getOutput();
@@ -281,18 +323,25 @@ struct page_expansion
     std::vector<std::string> _expanded_asides;
     std::vector<subpage_expansion> _subpages;
 
-    auto produce_result(const archetype::page& ap)
+    auto produce_result(const Path& output_path)
     {
         assert(_subpages.size() > 0);
         auto& first_subpage = _subpages[0];
 
         auto first_subpage_html =
-            first_subpage.produce_result(ap, _expanded_asides);
+            first_subpage.produce_result(output_path, _expanded_asides);
 
-        utils::write_to_file(ap._output_path, first_subpage_html);
+        utils::write_to_file(output_path, first_subpage_html);
 
-        for(int i = 1; i < _subpages.size(); ++i)
+        for(sz_t i = 1; i < _subpages.size(); ++i)
         {
+            auto adapted_op = output_path.getStr();
+            ssvu::replace(
+                adapted_op, ".html", "/" + std::to_string(i) + ".html");
+
+            utils::write_to_file(
+                adapted_op, _subpages[i].produce_result(
+                                Path{adapted_op}, _expanded_asides));
         }
     }
 };
@@ -300,6 +349,18 @@ struct page_expansion
 
 int main()
 {
+    Path rp{result_path};
+    if(rp.exists<Type::Folder>())
+    {
+        std::string cmd("rm -R "s + result_path);
+        system(cmd.c_str());
+    }
+
+    if(!rp.exists<Type::Folder>())
+    {
+        ssvufs::createFolder(rp);
+    }
+
     context ctx;
 
     for_all_page_json_files(
@@ -359,9 +420,14 @@ int main()
                             Path{ssvu::getReplaced(output_path, ".html", "")} +
                             "/" + e_full_name;
 
+                        // Register entry.
+                        ap._entries.emplace_back(eid);
+                        auto& ae = ctx._entry_mapping.add(eid);
+
                         if(e_contents.has("link_name"))
                         {
                             auto link_name = e_contents["link_name"].as<Str>();
+                            ae._link_name = link_name;
                             e_output_path += "/" + link_name + ".html";
                         }
                         else
@@ -371,9 +437,7 @@ int main()
                         }
 
 
-                        // Register entry.
-                        ap._entries.emplace_back(eid);
-                        auto& ae = ctx._entry_mapping.add(eid);
+
                         ae._template_path = e_template_path;
                         ae._expand = dic;
                         ae._output_path = e_output_path;
@@ -400,35 +464,70 @@ int main()
             ++pid;
         });
 
-    Path rp{result_path};
-    ssvufs::removeFile(rp);
 
     ctx._page_mapping.for_all([&ctx](auto pid, const archetype::page& ap)
         {
             page_expansion pe;
-            pe._subpages.emplace_back();
+
 
             const auto& entry_ids = ap._entries;
+            if(entry_ids.empty())
+            {
+                return;
+            }
 
+            // Expand permalinks
             for(auto eid : entry_ids)
             {
                 auto ae = ctx._entry_mapping.get(eid);
+                if(!ae._link_name)
+                {
+                    continue;
+                }
+
+
+                page_expansion permalink_pe;
+                permalink_pe._subpages.emplace_back();
+                auto& subpage = permalink_pe._subpages.back();
+
 
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
                     e_template, Settings::MaintainUnexisting);
 
-                pe._subpages[0]._expanded_entries.emplace_back(e_expanded);
+                subpage._expanded_entries.emplace_back(e_expanded);
+                permalink_pe.produce_result(ae._output_path);
             }
 
-            pe.produce_result(ap);
+            auto entries_per_subpage = ap._subpaging
+                                           ? ap._subpaging.value()
+                                           : std::numeric_limits<sz_t>::max();
 
-            if(ap._subpaging)
-            {
-            }
-            else
-            {
-            }
+
+            auto subpage_count = entry_ids.size() / entries_per_subpage;
+
+            utils::segmented_for(subpage_count, entries_per_subpage,
+                entry_ids.size(), [&](auto, auto i_begin, auto i_end)
+                {
+                    pe._subpages.emplace_back();
+                    auto& subpage = pe._subpages.back();
+
+                    for(sz_t ei(i_begin); ei < i_end; ++ei)
+                    {
+                        std::cout << ei << " / " << entry_ids.size() << "\r";
+
+                        auto ae = ctx._entry_mapping.get(entry_ids[ei]);
+
+                        auto e_template =
+                            Path{ae._template_path}.getContentsAsStr();
+                        auto e_expanded = ae._expand.getExpanded(
+                            e_template, Settings::MaintainUnexisting);
+
+                        subpage._expanded_entries.emplace_back(e_expanded);
+                    }
+                });
+
+            pe.produce_result(ap._output_path);
         });
 
     return 0;
