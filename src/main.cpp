@@ -207,17 +207,53 @@ int main()
 
             // Get entries.
             for_all_entry_json_files(path,
-                [&output_path](auto e_path, auto e_name, auto e_full_name, Val)
+                [&output_path](auto e_path, auto e_name, auto e_full_name,
+                                         Val es_contents)
                 {
-                    ssvu::lo("Entry|path") << e_path << "\n";
-                    ssvu::lo("Entry|name") << e_name << "\n";
-                    ssvu::lo("Entry|full_name") << e_full_name << "\n";
+                    sz_t eid = 0;
+                    for(Val e_contents : es_contents.forArr())
+                    {
 
-                    auto e_output_path =
-                        Path{ssvu::getReplaced(output_path, ".html", "")} + "/" + e_full_name + ".html";
-                    ssvu::lo("Entry|output_path") << e_output_path << "\n";
+                        ssvu::lo("Entry|path") << e_path << " [" << eid
+                                               << "]\n";
+                        ssvu::lo("Entry|name") << e_name << "/" << eid << "\n";
+                        ssvu::lo("Entry|full_name") << e_full_name << "/" << eid
+                                                    << "\n";
 
-                    ssvu::lo() << "\n";
+                        auto e_output_path =
+                            Path{ssvu::getReplaced(output_path, ".html", "")} +
+                            "/" + e_full_name;
+
+                        if(e_contents.has("link_name"))
+                        {
+                            e_output_path += "/" +
+                                             e_contents["link_name"].as<Str>() +
+                                             ".html";
+                        }
+                        else
+                        {
+                            e_output_path +=
+                                "/" + std::to_string(eid) + ".html";
+                        }
+
+
+
+                        ssvu::lo("Entry|output_path") << e_output_path << "\n";
+
+                        auto e_template_path = e_contents["template"].as<Str>();
+                        auto e_expand_data = e_contents["expand"].as<Val>();
+
+                        ssvu::lo("Entry|template") << e_template_path << "\n";
+                        ssvu::lo("Entry|expand") << e_expand_data << "\n";
+
+                        auto wd = e_path.getParent();
+                        auto dic = utils::expand_to_dictionary(wd, e_expand_data);
+
+                        ssvu::lo("Entry|dic|text") << dic.getExpanded("{{Text}}") << "\n";
+
+                        ssvu::lo() << "\n";
+                        ++eid;
+                    }
                 });
 
             // Increment unique page id.
