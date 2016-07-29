@@ -1,0 +1,11 @@
+[
+    {
+        "template": "templates/asides/text.tpl",
+
+        "expand":
+        {
+            "Title": "about this site",
+            "Text": "1_aboutwebsite.md"
+        }
+    }
+]
