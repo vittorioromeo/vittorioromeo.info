@@ -1,0 +1,4 @@
+resources/
+result/
+build/
+CMakeLists.txt.user
