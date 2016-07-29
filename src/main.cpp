@@ -6,15 +6,18 @@
 #include <SSVUtils/Json/Json.hpp>
 #include <SSVUtils/TemplateSystem/TemplateSystem.hpp>
 #include <DiscountCpp/DiscountCpp.hpp>
+#include <vrm/core/strong_typedef.hpp>
 
 namespace std
 {
     using namespace std::experimental;
 }
 
+
 using sz_t = std::size_t;
-using page_id = sz_t;
-using entry_id = sz_t;
+
+VRM_CORE_STRONG_TYPEDEF(sz_t, page_id);
+VRM_CORE_STRONG_TYPEDEF(sz_t, entry_id);
 
 namespace utils
 {
@@ -196,16 +199,29 @@ namespace structure
     */
 }
 
+namespace constant
+{
+    namespace folder
+    {
+        namespace name
+        {
+            std::string pages{"_pages"};
+            std::string entries{"_entries"};
+            std::string asides{"_asides"};
+        }
 
+        namespace path
+        {
+            std::string pages{"content/" + folder::name::pages + "/"};
+            std::string result{"result/"};
+        }
+    }
 
-constexpr const char* reserved_fld_pages = "_pages";
-constexpr const char* reserved_fld_entries = "_entries";
-constexpr const char* reserved_fld_asides = "_asides";
-
-constexpr const char* pages_path = "content/_pages/";
-constexpr const char* result_path = "result/";
-constexpr const char* page_json = "_page.json";
-
+    namespace file
+    {
+        std::string page_json{"_page.json"};
+    }
+}
 
 using namespace ssvu::FileSystem;
 using namespace ssvu::TemplateSystem;
@@ -216,19 +232,20 @@ void for_all_page_json_files(TF&& f)
 {
     std::vector<Path> page_json_paths{
         getScan<Mode::Recurse, Type::File, Pick::ByName>(
-            pages_path, page_json)};
+            constant::folder::path::pages, constant::file::page_json)};
 
     for(auto& p : page_json_paths)
     {
         const auto& path = p;
         const auto& name = p.getParent().getFolderName();
 
-        const auto& full_name = ssvu::getTrimR(
-            ssvu::getReplaced(p.getParent().getStr(), pages_path, ""),
-            [](char c)
-            {
-                return c == '/';
-            });
+        const auto& full_name =
+            ssvu::getTrimR(ssvu::getReplaced(p.getParent().getStr(),
+                               constant::folder::path::pages, ""),
+                [](char c)
+                {
+                    return c == '/';
+                });
 
         const auto& contents = ssvj::fromFile(path);
 
@@ -246,7 +263,8 @@ void for_all_entry_json_files(ssvufs::Path page_path, TF&& f)
     }
 
     std::vector<Path> entry_json_paths{
-        getScan<Mode::Recurse, Type::File, Pick::ByExt>(pages_path, ".json")};
+        getScan<Mode::Recurse, Type::File, Pick::ByExt>(
+            constant::folder::path::pages, ".json")};
 
     for(auto& p : entry_json_paths)
     {
@@ -274,8 +292,8 @@ void for_all_entry_json_files(ssvufs::Path page_path, TF&& f)
 
 struct context
 {
-    page_id _next_page_id = 0;
-    entry_id _next_entry_id = 0;
+    page_id _next_page_id{0};
+    entry_id _next_entry_id{0};
 
     structure::entry_mapping _entry_mapping;
     structure::page_mapping _page_mapping;
@@ -349,10 +367,10 @@ struct page_expansion
 
 int main()
 {
-    Path rp{result_path};
+    Path rp{constant::folder::path::result};
     if(rp.exists<Type::Folder>())
     {
-        std::string cmd("rm -R "s + result_path);
+        std::string cmd("rm -R "s + constant::folder::path::result);
         system(cmd.c_str());
     }
 
@@ -375,7 +393,8 @@ int main()
             ssvu::lo("Page|name") << name << "\n";
             ssvu::lo("Page|full_name") << full_name << "\n";
 
-            auto output_path = std::string{result_path} + full_name + ".html";
+            auto output_path = std::string{constant::folder::path::result} +
+                               full_name + ".html";
             ssvu::lo("Page|output_path") << output_path << "\n";
 
             // Register page.
