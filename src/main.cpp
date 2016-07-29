@@ -12,8 +12,24 @@ namespace std
     using namespace std::experimental;
 }
 
+using sz_t = std::size_t;
+using page_id = sz_t;
+using entry_id = sz_t;
+
 namespace utils
 {
+    auto path_depth(const ssvufs::Path& p)
+    {
+        return ssvu::getCharCount(p, '/');
+    }
+
+    auto resources_folder_path(sz_t depth)
+    {
+        ssvufs::Path result;
+        for(auto i(0u); i < depth; ++i) result += "../";
+        return result + "resources";
+    }
+
     auto expand_to_dictionary(const ssvufs::Path& wd, const ssvj::Val& mVal)
     {
         ssvu::TemplateSystem::Dictionary result;
@@ -33,10 +49,23 @@ namespace utils
 
         return result;
     }
+
+    void write_to_file(ssvufs::Path p, const std::string& s)
+    {
+        auto p_parent = p.getParent();
+        if(!p_parent.exists<ssvufs::Type::Folder>())
+        {
+            createFolder(p_parent);
+        }
+
+        std::ofstream o{p};
+        o << s;
+        o.flush();
+        o.close();
+    }
 }
 
-using sz_t = std::size_t;
-using page_id = sz_t;
+
 
 namespace archetype
 {
@@ -44,6 +73,8 @@ namespace archetype
     {
         ssvufs::Path _template_path;
         ssvu::TemplateSystem::Dictionary _expand;
+        ssvufs::Path _output_path;
+        page_id _parent_page;
     };
 
     struct page
@@ -51,14 +82,41 @@ namespace archetype
         std::string _name;
         ssvufs::Path _path;
         std::string _full_name;
-        std::string _output_path;
+        ssvufs::Path _output_path;
         std::optional<sz_t> _subpaging;
-        std::vector<entry> _entries;
+        std::vector<entry_id> _entries;
     };
 }
 
 namespace structure
 {
+    class entry_mapping
+    {
+    private:
+        std::map<entry_id, archetype::entry> _archetypes;
+
+    public:
+        auto& add(entry_id eid)
+        {
+            _archetypes[eid] = archetype::entry{};
+            return _archetypes[eid];
+        }
+
+        auto get(entry_id eid) const
+        {
+            return _archetypes.at(eid);
+        }
+
+        template <typename TF>
+        void for_all(TF&& f)
+        {
+            for(auto& a : _archetypes)
+            {
+                f(std::get<0>(a), std::get<1>(a));
+            }
+        }
+    };
+
     class page_mapping
     {
     private:
@@ -74,6 +132,15 @@ namespace structure
         auto get(page_id pid) const
         {
             return _archetypes.at(pid);
+        }
+
+        template <typename TF>
+        void for_all(TF&& f)
+        {
+            for(auto& a : _archetypes)
+            {
+                f(std::get<0>(a), std::get<1>(a));
+            }
         }
     };
 
@@ -166,9 +233,70 @@ void for_all_entry_json_files(ssvufs::Path page_path, TF&& f)
 struct context
 {
     page_id _next_page_id = 0;
+    entry_id _next_entry_id = 0;
+
+    structure::entry_mapping _entry_mapping;
     structure::page_mapping _page_mapping;
+
     // structure::page_hierarchy _page_hierarchy;
 };
+
+struct subpage_expansion
+{
+    std::vector<std::string> _expanded_entries;
+
+    auto produce_result(const archetype::page& ap,
+        const std::vector<std::string>& expanded_asides)
+    {
+        Dictionary dict;
+
+        for(const auto& e : _expanded_entries)
+        {
+            dict["Entries"] += Dictionary{"Entry", e};
+        }
+
+        for(const auto& a : expanded_asides)
+        {
+            dict["Asides"] += Dictionary{"Aside", a};
+        }
+
+        auto main_exp =
+            dict.getExpanded(Path{"templates/base/main.tpl"}.getContentsAsStr(),
+                Settings::MaintainUnexisting);
+
+        Path resourcesPath{utils::resources_folder_path(
+            utils::path_depth(ap._output_path) - 1)};
+
+        Dictionary dict2;
+        // dict["MainMenu"] = mainMenu.getOutput();
+        dict["Main"] = main_exp;
+        dict["ResourcesPath"] = resourcesPath;
+        return dict.getExpanded(Path{"templates/page.tpl"}.getContentsAsStr(),
+            Settings::MaintainUnexisting);
+    }
+};
+
+struct page_expansion
+{
+    std::vector<std::string> _expanded_asides;
+    std::vector<subpage_expansion> _subpages;
+
+    auto produce_result(const archetype::page& ap)
+    {
+        assert(_subpages.size() > 0);
+        auto& first_subpage = _subpages[0];
+
+        auto first_subpage_html =
+            first_subpage.produce_result(ap, _expanded_asides);
+
+        utils::write_to_file(ap._output_path, first_subpage_html);
+
+        for(int i = 1; i < _subpages.size(); ++i)
+        {
+        }
+    }
+};
+
 
 int main()
 {
@@ -207,18 +335,25 @@ int main()
 
             // Get entries.
             for_all_entry_json_files(path,
-                [&output_path](auto e_path, auto e_name, auto e_full_name,
-                                         Val es_contents)
+                [&ctx, &output_path, &pid, &ap](auto e_path, auto e_name,
+                                         auto e_full_name, Val es_contents)
                 {
-                    sz_t eid = 0;
+                    auto& eid = ctx._next_entry_id;
+
                     for(Val e_contents : es_contents.forArr())
                     {
-
+                        ssvu::lo("Entry|parent_page") << pid << "\n";
                         ssvu::lo("Entry|path") << e_path << " [" << eid
                                                << "]\n";
                         ssvu::lo("Entry|name") << e_name << "/" << eid << "\n";
                         ssvu::lo("Entry|full_name") << e_full_name << "/" << eid
                                                     << "\n";
+
+                        auto e_template_path = e_contents["template"].as<Str>();
+                        auto e_expand_data = e_contents["expand"].as<Val>();
+                        auto wd = e_path.getParent();
+                        auto dic =
+                            utils::expand_to_dictionary(wd, e_expand_data);
 
                         auto e_output_path =
                             Path{ssvu::getReplaced(output_path, ".html", "")} +
@@ -226,9 +361,8 @@ int main()
 
                         if(e_contents.has("link_name"))
                         {
-                            e_output_path += "/" +
-                                             e_contents["link_name"].as<Str>() +
-                                             ".html";
+                            auto link_name = e_contents["link_name"].as<Str>();
+                            e_output_path += "/" + link_name + ".html";
                         }
                         else
                         {
@@ -237,20 +371,25 @@ int main()
                         }
 
 
+                        // Register entry.
+                        ap._entries.emplace_back(eid);
+                        auto& ae = ctx._entry_mapping.add(eid);
+                        ae._template_path = e_template_path;
+                        ae._expand = dic;
+                        ae._output_path = e_output_path;
+                        ae._parent_page = pid;
+
 
                         ssvu::lo("Entry|output_path") << e_output_path << "\n";
-
-                        auto e_template_path = e_contents["template"].as<Str>();
-                        auto e_expand_data = e_contents["expand"].as<Val>();
-
                         ssvu::lo("Entry|template") << e_template_path << "\n";
                         ssvu::lo("Entry|expand") << e_expand_data << "\n";
 
-                        auto wd = e_path.getParent();
-                        auto dic = utils::expand_to_dictionary(wd, e_expand_data);
 
-                        ssvu::lo("Entry|dic|text") << dic.getExpanded("{{Text}}") << "\n";
 
+                        ssvu::lo("Entry|dic|text")
+                            << dic.getExpanded("{{Text}}") << "\n";
+
+                        // Increment unique entry id.
                         ssvu::lo() << "\n";
                         ++eid;
                     }
@@ -261,6 +400,36 @@ int main()
             ++pid;
         });
 
+    Path rp{result_path};
+    ssvufs::removeFile(rp);
+
+    ctx._page_mapping.for_all([&ctx](auto pid, const archetype::page& ap)
+        {
+            page_expansion pe;
+            pe._subpages.emplace_back();
+
+            const auto& entry_ids = ap._entries;
+
+            for(auto eid : entry_ids)
+            {
+                auto ae = ctx._entry_mapping.get(eid);
+
+                auto e_template = Path{ae._template_path}.getContentsAsStr();
+                auto e_expanded = ae._expand.getExpanded(
+                    e_template, Settings::MaintainUnexisting);
+
+                pe._subpages[0]._expanded_entries.emplace_back(e_expanded);
+            }
+
+            pe.produce_result(ap);
+
+            if(ap._subpaging)
+            {
+            }
+            else
+            {
+            }
+        });
 
     return 0;
 }
