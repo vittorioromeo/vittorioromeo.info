@@ -208,12 +208,16 @@ namespace constant
             std::string pages{"_pages"};
             std::string entries{"_entries"};
             std::string asides{"_asides"};
+            std::string resources{"resources"};
         }
 
         namespace path
         {
             std::string pages{"content/" + folder::name::pages + "/"};
             std::string result{"result/"};
+            std::string resources{
+                "/home/vittorioromeo/OHWorkspace/vittorioromeo.info/" +
+                folder::name::resources + "/"};
         }
     }
 
@@ -304,8 +308,10 @@ struct context
 struct subpage_expansion
 {
     std::vector<std::string> _expanded_entries;
+    std::string _link;
 
-    auto produce_result(const Path& output_path,
+    auto produce_result(const std::vector<subpage_expansion>& subpages,
+        const Path& output_path,
         const std::vector<std::string>& expanded_asides)
     {
         Dictionary dict;
@@ -320,17 +326,34 @@ struct subpage_expansion
             dict["Asides"] += Dictionary{"Aside", a};
         }
 
+        int aidx = 0;
+        for(const auto& a : subpages)
+        {
+            Dictionary inner_dict;
+
+            inner_dict["Subpage"] = ssvu::getReplaced(a._link, "result/", "");
+
+            if(a._link == _link)
+            {
+                inner_dict["SubpageLabel"] =
+                    "[[ " + std::to_string(aidx++) + " ]]";
+            }
+            else
+            {
+                inner_dict["SubpageLabel"] = std::to_string(aidx++);
+            }
+
+            dict["Subpages"] += inner_dict;
+        }
+
         auto main_exp =
             dict.getExpanded(Path{"templates/base/main.tpl"}.getContentsAsStr(),
                 Settings::MaintainUnexisting);
 
-        Path resourcesPath{
-            utils::resources_folder_path(utils::path_depth(output_path) - 1)};
-
         Dictionary dict2;
         // dict["MainMenu"] = mainMenu.getOutput();
         dict["Main"] = main_exp;
-        dict["ResourcesPath"] = resourcesPath;
+        dict["ResourcesPath"] = constant::folder::path::resources;
         return dict.getExpanded(Path{"templates/page.tpl"}.getContentsAsStr(),
             Settings::MaintainUnexisting);
     }
@@ -341,25 +364,37 @@ struct page_expansion
     std::vector<std::string> _expanded_asides;
     std::vector<subpage_expansion> _subpages;
 
-    auto produce_result(const Path& output_path)
+    auto produce_result(const archetype::page& ap, const Path& output_path)
     {
         assert(_subpages.size() > 0);
+
+        // Set links
+
         auto& first_subpage = _subpages[0];
+        first_subpage._link = output_path.getStr();
 
-        auto first_subpage_html =
-            first_subpage.produce_result(output_path, _expanded_asides);
-
-        utils::write_to_file(output_path, first_subpage_html);
 
         for(sz_t i = 1; i < _subpages.size(); ++i)
         {
             auto adapted_op = output_path.getStr();
             ssvu::replace(
                 adapted_op, ".html", "/" + std::to_string(i) + ".html");
+            _subpages[i]._link = adapted_op;
+        }
 
-            utils::write_to_file(
-                adapted_op, _subpages[i].produce_result(
-                                Path{adapted_op}, _expanded_asides));
+
+        // ---
+        // Write to file
+        auto first_subpage_html = first_subpage.produce_result(
+            _subpages, output_path, _expanded_asides);
+
+        utils::write_to_file(output_path, first_subpage_html);
+
+        for(sz_t i = 1; i < _subpages.size(); ++i)
+        {
+            utils::write_to_file(_subpages[i]._link,
+                _subpages[i].produce_result(
+                    _subpages, Path{_subpages[i]._link}, _expanded_asides));
         }
     }
 };
@@ -484,7 +519,7 @@ int main()
         });
 
 
-    ctx._page_mapping.for_all([&ctx](auto pid, const archetype::page& ap)
+    ctx._page_mapping.for_all([&ctx](auto, const archetype::page& ap)
         {
             page_expansion pe;
 
@@ -515,7 +550,7 @@ int main()
                     e_template, Settings::MaintainUnexisting);
 
                 subpage._expanded_entries.emplace_back(e_expanded);
-                permalink_pe.produce_result(ae._output_path);
+                permalink_pe.produce_result(ap, ae._output_path);
             }
 
             auto entries_per_subpage = ap._subpaging
@@ -526,7 +561,7 @@ int main()
             auto subpage_count = entry_ids.size() / entries_per_subpage;
 
             utils::segmented_for(subpage_count, entries_per_subpage,
-                entry_ids.size(), [&](auto, auto i_begin, auto i_end)
+                entry_ids.size(), [&](auto idx, auto i_begin, auto i_end)
                 {
                     pe._subpages.emplace_back();
                     auto& subpage = pe._subpages.back();
@@ -546,7 +581,7 @@ int main()
                     }
                 });
 
-            pe.produce_result(ap._output_path);
+            pe.produce_result(ap, ap._output_path);
         });
 
     return 0;

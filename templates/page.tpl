@@ -17,6 +17,7 @@
         <link rel="stylesheet" href="{{ResourcesPath}}/css/utils.css">
 
         <script src="../Resources/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        <base href="/home/vittorioromeo/OHWorkspace/vittorioromeo.info/result/">
     </head>
 
     <body>

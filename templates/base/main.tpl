@@ -13,12 +13,20 @@
 	</script>
 
     {{#Entries}}
-        {{Entry}}     
+        {{Entry}}
     {{/Entries}}
+
+    <nav>
+        <ul>
+            {{#Subpages}}
+                <li class="menuButton"><a href="{{Subpage}}">{{SubpageLabel}}</a></li>
+            {{/Subpages}}
+        </ul>
+    </nav>
 </article>
 
 <div class="asideWrapper">
-	
+
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- Aside2New -->
 <ins class="adsbygoogle"
@@ -28,7 +36,7 @@
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
-	
+
 	{{#Asides}}
 	    {{Aside}}
 	{{/Asides}}
