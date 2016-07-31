@@ -123,6 +123,9 @@ namespace archetype
     {
         struct element
         {
+            // TODO: probably good place to use `string_view`: store full path
+            // in an `std::string` and slices in `string_view`
+
             ssvufs::Path _template_path;
             ssvu::TemplateSystem::Dictionary _expand;
             ssvufs::Path _output_path;
