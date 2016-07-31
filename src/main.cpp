@@ -276,7 +276,7 @@ void for_all_page_json_files(TF&& f)
 namespace impl
 {
     template <typename TF>
-    void for_all_page_elements(
+    void for_all_page_element_files(
         const std::string& element_folder_name, ssvufs::Path page_path, TF&& f)
     {
         ssvufs::Path elements_path =
@@ -308,21 +308,48 @@ namespace impl
             f(path, name, full_name, json_val);
         }
     }
+
+    template <typename TF>
+    void for_all_elements(
+        const std::string& element_folder_name, ssvufs::Path page_path, TF&& f)
+    {
+        for_all_page_element_files(element_folder_name, page_path,
+            [&f](auto path, auto name, auto full_name, Val element_array)
+            {
+                for(Val element : element_array.forArr())
+                {
+                    f(path, name, full_name, element);
+                }
+            });
+    }
 }
 
 template <typename TF>
 void for_all_entry_json_files(ssvufs::Path page_path, TF&& f)
 {
-    impl::for_all_page_elements(
+    impl::for_all_page_element_files(
         constant::folder::name::entries, page_path, FWD(f));
 }
 
 template <typename TF>
 void for_all_aside_json_files(ssvufs::Path page_path, TF&& f)
 {
-    impl::for_all_page_elements(
+    impl::for_all_page_element_files(
         constant::folder::name::asides, page_path, FWD(f));
 }
+
+template <typename TF>
+void for_all_entries(ssvufs::Path page_path, TF&& f)
+{
+    impl::for_all_elements(constant::folder::name::entries, page_path, FWD(f));
+}
+
+template <typename TF>
+void for_all_asides(ssvufs::Path page_path, TF&& f)
+{
+    impl::for_all_elements(constant::folder::name::asides, page_path, FWD(f));
+}
+
 
 struct context
 {
@@ -345,6 +372,8 @@ struct subpage_expansion
         const std::vector<subpage_expansion>& subpages, const Path& output_path,
         const std::vector<std::string>& expanded_asides)
     {
+        (void)output_path;
+
         Dictionary dict;
 
         for(const auto& e : _expanded_entries)
@@ -481,8 +510,108 @@ struct page_expansion
     }
 };
 
+void process_page_entries(context& ctx, const Path& output_path,
+    const Path& path, page_id pid, archetype::page& ap)
+{
+    for_all_entries(path, [&ctx, &output_path, &pid, &ap](auto e_path,
+                              auto e_name, auto e_full_name, Val e_contents)
+        {
+            ctx._entry_mapping.create([&](auto eid, auto& ae)
+                {
+                    ssvu::lo("Entry|parent_page") << pid << "\n";
+                    ssvu::lo("Entry|path") << e_path << " [" << eid << "]\n";
+                    ssvu::lo("Entry|name") << e_name << "/" << eid << "\n";
+                    ssvu::lo("Entry|full_name") << e_full_name << "/" << eid
+                                                << "\n";
 
-int main()
+                    auto e_template_path = e_contents["template"].as<Str>();
+                    auto e_expand_data = e_contents["expand"].as<Val>();
+                    auto wd = e_path.getParent();
+                    auto dic = utils::expand_to_dictionary(wd, e_expand_data);
+
+                    auto e_output_path =
+                        Path{ssvu::getReplaced(output_path, ".html", "")} +
+                        "/" + e_full_name;
+
+                    // Register entry.
+                    ap._entries.emplace_back(eid);
+
+
+                    if(e_contents.has("link_name"))
+                    {
+                        auto link_name = e_contents["link_name"].as<Str>();
+                        ae._link_name = link_name;
+                        e_output_path += "/" + link_name + ".html";
+                    }
+                    else
+                    {
+                        e_output_path += "/" + std::to_string(eid) + ".html";
+                    }
+
+
+
+                    ae._template_path = e_template_path;
+                    ae._expand = dic;
+                    ae._output_path = e_output_path;
+                    ae._parent_page = pid;
+
+
+                    ssvu::lo("Entry|output_path") << e_output_path << "\n";
+                    ssvu::lo("Entry|template") << e_template_path << "\n";
+                    ssvu::lo("Entry|expand") << e_expand_data << "\n";
+
+
+
+                    // ssvu::lo("Entry|dic|text")
+                    //    << dic.getExpanded("{{Text}}") <<
+                    //    "\n";
+
+                    // Increment unique entry id.
+                    ssvu::lo() << "\n";
+                });
+        });
+}
+
+void process_page_asides(context& ctx, const Path& output_path,
+    const Path& path, page_id pid, archetype::page& ap)
+{
+    for_all_asides(path, [&ctx, &pid, &ap, &output_path](auto a_path,
+                             auto a_name, auto a_full_name, Val a_contents)
+        {
+            ctx._aside_mapping.create([&](auto aid, auto& aa)
+                {
+                    ssvu::lo("Aside|parent_page") << pid << "\n";
+                    ssvu::lo("Aside|path") << a_path << "\n";
+                    ssvu::lo("Aside|name") << a_name << "\n";
+                    ssvu::lo("Aside|full_name") << a_full_name << "\n";
+
+                    auto template_path = a_contents["template"].as<Str>();
+                    auto a_expand_data = a_contents["expand"].as<Val>();
+
+                    auto a_output_path =
+                        Path{ssvu::getReplaced(output_path, ".html", "")} +
+                        "/" + a_full_name;
+
+                    auto wd = a_path.getParent();
+                    auto dict = utils::expand_to_dictionary(wd, a_expand_data);
+
+
+                    // Register aside.
+                    ap._asides.emplace_back(aid);
+
+                    aa._parent_page = pid;
+                    aa._template_path = template_path;
+                    aa._output_path = a_output_path;
+                    aa._expand = dict;
+
+
+                    // Increment unique aside id.
+                    ssvu::lo() << "\n";
+                });
+        });
+}
+
+void clean_and_recreate_results_folder()
 {
     Path rp{constant::folder::path::result};
     if(rp.exists<Type::Folder>())
@@ -495,31 +624,31 @@ int main()
     {
         ssvufs::createFolder(rp);
     }
+}
 
-    context ctx;
+void load_main_menu_data(context& ctx)
+{
+    auto main_menu_json_path =
+        Path{constant::folder::path::content + constant::file::main_menu_json};
 
-    // Load main menu data
+    auto main_menu_json = ssvj::fromFile(main_menu_json_path);
+    auto& mm_entries = ctx._main_menu._menu_entries;
+
+    for(auto mm_e : main_menu_json.forArr())
     {
-        auto main_menu_json_path = Path{
-            constant::folder::path::content + constant::file::main_menu_json};
+        mm_entries.emplace_back();
+        auto& last_e = mm_entries.back();
 
-        auto main_menu_json = ssvj::fromFile(main_menu_json_path);
-        auto& mm_entries = ctx._main_menu._menu_entries;
+        last_e._label = mm_e["label"].as<Str>();
+        last_e._href = mm_e["href"].as<Str>();
 
-        for(auto mm_e : main_menu_json.forArr())
-        {
-            mm_entries.emplace_back();
-            auto& last_e = mm_entries.back();
+        ssvu::lo("MMEntry|label") << last_e._label << "\n";
+        ssvu::lo("MMEntry|href") << last_e._href << "\n\n";
+    };
+}
 
-            last_e._label = mm_e["label"].as<Str>();
-            last_e._href = mm_e["href"].as<Str>();
-
-            ssvu::lo("MMEntry|label") << last_e._label << "\n";
-            ssvu::lo("MMEntry|href") << last_e._href << "\n\n";
-        }
-    }
-
-    // Load page data
+void load_page_data(context& ctx)
+{
     for_all_page_json_files(
         [&ctx](auto path, auto name, auto full_name, Val contents)
         {
@@ -551,142 +680,14 @@ int main()
                         ssvu::lo("Page|eps") << eps << "\n";
                     }
 
-                    // Get entries.
-                    for_all_entry_json_files(
-                        path,
-                        [&ctx, &output_path, &pid, &ap](auto e_path,
-                            auto e_name, auto e_full_name, Val es_contents)
-                        {
-                            for(Val e_contents : es_contents.forArr())
-                            {
-                                ctx._entry_mapping.create(
-                                    [&](auto eid, auto& ae)
-                                    {
-                                        ssvu::lo("Entry|parent_page") << pid
-                                                                      << "\n";
-                                        ssvu::lo("Entry|path") << e_path << " ["
-                                                               << eid << "]\n";
-                                        ssvu::lo("Entry|name") << e_name << "/"
-                                                               << eid << "\n";
-                                        ssvu::lo("Entry|full_name")
-                                            << e_full_name << "/" << eid
-                                            << "\n";
-
-                                        auto e_template_path =
-                                            e_contents["template"].as<Str>();
-                                        auto e_expand_data =
-                                            e_contents["expand"].as<Val>();
-                                        auto wd = e_path.getParent();
-                                        auto dic = utils::expand_to_dictionary(
-                                            wd, e_expand_data);
-
-                                        auto e_output_path =
-                                            Path{ssvu::getReplaced(
-                                                output_path, ".html", "")} +
-                                            "/" + e_full_name;
-
-                                        // Register entry.
-                                        ap._entries.emplace_back(eid);
-
-
-                                        if(e_contents.has("link_name"))
-                                        {
-                                            auto link_name =
-                                                e_contents["link_name"]
-                                                    .as<Str>();
-                                            ae._link_name = link_name;
-                                            e_output_path +=
-                                                "/" + link_name + ".html";
-                                        }
-                                        else
-                                        {
-                                            e_output_path +=
-                                                "/" + std::to_string(eid) +
-                                                ".html";
-                                        }
-
-
-
-                                        ae._template_path = e_template_path;
-                                        ae._expand = dic;
-                                        ae._output_path = e_output_path;
-                                        ae._parent_page = pid;
-
-
-                                        ssvu::lo("Entry|output_path")
-                                            << e_output_path << "\n";
-                                        ssvu::lo("Entry|template")
-                                            << e_template_path << "\n";
-                                        ssvu::lo("Entry|expand")
-                                            << e_expand_data << "\n";
-
-
-
-                                        // ssvu::lo("Entry|dic|text")
-                                        //    << dic.getExpanded("{{Text}}") <<
-                                        //    "\n";
-
-                                        // Increment unique entry id.
-                                        ssvu::lo() << "\n";
-                                    });
-                            }
-                        });
-
-                    // Get asides.
-                    for_all_aside_json_files(
-                        path,
-                        [&ctx, &pid, &ap, &output_path](auto a_path,
-                            auto a_name, auto a_full_name, Val as_contents)
-                        {
-
-
-                            for(Val a_contents : as_contents.forArr())
-                            {
-                                ctx._aside_mapping.create(
-                                    [&](auto aid, auto& aa)
-                                    {
-                                        ssvu::lo("Aside|parent_page") << pid
-                                                                      << "\n";
-                                        ssvu::lo("Aside|path") << a_path
-                                                               << "\n";
-                                        ssvu::lo("Aside|name") << a_name
-                                                               << "\n";
-                                        ssvu::lo("Aside|full_name")
-                                            << a_full_name << "\n";
-
-                                        auto template_path =
-                                            a_contents["template"].as<Str>();
-                                        auto a_expand_data =
-                                            a_contents["expand"].as<Val>();
-
-                                        auto a_output_path =
-                                            Path{ssvu::getReplaced(
-                                                output_path, ".html", "")} +
-                                            "/" + a_full_name;
-
-                                        auto wd = a_path.getParent();
-                                        auto dict = utils::expand_to_dictionary(
-                                            wd, a_expand_data);
-
-
-                                        // Register aside.
-                                        ap._asides.emplace_back(aid);
-
-                                        aa._parent_page = pid;
-                                        aa._template_path = template_path;
-                                        aa._output_path = a_output_path;
-                                        aa._expand = dict;
-
-
-                                        // Increment unique aside id.
-                                        ssvu::lo() << "\n";
-                                    });
-                            }
-                        });
+                    process_page_entries(ctx, output_path, path, pid, ap);
+                    process_page_asides(ctx, output_path, path, pid, ap);
                 });
         });
+}
 
-
+void process_pages(context& ctx)
+{
     ctx._page_mapping.for_all([&ctx](auto, const archetype::page& ap)
         {
             page_expansion pe;
@@ -743,6 +744,8 @@ int main()
             utils::segmented_for(subpage_count, entries_per_subpage,
                 entry_ids.size(), [&](auto idx, auto i_begin, auto i_end)
                 {
+                    (void)idx;
+
                     pe._subpages.emplace_back();
                     auto& subpage = pe._subpages.back();
 
@@ -774,6 +777,16 @@ int main()
 
             pe.produce_result(ctx, ap, ap._output_path);
         });
+}
+
+int main()
+{
+    clean_and_recreate_results_folder();
+
+    context ctx;
+    load_main_menu_data(ctx);
+    load_page_data(ctx);
+    process_pages(ctx);
 
     return 0;
 }
