@@ -1,244 +1,238 @@
-[
-    {
-        "template": "templates/entries/blog.tpl",
-        "link_name": "cppnow2016_videos_available",
-        "expand":
+{
+    "link_name": "blog",
+    "elements": 
+    [
         {
-            "Title": "C++Now 2016 videos available",
-            "Text": "md/a7.md",
-            "Date": "17 july 2016"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2016_videos_available",
+            "expand":
+            {
+                "Title": "C++Now 2016 videos available",
+                "Text": "md/a7.md",
+                "Date": "17 july 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "trip report - C++Now 2016",
+                "Text": "md/a6.md",
+                "Date": "16 may 2016"
+            }
+        },
         {
-            "Title": "trip report - C++Now 2016",
-            "Text": "md/a6.md",
-            "Date": "16 may 2016"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "meeting c++ lightning talks",
+                "Text": "md/a5.md",
+                "Date": "12 december 2015"
+            }
+        },
         {
-            "Title": "meeting c++ lightning talks",
-            "Text": "md/a5.md",
-            "Date": "12 december 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "new tutorial, meeting c++",
+                "Text": "md/a4.md",
+                "Date": "06 december 2015"
+            }
+        },
         {
-            "Title": "new tutorial, meeting c++",
-            "Text": "md/a4.md",
-            "Date": "06 december 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "my cppcon 2015 talks",
+                "Text": "md/a3.md",
+                "Date": "30 october 2015"
+            }
+        },
         {
-            "Title": "my cppcon 2015 talks",
-            "Text": "md/a3.md",
-            "Date": "30 october 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "dive into c++14!",
+                "Text": "md/a2.md",
+                "Date": "6 june 2015"
+            }
+        },
         {
-            "Title": "dive into c++14!",
-            "Text": "md/a2.md",
-            "Date": "6 june 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-        "link_name": "new_dive_into_cpp_ep",
+            "template": "templates/entries/blog.tpl",
+            "link_name": "new_dive_into_cpp_ep",
 
-        "expand":
+            "expand":
+            {
+                "Title": "new dive into c++ episode",
+                "Text": "md/a1.md",
+                "Date": "21 march 2015"
+            }
+        },
         {
-            "Title": "new dive into c++ episode",
-            "Text": "md/a1.md",
-            "Date": "21 march 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "delver's choice",
+                "Text": "md/9.md",
+                "Date": "01 february 2015"
+            }
+        },
         {
-            "Title": "delver's choice",
-            "Text": "md/9.md",
-            "Date": "01 february 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "new year, new tutorial video",
+                "Text": "md/8.md",
+                "Date": "06 january 2015"
+            }
+        },
         {
-            "Title": "new year, new tutorial video",
-            "Text": "md/8.md",
-            "Date": "06 january 2015"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "OH2.0-RC2 .deb available",
+                "Text": "md/7.md",
+                "Date": "22 october 2014"
+            }
+        },
         {
-            "Title": "OH2.0-RC2 .deb available",
-            "Text": "md/7.md",
-            "Date": "22 october 2014"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "CppCon2014 video and stuff",
+                "Text": "md/6.md",
+                "Date": "09 october 2014"
+            }
+        },
         {
-            "Title": "CppCon2014 video and stuff",
-            "Text": "md/6.md",
-            "Date": "09 october 2014"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "post-summer update",
+                "Text": "md/5.md",
+                "Date": "27 september 2014"
+            }
+        },
         {
-            "Title": "post-summer update",
-            "Text": "md/5.md",
-            "Date": "27 september 2014"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "open hexagon 2.0 RC2 released",
+                "Text": "<p>Get it on the projects page!</p> < p > Please report issues and give your feedback on the official Facebook page. < /p> < hr > ",
+                "Date": "02 may 2014"
+            }
+        },
         {
-            "Title": "open hexagon 2.0 RC2 released",
-            "Text": "<p>Get it on the projects page!</p>
-                    <p>Please report issues and give your feedback on the official Facebook page.</p>
-                    <hr>",
-            "Date": "02 may 2014"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "dive into C++11 - episodes 3, 4",
+                "Text": "md/4.md",
+                "Date": "05 january 2014"
+            }
+        },
         {
-            "Title": "dive into C++11 - episodes 3, 4",
-            "Text": "md/4.md",
-            "Date": "05 january 2014"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "new tutorial - dive into C++11 [2]",
+                "Text": "<p>Let's expand our Arkanoid clone and our C++11 knowledge.</p> < p > Learn more about `constexpr`
+                and uniform initialization,
+                and how to deal with FPS and framerates. < /p> < p > Watch on the TUTORIALS page. < /p> < hr > ",
+                "Date": "01 december 2013"
+            }
+        },
         {
-            "Title": "new tutorial - dive into C++11 [2]",
-            "Text": "<p>Let's expand our Arkanoid clone and our C++11 knowledge.</p>
-                    <p>Learn more about `constexpr` and uniform initialization, and how to deal with FPS and framerates.</p>
-                    <p>Watch on the TUTORIALS page.</p>
-                    <hr>",
-            "Date": "01 december 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "new tutorial - dive into C++11 [1]",
+                "Text": "<p>Let's build an Arkanoid clone from scratch in 40 minutes, using C++11 and SFML 2.1!</p> < p > Watch on the TUTORIALS page. < /p> < hr > ",
+                "Date": "24 november 2013"
+            }
+        },
         {
-            "Title": "new tutorial - dive into C++11 [1]",
-            "Text": "<p>Let's build an Arkanoid clone from scratch in 40 minutes, using C++11 and SFML 2.1!</p>
-                    <p>Watch on the TUTORIALS page.</p>
-                    <hr>",
-            "Date": "24 november 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "moved to new host",
+                "Text": "<p>Many, many thanks to Daniel Porter!.</p> < hr > ",
+                "Date": "05 november 2013"
+            }
+        },
         {
-            "Title": "moved to new host",
-            "Text": "<p>Many, many thanks to Daniel Porter!.</p>
-                    <hr>",
-            "Date": "05 november 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "operation bloodshed",
+                "Text": "md/3.md",
+                "Date": "07 october 2013"
+            }
+        },
         {
-            "Title": "operation bloodshed",
-            "Text": "md/3.md",
-            "Date": "07 october 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "ludum dare 27 - 10corp",
+                "Text": "md/2.md",
+                "Date": "26 august 2013"
+            }
+        },
         {
-            "Title": "ludum dare 27 - 10corp",
-            "Text": "md/2.md",
-            "Date": "26 august 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "cppdiscount",
+                "Text": "md/1.md",
+                "Date": "09 august 2013"
+            }
+        },
         {
-            "Title": "cppdiscount",
-            "Text": "md/1.md",
-            "Date": "09 august 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "markdown and more",
+                "Text": "md/0.md",
+                "Date": "07 august 2013"
+            }
+        },
         {
-            "Title": "markdown and more",
-            "Text": "md/0.md",
-            "Date": "07 august 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
+            "expand":
+            {
+                "Title": "done with school finals",
+                "Text": "<p>Today was the last day of school finals. I'm very happy about how my exams went and even happier that I finally have a lot more free time!</p> < p > I 've also been working on Open Hexagon 2.0, which will be a big gameplay update with new levels and mechanics. Check the beta out on the official Facebook page.</p> < hr > ",
+                "Date": "11 july 2013"
+            }
+        },
         {
-            "Title": "done with school finals",
-            "Text": "<p>Today was the last day of school finals. I'm very happy about how my exams went and even happier that I finally have a lot more free time!</p>
-                    <p>I've also been working on Open Hexagon 2.0, which will be a big gameplay update with new levels and mechanics. Check the beta out on the official Facebook page.</p>
-                    <hr>",
-            "Date": "11 july 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
+            "template": "templates/entries/blog.tpl",
 
-        "expand":
-        {
-            "Title": "open hexagon v1.92 linux release",
-            "Text": "<p>Finally, a multi-architecture (both 32 and 64 bit) .tar.xz archive is available!</p>
-                    <p>Download on the projects page, as usual. :)</p>
-                    <hr>",
+            "expand":
+            {
+                "Title": "open hexagon v1.92 linux release",
+                "Text": "<p>Finally, a multi-architecture (both 32 and 64 bit) .tar.xz archive is available!</p> < p > Download on the projects page,
+                as usual.: ) < /p> < hr > ",
             "Date": "22 june 2013"
         }
     },
@@ -249,8 +243,8 @@
         {
             "Title": "open hexagon v1.92 released",
             "Text": "<p>Friend list and key customization added. (minor update)</br>
-                    If you're using the auto updater to update, delete 'config.json' from your folder first!</p>
-                    <hr>",
+            If you 're using the auto updater to update, delete '
+            config.json ' from your folder first!</p> < hr > ",
             "Date": "15 june 2013"
         }
     },
@@ -260,8 +254,7 @@
         "expand":
         {
             "Title": "open hexagon auto updater v1.1 released",
-            "Text": "<p>Rewritten from scratch... opening the way for cross-platform updating.</p>
-                    <hr>",
+            "Text": "<p>Rewritten from scratch... opening the way for cross-platform updating.</p> < hr > ",
             "Date": "15 june 2013"
         }
     },
@@ -272,8 +265,7 @@
         {
             "Title": "two new video tutorials available!",
             "Text": "<p>I've created two tutorial videos where I explain how to speed up collision broad-phase detection using a 2D grid spatial partitioning algorithm.</br>
-                    Check them out in the tutorials section!</p>
-                    <hr>",
+            Check them out in the tutorials section! < /p> < hr > ",
             "Date": "11 june 2013"
         }
     },
@@ -284,188 +276,168 @@
         {
             "Title": "reinventing the wheel + etc",
             "Text": "<p>In the latest months I've been mostly working on my libraries that you can find on GitHub.</br>
-                    I've \"reinvented\" the wheel by creating my own cross-platform filesystem and my own template system (similar to Ctemplate). You can find both of them in SSVUtils, on my GitHub page. Pull requests and comments are greatly appreciated!</br>
-                    I am happy to announce that the newest version of this website is generated using those libraries, without any Boost or Ctemplate dependency.</p>
-                    <p>Other news: real life is taking a lot of time away from programming. I will have my finals this month, and then I'll get into computer science education as soon as possible.</p>
-                    <p>I've also added a donation button to the website: since I'm currently unemployed every donation would be really helpful, especially in paying the server. Consider donating if you like my work :)</p>
-                    <p>Hopefully I'll find the time to make some new tutorials/youtube videos before my finals. Stay tuned!</p>
-                    <hr>",
-            "Date": "10 june 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "back to work, update",
-            "Text": "<p>Hello everyone, I've been on vacation for a week and I'm back at home now. I'm very busy with school (final exams are in about 1 month), but I will use most of my spare time to work on my projects.</p>
-                    <p>Current development is on Open Hexagon updates, but also on my libraries and on experimental prototypes. I've also added a donation button to the site, which you can use if you'd like to support my work.</p>
-                    <p>I will try to keep you updated in the following weeks!</p>
-                    <hr>",
-            "Date": "07 may 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.91 released",
-            "Text": "<p>Server improvements.</p>
-                    <hr>",
-            "Date": "09 april 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.9 released",
-            "Text": "<p>A brand new level pack and an auto updating system!</p>
-                    <hr>",
-            "Date": "29 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.84 released",
-            "Text": "<p>Security and performance update.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "15 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.83 released",
-            "Text": "<p>Security update.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "14 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.82 now available for linux",
-            "Text": "<p>Thanks to Lukasz Magiera (deb port) and Ethan Lee (tar.gz port), Open Hexagon v1.82 is now available on Linux.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "12 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.82 released",
-            "Text": "<p>Bugfix and minor improvements update.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "11 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.81 released",
-            "Text": "<p>Bugfix update. Scores have been unfortunately wiped for security reasons.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "10 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.8 released",
-            "Text": "<p>Online functionality update! High scores, leaderboards, version checking. Also, a lot of bug fixes and improvements.</p>
-                    <p>Download on the projects page.</p>
-                    <hr>",
-            "Date": "10 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": ".deb packages for OH v1.7 available",
-            "Text": "<p>Download on the projects page.</p>
-                    <p>Thanks Łukasz Magiera! :)</p>
-                    <hr>",
-            "Date": "06 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.7 released",
-            "Text": "<p>Brand new 3D effects, a circular level, a lot of bug fixes and code cleanup. Download it and share your creations :)</p>
-                    <p><a href=\"http://www.youtube.com/watch?v=9T8HWaxMv88\">Update trailer</a></p>
-                    <p>Update: Linux port released! Thanks Ethan Lee!</p>
-                    <hr>",
-            "Date": "03 march 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "\"tutorials\" section created",
-            "Text": "<p>I added a new section to the website where I will share my tutorials and my articles. Check it out!</p>
-                    <hr>",
-            "Date": "12 february 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.6 released",
-            "Text": "<p>Bug fixes, custom sounds, and other small changes. Download from the projects page.</p>
-                    <hr>",
-            "Date": "14 january 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "open hexagon v1.52 released",
-            "Text": "<p>Fixed some annoying bugs. Download from the projects page.</p>
-                    <hr>",
-            "Date": "01 january 2013"
-        }
-    },
-    {
-        "template": "templates/entries/blog.tpl",
-
-        "expand":
-        {
-            "Title": "blog under construction",
-            "Text": "<p>When the code that generates the blog entries is ready, the blog will be displayed right here, on the home page. Stay tuned!</p>",
-            "Date": "29 december 2012"
-        }
+            I 've \"reinvented\" the wheel by creating my own cross-platform filesystem and my own template system (similar to Ctemplate). You can find both of them in SSVUtils, on my GitHub page. Pull requests and comments are greatly appreciated!</br>
+            I am happy to announce that the newest version of this website is generated using those libraries,
+            without any Boost or Ctemplate dependency. < /p> < p > Other news: real life is taking a lot of time away from programming.I will have my finals this month,
+            and then I 'll get into computer science education as soon as possible.</p> < p > I 've also added a donation button to the website: since I'
+            m currently unemployed every donation would be really helpful,
+            especially in paying the server.Consider donating
+            if you like my work: ) < /p> < p > Hopefully I 'll find the time to make some new tutorials/youtube videos before my finals. Stay tuned!</p> < hr > ",
+        "Date": "10 june 2013"
     }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "back to work, update",
+        "Text": "<p>Hello everyone, I've been on vacation for a week and I'm back at home now. I'm very busy with school (final exams are in about 1 month), but I will use most of my spare time to work on my projects.</p> < p > Current development is on Open Hexagon updates,
+        but also on my libraries and on experimental prototypes.I 've also added a donation button to the site, which you can use if you'
+        d like to support my work. < /p> < p > I will
+        try to keep you updated in the following weeks! < /p> < hr > ",
+        "Date": "07 may 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.91 released",
+        "Text": "<p>Server improvements.</p> < hr > ",
+        "Date": "09 april 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.9 released",
+        "Text": "<p>A brand new level pack and an auto updating system!</p> < hr > ",
+        "Date": "29 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.84 released",
+        "Text": "<p>Security and performance update.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "15 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.83 released",
+        "Text": "<p>Security update.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "14 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.82 now available for linux",
+        "Text": "<p>Thanks to Lukasz Magiera (deb port) and Ethan Lee (tar.gz port), Open Hexagon v1.82 is now available on Linux.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "12 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.82 released",
+        "Text": "<p>Bugfix and minor improvements update.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "11 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.81 released",
+        "Text": "<p>Bugfix update. Scores have been unfortunately wiped for security reasons.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "10 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.8 released",
+        "Text": "<p>Online functionality update! High scores, leaderboards, version checking. Also, a lot of bug fixes and improvements.</p> < p > Download on the projects page. < /p> < hr > ",
+        "Date": "10 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": ".deb packages for OH v1.7 available",
+        "Text": "<p>Download on the projects page.</p> < p > Thanks Łukasz Magiera!: ) < /p> < hr > ",
+    "Date": "06 march 2013"
+}
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.7 released",
+        "Text": "<p>Brand new 3D effects, a circular level, a lot of bug fixes and code cleanup. Download it and share your creations :)</p> < p > < a href = \"http://www.youtube.com/watch?v=9T8HWaxMv88\">Update trailer</a></p> < p > Update: Linux port released!Thanks Ethan Lee! < /p> < hr > ",
+        "Date": "03 march 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "\"tutorials\" section created",
+        "Text": "<p>I added a new section to the website where I will share my tutorials and my articles. Check it out!</p> < hr > ",
+        "Date": "12 february 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.6 released",
+        "Text": "<p>Bug fixes, custom sounds, and other small changes. Download from the projects page.</p> < hr > ",
+        "Date": "14 january 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "open hexagon v1.52 released",
+        "Text": "<p>Fixed some annoying bugs. Download from the projects page.</p> < hr > ",
+        "Date": "01 january 2013"
+    }
+},
+{
+    "template": "templates/entries/blog.tpl",
+
+    "expand":
+    {
+        "Title": "blog under construction",
+        "Text": "<p>When the code that generates the blog entries is ready, the blog will be displayed right here, on the home page. Stay tuned!</p>",
+        "Date": "29 december 2012"
+    }
+}
 ]
+}

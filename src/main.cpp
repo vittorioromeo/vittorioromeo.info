@@ -315,9 +315,17 @@ namespace impl
         const std::string& element_folder_name, ssvufs::Path page_path, TF&& f)
     {
         for_all_page_element_files(element_folder_name, page_path,
-            [&f](auto path, auto name, auto full_name, Val element_array)
+            [&f](auto path, auto name, auto full_name, Val element_json)
             {
-                for(Val element : element_array.forArr())
+                // Force link/output name of a group of entries.
+                if(element_json.has("link_name"))
+                {
+                    auto link_name = element_json["link_name"].as<Str>();
+                    ssvu::replace(full_name, name, link_name);
+                    name = link_name;
+                }
+
+                for(Val element : element_json["elements"].forArr())
                 {
                     f(path, name, full_name, element);
                 }
@@ -524,6 +532,8 @@ void process_page_entries(context& ctx, const Path& output_path,
                     ssvu::lo("Entry|name") << e_name << "/" << eid << "\n";
                     ssvu::lo("Entry|full_name") << e_full_name << "/" << eid
                                                 << "\n";
+
+
 
                     auto e_template_path = e_contents["template"].as<Str>();
                     auto e_expand_data = e_contents["expand"].as<Val>();
@@ -750,8 +760,6 @@ void process_pages(context& ctx)
                         </script>
 
                                                             )";
-
-                // "totally real and functioning comment box";
 
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
