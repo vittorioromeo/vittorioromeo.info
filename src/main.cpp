@@ -735,38 +735,42 @@ void process_pages(context& ctx)
                 permalink_pe._subpages.emplace_back();
                 auto& subpage = permalink_pe._subpages.back();
 
+                auto permalink_output_path = ae._output_path;
+                auto canonical_permalink_url =
+                    ssvu::getReplaced(permalink_output_path.getStr(),
+                        constant::folder::path::result,
+                        "http://vittorioromeo.info/");
 
-                ae._expand["CommentsBox"] = R"(
-                        <div id="disqus_thread"></div>
-                        <script>
+                ae._expand["CommentsBox"] =
+                    R"(
+                    <div id="disqus_thread"></div>
+                    <script>
 
-                        var disqus_url = 'http://vittorioromeo.info';
+                    var disqus_url = 'http://vittorioromeo.info';
 
-                        /**
-                         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-                         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
-                        /*
-                        var disqus_config = function () {
-                            this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-                            this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-                        };
-                        */
-                        (function() { // DON'T EDIT BELOW THIS LINE
-                            var d = document, s = d.createElement('script');
-                            s.src = 'https://vittorioromeo.disqus.com/embed.js';
-                            s.setAttribute('data-timestamp', +new Date());
-                            (d.head || d.body).appendChild(s);
-                        })();
-                        </script>
+                    var disqus_config = function () {
+                        this.page.url = ")" +
+                    canonical_permalink_url +
+                    R"(";
+                        this.page.identifier = ")" +
+                    ae._link_name.value() +
+                    R"(";
+                    };
 
-                                                            )";
+                    (function() {
+                        var d = document, s = d.createElement('script');
+                        s.src = 'https://vittorioromeo.disqus.com/embed.js';
+                        s.setAttribute('data-timestamp', +new Date());
+                        (d.head || d.body).appendChild(s);
+                    })();
+                    </script>)";
 
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
                     e_template, Settings::EraseUnexisting);
 
                 subpage._expanded_entries.emplace_back(e_expanded);
-                permalink_pe.produce_result(ctx, my_ap, ae._output_path);
+                permalink_pe.produce_result(ctx, my_ap, permalink_output_path);
             }
 
 
