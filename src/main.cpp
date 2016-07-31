@@ -230,9 +230,7 @@ namespace constant
 
             std::string result{folder::name::result + "/"};
 
-            std::string resources{
-                "/home/vittorioromeo/OHWorkspace/vittorioromeo.info/" +
-                folder::name::resources + "/"};
+            std::string resources{"/" + folder::name::resources};
         }
     }
 
@@ -611,18 +609,22 @@ void process_page_asides(context& ctx, const Path& output_path,
         });
 }
 
-void clean_and_recreate_results_folder()
+void clean_and_recreate_result_folder()
 {
     Path rp{constant::folder::path::result};
     if(rp.exists<Type::Folder>())
     {
-        std::string cmd("rm -R "s + constant::folder::path::result);
+        std::string cmd("rm -R ./"s + constant::folder::name::result);
         system(cmd.c_str());
     }
 
     if(!rp.exists<Type::Folder>())
     {
         ssvufs::createFolder(rp);
+
+        std::string mk_link(
+            "ln -s ../resources/ ./" + constant::folder::name::result);
+        system(mk_link.c_str());
     }
 }
 
@@ -721,8 +723,32 @@ void process_pages(context& ctx)
                 auto& subpage = permalink_pe._subpages.back();
 
 
-                ae._expand["CommentsBox"] =
-                    "totally real and functioning comment box";
+                ae._expand["CommentsBox"] = R"(
+                        <div id="disqus_thread"></div>
+                        <script>
+
+                        var disqus_url = 'http://vittorioromeo.info';
+
+                        /**
+                         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+                         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+                        /*
+                        var disqus_config = function () {
+                            this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+                            this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+                        };
+                        */
+                        (function() { // DON'T EDIT BELOW THIS LINE
+                            var d = document, s = d.createElement('script');
+                            s.src = 'https://vittorioromeo.disqus.com/embed.js';
+                            s.setAttribute('data-timestamp', +new Date());
+                            (d.head || d.body).appendChild(s);
+                        })();
+                        </script>
+
+                                                            )";
+
+                // "totally real and functioning comment box";
 
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
@@ -781,7 +807,7 @@ void process_pages(context& ctx)
 
 int main()
 {
-    clean_and_recreate_results_folder();
+    clean_and_recreate_result_folder();
 
     context ctx;
     load_main_menu_data(ctx);
