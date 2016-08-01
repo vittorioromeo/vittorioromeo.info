@@ -16,13 +16,13 @@
         {{Entry}}
     {{/Entries}}
 
-    <nav>
+    <div class="pagination">
         <ul>
             {{#Subpages}}
-                <li class="menuButton"><a href="{{Subpage}}">{{SubpageLabel}}</a></li>
+                <li class="pageButton"><a href="{{Subpage}}">{{SubpageLabel}}</a></li>
             {{/Subpages}}
         </ul>
-    </nav>
+    </div>
 </article>
 
 <div class="asideWrapper">

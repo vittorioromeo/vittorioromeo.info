@@ -76,10 +76,41 @@ code {
   max-width: 100%;
   max-height: 100%; }
 
+.pagination ul
+{margin: 0;
+    padding: 0;
+    list-style-type: none;
+    text-align: right;}
+.pagination ul li
+{
+  display: inline-block;
+    padding: 0 3px;
+    text-align: center;
+    background-color: rgb(160, 160, 160);
+   
+  }
+
+  .pagination ul li a
+  { color: white;
+    text-decoration: none;
+
+  }
+
+.pageButton { 
+  width: 35px;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   letter-spacing: 0.14em;
-  line-height: 0.8em; }
+  line-height: 0.8em; 
+}
+
+h2 {
+  
+  padding-bottom: 15px;
+  color: #555555;
+}
 
 body {
   background-color: white;
@@ -309,3 +340,51 @@ nav a {
     padding-bottom: 30px;
     width: 80%;
     height: auto; }
+
+
+ table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+ table th {
+  font-weight: bold;
+}
+
+ table th,
+ table td {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+}
+
+ table tr {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
+
+ table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777;
+  margin: 0;
+}
+
+blockquote > :first-child {
+  margin-top: 0;
+}
+
+blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+code {
+  border-radius: 3px;
+  border: 1px solid #eaeaea;
+}

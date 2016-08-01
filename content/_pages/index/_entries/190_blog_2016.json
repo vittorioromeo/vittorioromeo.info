@@ -129,7 +129,7 @@
             "expand":
             {
                 "Title": "open hexagon 2.0 RC2 released",
-                "Text": "<p>Get it on the projects page!</p> <p> Please report issues and give your feedback on the official Facebook page. </p> <hr> ",
+                "Text": "<p>Get it on the projects page!</p> <p> Please report issues and give your feedback on the official Facebook page. </p>  ",
                 "Date": "02 may 2014"
             }
         },
@@ -151,7 +151,7 @@
                 "Title": "new tutorial - dive into C++11 [2]",
                 "Text": "<p>Let's expand our Arkanoid clone and our C++11 knowledge.</p> <p> Learn more about `constexpr`
                 and uniform initialization,
-                and how to deal with FPS and framerates. </p> <p> Watch on the TUTORIALS page. </p> <hr> ",
+                and how to deal with FPS and framerates. </p> <p> Watch on the TUTORIALS page. </p>  ",
                 "Date": "01 december 2013"
             }
         },
@@ -161,7 +161,7 @@
             "expand":
             {
                 "Title": "new tutorial - dive into C++11 [1]",
-                "Text": "<p>Let's build an Arkanoid clone from scratch in 40 minutes, using C++11 and SFML 2.1!</p> <p> Watch on the TUTORIALS page. </p> <hr> ",
+                "Text": "<p>Let's build an Arkanoid clone from scratch in 40 minutes, using C++11 and SFML 2.1!</p> <p> Watch on the TUTORIALS page. </p>  ",
                 "Date": "24 november 2013"
             }
         },
@@ -171,7 +171,7 @@
             "expand":
             {
                 "Title": "moved to new host",
-                "Text": "<p>Many, many thanks to Daniel Porter!.</p> <hr> ",
+                "Text": "<p>Many, many thanks to Daniel Porter!.</p>  ",
                 "Date": "05 november 2013"
             }
         },

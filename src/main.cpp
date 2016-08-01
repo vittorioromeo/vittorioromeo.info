@@ -5,7 +5,6 @@
 #include <SSVUtils/Core/Core.hpp>
 #include <SSVUtils/Json/Json.hpp>
 #include <SSVUtils/TemplateSystem/TemplateSystem.hpp>
-#include <DiscountCpp/DiscountCpp.hpp>
 #include <vrm/core/strong_typedef.hpp>
 
 namespace std
@@ -39,12 +38,9 @@ namespace constant
         namespace path
         {
             std::string content{folder::name::content + "/"};
-
             std::string pages{content + folder::name::pages + "/"};
-
             std::string result{folder::name::result + "/"};
             std::string temp{folder::name::temp + "/"};
-
             std::string resources{"/" + folder::name::resources};
         }
     }
@@ -59,53 +55,34 @@ namespace constant
 
 namespace utils
 {
-    size_t find_nth(const std::string& haystack, size_t pos,
-        const std::string& needle, size_t nth)
+    template <typename T>
+    auto find_nth(const std::string& haystack, sz_t pos, const T& needle,
+        sz_t nth) noexcept
     {
-        size_t found_pos = haystack.find(needle, pos);
-        if(0 == nth || std::string::npos == found_pos) return found_pos;
+        auto found_pos = haystack.find(needle, pos);
+
+        if(nth == 0 || std::string::npos == found_pos)
+        {
+            return found_pos;
+        }
+
         return find_nth(haystack, found_pos + 1, needle, nth - 1);
     }
 
-    // TODO:
-    /*
-    auto path_depth(const ssvufs::Path& p)
-    {
-        return ssvu::getCharCount(p, '/');
-    }
-
-    auto resources_folder_path(sz_t depth)
-    {
-        ssvufs::Path result;
-
-        for(sz_t i(0); i < depth + 1; ++i)
-        {
-            result += "../";
-        }
-
-        return result + "resources";
-    }
-    */
-
     auto html_from_md(const ssvufs::Path& p)
     {
-#if 0
-        return discountcpp::getHTMLFromMarkdownFile(p);
-#else
-        std::string cmd = "mkdir -p "s + constant::folder::path::temp +
-                          " ; touch "s + constant::folder::path::temp +
-                          "temp.html ; chmod 777 "s +
-                          constant::folder::path::temp + "temp.html ; "s +
+        const auto& tempf = constant::folder::path::temp;
+
+        std::string cmd = "mkdir -p "s + tempf + " ; touch "s + tempf +
+                          "temp.html ; chmod 777 "s + tempf + "temp.html ; "s +
                           "pandoc --mathjax --highlight-style=pygments " + p +
-                          " -o "s + constant::folder::path::temp + "temp.html";
+                          " -o "s + tempf + "temp.html";
 
         system(cmd.c_str());
 
-        std::ifstream ifs{constant::folder::path::temp + "temp.html"};
+        std::ifstream ifs{tempf + "temp.html"};
         return std::string{std::istreambuf_iterator<char>(ifs),
             std::istreambuf_iterator<char>()};
-
-#endif
     }
 
     auto expand_to_dictionary(
@@ -254,22 +231,6 @@ namespace structure
     using aside_mapping = impl::mapping<aside_id, archetype::aside>;
     using entry_mapping = impl::mapping<entry_id, archetype::entry>;
     using page_mapping = impl::mapping<page_id, archetype::page>;
-
-    /*
-    class page_hierarchy
-    {
-    private:
-        std::map<page_id, std::vector<page_id>> _children;
-        std::map<page_id, page_id> _parents;
-
-    public:
-        void add(page_id parent, page_id child)
-        {
-            _children[parent].emplace_back(child);
-            _parents[child] = parent;
-        }
-    };
-    */
 }
 
 using namespace ssvu::FileSystem;
@@ -296,9 +257,8 @@ void for_all_page_json_files(TF&& f)
                     return c == '/';
                 });
 
-        const auto& contents = ssvj::fromFile(path);
-
-        f(path, name, full_name, contents);
+        const auto& json_val = ssvj::fromFile(path);
+        f(path, name, full_name, json_val);
     }
 }
 
@@ -335,7 +295,6 @@ namespace impl
 
             // Read json contents.
             const auto& json_val = ssvj::fromFile(path);
-
             f(path, name, full_name, json_val);
         }
     }
@@ -442,7 +401,7 @@ struct subpage_expansion
                 if(a._link == _link)
                 {
                     inner_dict["SubpageLabel"] =
-                        "[[ " + std::to_string(aidx++) + " ]]";
+                        "[" + std::to_string(aidx++) + "]";
                 }
                 else
                 {
@@ -851,12 +810,12 @@ void process_pages(context& ctx)
 
                             if(second_paragraph != std::string::npos)
                             {
-
                                 auto new_text =
                                     old_text.substr(0, second_paragraph + 4);
                                 new_text +=
                                     "<p style='text-align: right; font-style: italic; font-size: small;'> "s +
-                                    atag_link + " ... read more </a></p>";
+                                    atag_link +
+                                    " ... read more </a></p></body></html>";
 
                                 ae._expand["Text"] = new_text;
                             }
