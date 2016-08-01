@@ -18,7 +18,6 @@ VRM_CORE_STRONG_TYPEDEF(sz_t, aside_id);
 VRM_CORE_STRONG_TYPEDEF(sz_t, page_id);
 VRM_CORE_STRONG_TYPEDEF(sz_t, entry_id);
 
-
 namespace constant
 {
     namespace folder
@@ -69,20 +68,45 @@ namespace utils
         return find_nth(haystack, found_pos + 1, needle, nth - 1);
     }
 
-    auto html_from_md(const ssvufs::Path& p)
+    template <typename T>
+    void exec_cmd(T&& x)
     {
-        const auto& tempf = constant::folder::path::temp;
-
-        std::string cmd = "mkdir -p "s + tempf + " ; touch "s + tempf +
-                          "temp.html ; chmod 777 "s + tempf + "temp.html ; "s +
-                          "pandoc --mathjax --highlight-style=pygments " + p +
-                          " -o "s + tempf + "temp.html";
-
+        std::string cmd(FWD(x));
         system(cmd.c_str());
+    }
 
-        std::ifstream ifs{tempf + "temp.html"};
-        return std::string{std::istreambuf_iterator<char>(ifs),
-            std::istreambuf_iterator<char>()};
+    namespace impl
+    {
+        auto html_from_md(const ssvufs::Path& p)
+        {
+            const auto& tempf = constant::folder::path::temp;
+
+            {
+                std::ostringstream oss;
+                oss << "mkdir -p " << tempf << " ; touch " << tempf
+                    << "temp.html ; chmod 777 " << tempf << "temp.html ; "
+                    << "pandoc --mathjax --highlight-style=pygments " << p
+                    << " -o " << tempf << "temp.html";
+
+                utils::exec_cmd(oss.str());
+            }
+
+            std::ifstream ifs{tempf + "temp.html"};
+            return std::string{std::istreambuf_iterator<char>(ifs),
+                std::istreambuf_iterator<char>()};
+        }
+
+        template <typename T>
+        auto expand_kv_pair(const ssvufs::Path& working_directory, const T& p)
+        {
+            if(ssvu::endsWith(p.value, ".md"))
+            {
+                auto md_path = working_directory + ssvufs::Path{p.value};
+                return html_from_md(md_path);
+            }
+
+            return p.value;
+        }
     }
 
     auto expand_to_dictionary(
@@ -92,27 +116,20 @@ namespace utils
 
         for(const auto& p : mVal.forObjAs<std::string>())
         {
-            if(ssvu::endsWith(p.value, ".md"))
-            {
-                auto md_path = working_directory + ssvufs::Path{p.value};
-                result[p.key] = html_from_md(md_path);
-            }
-            else
-            {
-                result[p.key] = p.value;
-            }
+            result[p.key] = impl::expand_kv_pair(working_directory, p);
         }
 
         return result;
     }
+
+
 
     void write_to_file(const ssvufs::Path& p, const std::string& s)
     {
         auto p_parent = p.getParent();
         if(!p_parent.exists<ssvufs::Type::Folder>())
         {
-            std::string cmd("mkdir -p "s + p_parent.getStr());
-            system(cmd.c_str());
+            exec_cmd("mkdir -p "s + p_parent.getStr());
         }
 
         assert(p_parent.exists<ssvufs::Type::Folder>());
@@ -247,8 +264,11 @@ void for_all_page_json_files(TF&& f)
     for(auto& p : page_json_paths)
     {
         const auto& path = p;
+
+        // Name of the folder containing "_page.json".
         const auto& name = p.getParent().getFolderName();
 
+        // Remove "_pages" and right-trim until first "/".
         const auto& full_name =
             ssvu::getTrimR(ssvu::getReplaced(p.getParent().getStr(),
                                constant::folder::path::pages, ""),
@@ -562,11 +582,6 @@ void process_page_entries(context& ctx, const Path& output_path,
 
 
 
-                    // ssvu::lo("Entry|dic|text")
-                    //    << dic.getExpanded("{{Text}}") <<
-                    //    "\n";
-
-                    // Increment unique entry id.
                     ssvu::lo() << "\n";
                 });
         });
@@ -616,17 +631,15 @@ void clean_and_recreate_result_folder()
     Path rp{constant::folder::path::result};
     if(rp.exists<Type::Folder>())
     {
-        std::string cmd("rm -R ./"s + constant::folder::name::result);
-        system(cmd.c_str());
+        utils::exec_cmd("rm -R ./"s + constant::folder::name::result);
     }
 
     if(!rp.exists<Type::Folder>())
     {
         ssvufs::createFolder(rp);
 
-        std::string mk_link(
+        utils::exec_cmd(
             "ln -s ../resources/ ./" + constant::folder::name::result);
-        system(mk_link.c_str());
     }
 }
 
@@ -730,29 +743,19 @@ void process_pages(context& ctx)
                         constant::folder::path::result,
                         "http://vittorioromeo.info/");
 
-                ae._expand["CommentsBox"] =
-                    R"(
-                    <div id="disqus_thread"></div>
-                    <script>
+                // Disqus
+                {
+                    Dictionary disqus;
+                    disqus["PageUrl"] = canonical_permalink_url;
+                    disqus["PageId"] = ae._link_name.value();
 
-                    var disqus_url = 'http://vittorioromeo.info';
+                    auto disqus_template =
+                        Path{"templates/other/disqus.tpl"}.getContentsAsStr();
+                    auto expanded_disqus = disqus.getExpanded(
+                        disqus_template, Settings::EraseUnexisting);
 
-                    var disqus_config = function () {
-                        this.page.url = ")" +
-                    canonical_permalink_url +
-                    R"(";
-                        this.page.identifier = ")" +
-                    ae._link_name.value() +
-                    R"(";
-                    };
-
-                    (function() {
-                        var d = document, s = d.createElement('script');
-                        s.src = 'https://vittorioromeo.disqus.com/embed.js';
-                        s.setAttribute('data-timestamp', +new Date());
-                        (d.head || d.body).appendChild(s);
-                    })();
-                    </script>)";
+                    ae._expand["CommentsBox"] = expanded_disqus;
+                }
 
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
@@ -781,7 +784,6 @@ void process_pages(context& ctx)
 
                     for(sz_t ei(i_begin); ei < i_end; ++ei)
                     {
-                        std::cout << ei << " / " << entry_ids.size() << "\r";
 
                         auto ae = ctx._entry_mapping.get(entry_ids[ei]);
 
@@ -791,19 +793,17 @@ void process_pages(context& ctx)
                         // Has permalink
                         if(ae._link_name)
                         {
-                            auto atag_link = "<a href='" +
-                                             ssvu::getReplaced(ae._output_path,
-                                                 "result/", "") +
-                                             "'>";
+                            auto atag_href = ssvu::getReplaced(ae._output_path,
+                                constant::folder::path::result, "");
+
+                            auto atag_link = "<a href='" + atag_href + "'>";
 
                             auto atag_link_styled =
                                 "<a style='color: black; text-decoration: "
                                 "none;' href='" +
-                                ssvu::getReplaced(
-                                    ae._output_path, "result/", "") +
-                                "'>";
+                                atag_href + "'>";
 
-
+                            // Ellipse long text
                             std::string old_text = ae._expand["Text"].asStr();
                             auto second_paragraph =
                                 utils::find_nth(old_text, 0, "</p>", 2);
