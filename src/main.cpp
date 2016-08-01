@@ -19,8 +19,54 @@ VRM_CORE_STRONG_TYPEDEF(sz_t, aside_id);
 VRM_CORE_STRONG_TYPEDEF(sz_t, page_id);
 VRM_CORE_STRONG_TYPEDEF(sz_t, entry_id);
 
+
+namespace constant
+{
+    namespace folder
+    {
+        namespace name
+        {
+            std::string pages{"_pages"};
+            std::string entries{"_entries"};
+            std::string asides{"_asides"};
+
+            std::string content{"content"};
+            std::string resources{"resources"};
+            std::string result{"result"};
+            std::string temp{"temp"};
+        }
+
+        namespace path
+        {
+            std::string content{folder::name::content + "/"};
+
+            std::string pages{content + folder::name::pages + "/"};
+
+            std::string result{folder::name::result + "/"};
+            std::string temp{folder::name::temp + "/"};
+
+            std::string resources{"/" + folder::name::resources};
+        }
+    }
+
+    namespace file
+    {
+        std::string page_json{"_page.json"};
+        std::string main_menu_json{"_menu.json"};
+    }
+}
+
+
 namespace utils
 {
+    size_t find_nth(const std::string& haystack, size_t pos,
+        const std::string& needle, size_t nth)
+    {
+        size_t found_pos = haystack.find(needle, pos);
+        if(0 == nth || std::string::npos == found_pos) return found_pos;
+        return find_nth(haystack, found_pos + 1, needle, nth - 1);
+    }
+
     // TODO:
     /*
     auto path_depth(const ssvufs::Path& p)
@@ -43,7 +89,23 @@ namespace utils
 
     auto html_from_md(const ssvufs::Path& p)
     {
+#if 0
         return discountcpp::getHTMLFromMarkdownFile(p);
+#else
+        std::string cmd = "mkdir -p "s + constant::folder::path::temp +
+                          " ; touch "s + constant::folder::path::temp +
+                          "temp.html ; chmod 777 "s +
+                          constant::folder::path::temp + "temp.html ; "s +
+                          "pandoc --mathjax --highlight-style=pygments " + p +
+                          " -o "s + constant::folder::path::temp + "temp.html";
+
+        system(cmd.c_str());
+
+        std::ifstream ifs{constant::folder::path::temp + "temp.html"};
+        return std::string{std::istreambuf_iterator<char>(ifs),
+            std::istreambuf_iterator<char>()};
+
+#endif
     }
 
     auto expand_to_dictionary(
@@ -208,40 +270,6 @@ namespace structure
         }
     };
     */
-}
-
-namespace constant
-{
-    namespace folder
-    {
-        namespace name
-        {
-            std::string pages{"_pages"};
-            std::string entries{"_entries"};
-            std::string asides{"_asides"};
-
-            std::string content{"content"};
-            std::string resources{"resources"};
-            std::string result{"result"};
-        }
-
-        namespace path
-        {
-            std::string content{folder::name::content + "/"};
-
-            std::string pages{content + folder::name::pages + "/"};
-
-            std::string result{folder::name::result + "/"};
-
-            std::string resources{"/" + folder::name::resources};
-        }
-    }
-
-    namespace file
-    {
-        std::string page_json{"_page.json"};
-        std::string main_menu_json{"_menu.json"};
-    }
 }
 
 using namespace ssvu::FileSystem;
@@ -409,7 +437,7 @@ struct subpage_expansion
                 Dictionary inner_dict;
 
                 inner_dict["Subpage"] =
-                    ssvu::getReplaced(a._link, "result/", "");
+                    ssvu::getReplaced(a._link, "result/", "/");
 
                 if(a._link == _link)
                 {
@@ -801,13 +829,39 @@ void process_pages(context& ctx)
                         auto e_template =
                             Path{ae._template_path}.getContentsAsStr();
 
+                        // Has permalink
                         if(ae._link_name)
                         {
-                            ae._expand["PermalinkBegin"] =
-                                "<a href='" + ssvu::getReplaced(ae._output_path,
-                                                  "result/", "") +
+                            auto atag_link = "<a href='" +
+                                             ssvu::getReplaced(ae._output_path,
+                                                 "result/", "") +
+                                             "'>";
+
+                            auto atag_link_styled =
+                                "<a style='color: black; text-decoration: "
+                                "none;' href='" +
+                                ssvu::getReplaced(
+                                    ae._output_path, "result/", "") +
                                 "'>";
 
+
+                            std::string old_text = ae._expand["Text"].asStr();
+                            auto second_paragraph =
+                                utils::find_nth(old_text, 0, "</p>", 2);
+
+                            if(second_paragraph != std::string::npos)
+                            {
+
+                                auto new_text =
+                                    old_text.substr(0, second_paragraph + 4);
+                                new_text +=
+                                    "<p style='text-align: right; font-style: italic; font-size: small;'> "s +
+                                    atag_link + " ... read more </a></p>";
+
+                                ae._expand["Text"] = new_text;
+                            }
+
+                            ae._expand["PermalinkBegin"] = atag_link_styled;
                             ae._expand["PermalinkEnd"] = "</a>";
                         }
 

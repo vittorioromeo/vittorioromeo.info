@@ -1,0 +1,16 @@
+{
+    "link_name": "blog",
+    "elements": 
+    [
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "new_website_generator_2016",
+            "expand":
+            {
+                "Title": "new website generator",
+                "Text": "180_blog_2016_md/1000_new_website_generator.md",
+                "Date": "1 august 2016"
+            }
+        }
+    ]
+}

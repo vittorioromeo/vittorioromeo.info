@@ -1,0 +1,219 @@
+{
+    "link_name": "blog",
+    "elements": 
+    [
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2016_videos_available",
+            "expand":
+            {
+                "Title": "C++Now 2016 videos available",
+                "Text": "190_blog_2016_md/a7.md",
+                "Date": "17 july 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "trip report - C++Now 2016",
+                "Text": "190_blog_2016_md/a6.md",
+                "Date": "16 may 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "meeting c++ lightning talks",
+                "Text": "190_blog_2016_md/a5.md",
+                "Date": "12 december 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "new tutorial, meeting c++",
+                "Text": "190_blog_2016_md/a4.md",
+                "Date": "06 december 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "my cppcon 2015 talks",
+                "Text": "190_blog_2016_md/a3.md",
+                "Date": "30 october 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "dive into c++14!",
+                "Text": "190_blog_2016_md/a2.md",
+                "Date": "6 june 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "new_dive_into_cpp_ep",
+
+            "expand":
+            {
+                "Title": "new dive into c++ episode",
+                "Text": "190_blog_2016_md/a1.md",
+                "Date": "21 march 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "delver's choice",
+                "Text": "190_blog_2016_md/9.md",
+                "Date": "01 february 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "new year, new tutorial video",
+                "Text": "190_blog_2016_md/8.md",
+                "Date": "06 january 2015"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "OH2.0-RC2 .deb available",
+                "Text": "190_blog_2016_md/7.md",
+                "Date": "22 october 2014"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "CppCon2014 video and stuff",
+                "Text": "190_blog_2016_md/6.md",
+                "Date": "09 october 2014"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "post-summer update",
+                "Text": "190_blog_2016_md/5.md",
+                "Date": "27 september 2014"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "open hexagon 2.0 RC2 released",
+                "Text": "<p>Get it on the projects page!</p> <p> Please report issues and give your feedback on the official Facebook page. </p> <hr> ",
+                "Date": "02 may 2014"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "dive into C++11 - episodes 3, 4",
+                "Text": "190_blog_2016_md/4.md",
+                "Date": "05 january 2014"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "new tutorial - dive into C++11 [2]",
+                "Text": "<p>Let's expand our Arkanoid clone and our C++11 knowledge.</p> <p> Learn more about `constexpr`
+                and uniform initialization,
+                and how to deal with FPS and framerates. </p> <p> Watch on the TUTORIALS page. </p> <hr> ",
+                "Date": "01 december 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "new tutorial - dive into C++11 [1]",
+                "Text": "<p>Let's build an Arkanoid clone from scratch in 40 minutes, using C++11 and SFML 2.1!</p> <p> Watch on the TUTORIALS page. </p> <hr> ",
+                "Date": "24 november 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "moved to new host",
+                "Text": "<p>Many, many thanks to Daniel Porter!.</p> <hr> ",
+                "Date": "05 november 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "operation bloodshed",
+                "Text": "190_blog_2016_md/3.md",
+                "Date": "07 october 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "ludum dare 27 - 10corp",
+                "Text": "190_blog_2016_md/2.md",
+                "Date": "26 august 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "cppdiscount",
+                "Text": "190_blog_2016_md/1.md",
+                "Date": "09 august 2013"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+
+            "expand":
+            {
+                "Title": "markdown and more",
+                "Text": "190_blog_2016_md/0.md",
+                "Date": "07 august 2013"
+            }
+        }
+    ]
+}

@@ -9,6 +9,9 @@
             {{Text}}
         </div>
     </div>
+    
+    <hr>
+
 </section>
 
 {{CommentsBox}}

@@ -17,6 +17,10 @@
         <link rel="stylesheet" href="{{ResourcesPath}}/css/utils.css">
 
         <script src="{{ResourcesPath}}/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+        <script type="text/javascript" async
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
         <!-- <base href="/home/vittorioromeo/OHWorkspace/vittorioromeo.info/result/"> -->
     </head>
 
@@ -163,8 +167,6 @@
         <script>window.jQuery || document.write('<script src="{{ResourcesPath}}/js/vendor/jquery-1.8.3.min.js"><\/script>')</script>
         <script src="{{ResourcesPath}}/js/jquery.animate-colors-min.js"></script> <script src="{{ResourcesPath}}/js/main.js"></script>
         <link rel="stylesheet" href="{{ResourcesPath}}/js/styles/github.css">
-        <script src="{{ResourcesPath}}/js/highlight.pack.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script>
 
         <script>
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
