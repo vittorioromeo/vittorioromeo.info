@@ -274,6 +274,8 @@ void for_all_page_json_files(TF&& f)
     }
 }
 
+// TODO: patreon button in template
+
 namespace impl
 {
     template <typename TF>
