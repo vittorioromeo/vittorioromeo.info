@@ -1,0 +1,27 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "delver's choice",
+				"Text": "<img src=\"resources/img/delversChoice.png\">
+						<p>Delver's Choice is a fast-paced, simple and accessible, retro-styled dungeon crawler,
+						that uses only four numeric keys and a simple RPG battle system</p>
+						<p>The player is constantly faced with randomly-generated challenges - having to make a choice is a small period of time is the point of the game.</p>
+						<p>Choices depend on your current statistics, on the enemies' statistics and the items in the environment. Will you be able to reach the hardest rooms of the dungeon?</p>
+						<p>Originally developed for Global Game Jam 2015. Currently being developed further as a FOSS game.</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "RC7(win)", 			"Link": "/GGJ2015/DelversChoice_RC7_Full_Win32.7z" },
+				{ "Title": "GGJ entry", 		"Link": "http://globalgamejam.org/2015/games/delvers-choice\" target=\"_blank\"" },
+				{ "Title": "github", 			"Link": "https://github.com/SuperV1234/DelversChoice\" target=\"_blank\"" }
+			]
+		}
+	]
+}

@@ -1,0 +1,36 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "open hexagon",
+				"Text": "<img src=\"resources/img/openHexagon.png\">
+						<p>Open Hexagon is a free open-source clone of the game \"Super Hexagon by Terry Cavanagh\".<br>
+						Gameplay is easy to learn but hard to master.<br>
+						You control a triangle that rotates around the center of the screen.<br>
+						Your goal is to stay alive as long as possible by avoiding the walls that go towards the center.<br>
+						Features JSON and LUA scripting for complete customization and level sharing.</p>
+						<p>Compete online for the top high scores!</p>
+						<p>If you're having trouble extracting the archive for the GNU/Linux 2.0-RC1 version, rename the file
+						extension to <code>.tar.xz</code>.</p>"
+			}
+		},
+		{ 
+			"MenuItems":
+			[
+				{ "Title": "2.0-RC2(win)", 		"Link": "/Misc/Temp/OpenHexagonV2.0-RC2-Win32.zip" },
+				{ "Title": "2.0-RC2(deb)", 		"Link": "/Misc/Temp/OpenHexagon2.0-RC2.deb" },
+				{ "Title": "2.0-RC1(linux)", 	"Link": "/Misc/Temp/OpenHexagon2.0-RC1.xz" },
+				{ "Title": "1.92(win)", 		"Link": "/Downloads/OpenHexagon/OpenHexagonV1.92.7z" },
+				{ "Title": "1.92(linux)",		"Link": "/Downloads/OpenHexagon/Linux/OpenHexagonV1.92.tar.gz" },
+				{ "Title": "readme", 			"Link": "/Downloads/OpenHexagon/README.html\" target=\"_blank\"" },
+				{ "Title": "fb", 				"Link": "http://www.facebook.com/OpenHexagon\" target=\"_blank\"" },
+				{ "Title": "packs", 			"Link": "/Downloads/OpenHexagon/LevelPacks\" target=\"_blank\"" },
+				{ "Title": "github", 			"Link": "https://github.com/SuperV1234/SSVOpenHexagon\" target=\"_blank\"" }
+			]
+		}
+	]
+}

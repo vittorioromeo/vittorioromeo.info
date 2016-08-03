@@ -1,0 +1,14 @@
+{
+    "elements": 
+    [
+        {
+            "template": "templates/entries/header.tpl",
+
+            "expand":
+            {
+                "Title": "portfolio",
+                "Text": "This is my current portfolio/CV. <hr>"
+            }
+        }
+    ]
+}

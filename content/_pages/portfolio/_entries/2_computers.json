@@ -1,0 +1,18 @@
+{
+    "elements": 
+    [
+        {
+		    "template": "templates/entries/text.tpl",
+
+		    "expand":
+		    {
+		        "Title": "digital competence",
+		        "Text": "
+
+		<p>Experienced in the following technologies:<br><strong></strong></p><ul><li><strong>&#8203;Microsoft Windows </strong>&#8203;and <strong>&#8203;GNU/Linux</strong></li><li><strong>M</strong><strong>odern C++</strong>&#8203;, <strong>&#8203;C#</strong>&#8203; and<strong>&#8203; .NET Framework</strong></li><li><strong>Java</strong>,<strong> </strong>&#8203;<strong>&#8203;HTML5</strong>,<strong> CSS</strong>,<strong> JS and</strong><strong> SQL</strong></li><li><strong>2D game development</strong></li><li><strong>MinGW, GCC, Clang </strong>and<strong> Boost</strong></li></ul><strong></strong>
+
+		            <hr>"
+		    }
+		}
+	]
+}

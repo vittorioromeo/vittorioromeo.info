@@ -1,0 +1,15 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/blog.tpl",
+
+			"expand":
+			{
+				"Title": "...",
+				"Text": "mdEntries/0.md",
+				"Date": "22 september 2014"
+			}
+		}
+	]
+}

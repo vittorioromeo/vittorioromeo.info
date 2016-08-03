@@ -1,0 +1,14 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "",
+				"Text": "mdEntries/0.md"
+			}
+		}
+	]
+}

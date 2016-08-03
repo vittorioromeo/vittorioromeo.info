@@ -142,7 +142,11 @@ namespace utils
     template <typename TF>
     void segmented_for(sz_t split_count, sz_t per_split, sz_t total, TF&& f)
     {
-        assert(split_count > 0);
+        // TODO:
+        if(split_count <= 0)
+        {
+            return;
+        }
 
         for(sz_t i_split = 0; i_split < split_count - 1; ++i_split)
         {
@@ -337,7 +341,12 @@ namespace impl
 
                 for(Val element : element_json["elements"].forArr())
                 {
-                    f(path, name, full_name, element);
+                    // TODO:
+                    if(!element.has("MenuItems"))
+                    {
+
+                        f(path, name, full_name, element);
+                    }
                 }
             });
     }
@@ -409,7 +418,7 @@ struct subpage_expansion
 
         // Pagination controls
 
-        if(ap._subpaging)
+        if(ap._subpaging && subpages.size() > 1)
         {
             int aidx = 0;
             for(const auto& a : subpages)
@@ -480,6 +489,13 @@ struct page_expansion
     auto produce_result(
         context& ctx, const archetype::page& ap, const Path& output_path)
     {
+
+        // TODO
+        if(_subpages.size() <= 0)
+        {
+            return;
+        }
+
         assert(_subpages.size() > 0);
 
 
@@ -787,8 +803,6 @@ void process_pages(context& ctx)
 
                 subpage._expanded_entries.emplace_back(e_expanded);
                 permalink_pe.produce_result(ctx, my_ap, permalink_output_path);
-
-
             }
 
 
@@ -798,7 +812,8 @@ void process_pages(context& ctx)
                                            : std::numeric_limits<sz_t>::max();
 
 
-            auto subpage_count = entry_ids.size() / entries_per_subpage;
+            auto subpage_count =
+                std::max(sz_t(1), entry_ids.size() / entries_per_subpage);
 
             utils::segmented_for(subpage_count, entries_per_subpage,
                 entry_ids.size(), [&](auto idx, auto i_begin, auto i_end)

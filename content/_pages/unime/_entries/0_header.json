@@ -1,0 +1,15 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/header.tpl",
+
+			"expand":
+			{
+				"Title": "unime",
+				"Text": "Stuff about UNIME. [Informatica 2013-2015]
+						<hr>"
+			}
+		}
+	]
+}

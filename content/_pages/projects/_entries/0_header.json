@@ -1,0 +1,15 @@
+{
+    "elements": 
+    [
+        {
+			"template": "templates/entries/header.tpl",
+
+			"expand":
+			{
+				"Title": "projects",
+				"Text": "Everything I'm working on or I've worked on.
+						<hr>"
+			}
+		}
+	]
+}

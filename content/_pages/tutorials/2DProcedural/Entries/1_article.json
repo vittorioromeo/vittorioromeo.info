@@ -1,0 +1,75 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/blog.tpl",
+
+			"expand":
+			{
+				"Title": "originally written on:",
+				"Date": "23 august 2012",
+				"Text": "
+						<br>
+						<h3>Thoughts</h3>
+
+						<p>I’ve always been a fan on procedural generation, not only for environments, but also for entities (enemies, items, weapons, etc.). However I don’t think at all the procedural generation is “better” than user-made content. Procedural generation works best when the entire game is designed around it, when level design doesn’t require a lot of creativity or when the elements are simple enough that any level will be fun to play. User-made content is still superior in most of the results, but it is obviously more consuming in terms of development times. Also, even though I never experimented with it a lot, I’ve always liked the idea of mixing user-made content with procedural generation. An example could be levels made up of user-made rooms attached together randomly. Something similar is modular item creation, like in Borderlands, where developers create a lot of pieces and then the system attaches them together randomly, creating interesting results. I think that procedural generation is a very powerful tool, it can help you save precious development time on content creation and also dramatically increase any game’s re-playability. I think it is suitable for any game genre, in one way or the other - it shouldn't be limited to roguelikes.</p>
+
+						<br>
+						<h3>My first tests</h3>
+
+						<p>
+						<img src=\"http://veegamedev.files.wordpress.com/2012/08/11.png\"/>
+						 <br>This probably was my first test, made in 2009. It is very simple, it generates empty rooms in a wall-filled 2d array, then carves a path from every center of the room to the other centers. It generated predictable and boring levels. It is an example of what not-to-do.<br>
+						 <img src=\"http://veegamedev.files.wordpress.com/2012/08/2.png\"/>
+						 <br> This is the updated version. It still gives the same results, but stores rooms and paths in objects, so that you can collect and manipulate them more easily. It also creates walls around walkable tiles to make the levels look a little nicer. Then I experimented with field of view algorithms and other typical roguelike mechanics, and this prototype is what came out of it: <a href=\"http://www.youtube.com/watch?v=FyHrHb76lnY\">http://www.youtube.com/watch?v=FyHrHb76lnY</a></p>
+
+						<br>
+						<h3>Moving on</h3>
+
+						<p>I stopped experimenting with procedural generation after a while, and worked on other stuff. That’s when I started getting into a puzzle game, called DROD (Deadly Rooms of Death), which caught my attention for a lot of time, so I decided to make a clone of it.<br>
+						<img src=\"http://veegamedev.files.wordpress.com/2012/08/drodrl-e1345686452808.png\"/>
+						<br> When suddenly it struck me – I’ll make a roguelike clone. I started working on a level generation library, this is the first video of it: <a href=\"http://www.youtube.com/watch?v=tbMcle88t3U\">http://www.youtube.com/watch?v=tbMcle88t3U</a> The generation was still largely similar to the one of the previous video. I was however storing room outlines and rooms separately, so that I could easily add doors or pathways that didn’t start from the center. This next video shows how useful storing rooms in separate objects was – I added special tiles that prevented diagonal movement in random rooms: <a href=\"http://www.youtube.com/watch?v=9EEh0OJjKO4\">http://www.youtube.com/watch?v=9EEh0OJjKO4</a> The last video shows why storing paths is also a good idea – I randomly added doors along paths to spice up levels: <a href=\"http://www.youtube.com/watch?v=QFMM4qtUbx4\">http://www.youtube.com/watch?v=QFMM4qtUbx4</a></p>
+
+						<br>
+						<h3>Improving the generation</h3>
+
+						<p>In 2011, I started experimenting with pathfinding. I had the idea of randomly generating levels by placing rooms around in a big open space, then pathfinding from the first one to the next one, until they were all connected. <br>
+						<img src=\"http://veegamedev.files.wordpress.com/2012/08/3.png\"/>
+						<br> This was my first attempt: <a href=\"http://www.youtube.com/watch?v=Ve0s8109Erg\">http://www.youtube.com/watch?v=Ve0s8109Erg</a> As you can see, it was slow. It also added doors on random room outline tiles. I improved it a bit later, rendering tiles with SFML.NET. Also added a simple player entity and basic collisions: <a href=\"http://www.youtube.com/watch?v=NDeM5oQyve8\">http://www.youtube.com/watch?v=NDeM5oQyve8</a> This is much more interesting than the DROD Roguelike one, because it doesn’t create overlapping rooms and paths, which can lead to unintended solutions or simply bad-looking levels. The generated levels could also be retrieved as a connection of nodes <em>(a graph)</em>. This was incredibly useful, because you could actually write some clever code that automatically added keys and doors that were accessible only in a specific order and make levels less linear. his is still my favorite approach - it could also be sped up by using <strong>Jump Point Search</strong> instead of<strong> A*</strong>.</p>
+
+						<br>
+						<h3>VeeGen</h3>
+
+						<p>I decided to create a library for easy 2d terrain generation. Code quality is not the best, considering it’s from late 2011, but its features are working and it’s easy to use in any project. It’s called VeeGen, and it is available on my GitHub page, along with a demo. Here’s how the API looks:</p>
+
+						
+
+		<!-- HTML generated using hilite.me --><div style=\"background: #202020; overflow:auto;width:auto;color:white;background:black;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;\"><pre style=\"margin: 0; line-height: 125%\"><span style=\"color: #6ab825; font-weight: bold\">int</span> <span style=\"color: #d0d0d0\">width</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #3677a9\">100</span><span style=\"color: #d0d0d0\">;</span>
+		<span style=\"color: #6ab825; font-weight: bold\">int</span> <span style=\"color: #d0d0d0\">height</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #3677a9\">100</span><span style=\"color: #d0d0d0\">;</span>
+		<span style=\"color: #6ab825; font-weight: bold\">int</span> <span style=\"color: #d0d0d0\">initialValue</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #3677a9\">0</span><span style=\"color: #d0d0d0\">;</span>
+
+		<span style=\"color: #6ab825; font-weight: bold\">var</span> <span style=\"color: #d0d0d0\">world</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #6ab825; font-weight: bold\">new</span> <span style=\"color: #d0d0d0\">VGWorld(width,</span> <span style=\"color: #d0d0d0\">height,</span> <span style=\"color: #d0d0d0\">initialValue);</span>
+		<span style=\"color: #999999; font-style: italic\">// creates a world that contains a 2d array of tiles</span>
+
+		<span style=\"color: #6ab825; font-weight: bold\">var</span> <span style=\"color: #d0d0d0\">area</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #6ab825; font-weight: bold\">new</span> <span style=\"color: #d0d0d0\">VGArea(world,</span> <span style=\"color: #3677a9\">0</span><span style=\"color: #d0d0d0\">,</span> <span style=\"color: #3677a9\">0</span><span style=\"color: #d0d0d0\">,</span> <span style=\"color: #3677a9\">50</span><span style=\"color: #d0d0d0\">,</span> <span style=\"color: #3677a9\">50</span><span style=\"color: #d0d0d0\">);</span>
+		<span style=\"color: #999999; font-style: italic\">// defines an area that goes from 0;0 to 50;50</span>
+
+		<span style=\"color: #6ab825; font-weight: bold\">var</span> <span style=\"color: #d0d0d0\">dungeonGenerator</span> <span style=\"color: #d0d0d0\">=</span> <span style=\"color: #6ab825; font-weight: bold\">new</span> <span style=\"color: #d0d0d0\">VGGBSPDungeon(mSplits:</span> <span style=\"color: #3677a9\">9</span><span style=\"color: #d0d0d0\">,</span> <span style=\"color: #d0d0d0\">mCarveOffset:</span> <span style=\"color: #3677a9\">1</span><span style=\"color: #d0d0d0\">);</span>
+		<span style=\"color: #d0d0d0\">dungeonGenerator.Generate(area);</span>
+		</pre></div>
+
+					
+
+						<p>There are three different generators in the library:</p>
+
+						<ul>
+						    <li><strong>BSPDungeon</strong>: generates a dungeon via binary space partitioning</li>
+						    <li><strong>Cave</strong>: generates a cave using cellar automata</li>
+						    <li><strong>Walker</strong>: uses “walkers”, entities that walk around the area, carving it and spawning rooms randomly</li>
+						</ul>
+
+						<p>In retrospect, the API could be highly improved, but the functionality is still there. I have a video explaining most of the features right here, check it out: <a href=\"http://www.youtube.com/watch?v=d0ByM6mkce4\">http://www.youtube.com/watch?v=d0ByM6mkce4</a> The cool thing about VeeGen is that you can mix'n'match different generators. Areas allow you to use a generator in a certain part of the world, and another generator in another part. With some interesting code you could create dungeons with rooms filled of caves, for example. Or a large open world with dungeons and caves placed randomly But even more interesting is the fact that you can use more generators in the same area. You can see in the video <em>(and try it for yourself in the demo)</em> that it is possible to generate a dungeon on top of a cave, then, hypothetically, have some walkers carve some additional paths and rooms in the dungeon. The possibilities are endless, and creating custom generators shouldn't be hard at all.</p>"
+			}
+		}
+	]
+}

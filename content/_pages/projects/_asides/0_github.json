@@ -1,0 +1,15 @@
+{
+    "elements": 
+    [
+        {
+			"template": "templates/asides/text.tpl",
+
+			"expand":
+			{
+				"Title": "more projects",
+				"Text": "<p>This is only a very small subset of all my projects! <br> <a href=\"https://github.com/SuperV1234\" target=\"_blank\">Check out my GitHub page to see the rest.</a></p>
+						"
+			}
+		}
+	]
+}

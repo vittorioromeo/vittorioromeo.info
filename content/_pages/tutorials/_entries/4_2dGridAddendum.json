@@ -1,0 +1,22 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "2D grid spatial partitioning addendum (with code analysis and drawn explanation)",
+				"Text": "<img src=\"resources/img/Tutorials/Banners/2dGridAddendum.png\">
+						<p>This is a screencast, where I explain to a friend (http://www.youtube.com/user/TheGeekatory) using a virtual whiteboard and Mumble voice chat, how 2D grid spatial partitioning works and how it can be implemented. 
+						It features a real-time drawing that helps with understanding how spatial partitioning works, and code analysis from my personal implementation, that can be found and forked on my GitHub page, in the SSVSCollision repository.</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "watch (youtube)", "Link": "http://www.youtube.com/watch?v=vYB37BDtHuQ\" target=\"_blank\"" }
+			]
+		}
+	]
+}

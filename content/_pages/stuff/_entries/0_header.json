@@ -1,0 +1,15 @@
+{
+    "elements": 
+    [
+        {
+			"template": "templates/entries/header.tpl",
+
+			"expand":
+			{
+				"Title": "stuff I like",
+				"Text": "A list of all the non-programming related things I like. I created this page to keep track of my good entertainment experiences and share them with everyone else.
+						<hr>"
+			}
+		}
+	]
+}

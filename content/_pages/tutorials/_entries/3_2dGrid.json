@@ -1,0 +1,22 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "2D grid spatial partitioning basics (speed up collision broad-phase)",
+				"Text": "<img src=\"resources/img/Tutorials/Banners/2dGrid.png\">
+						<p>A grid as a spatial partitioning method is easy to implement and can speed up immensely collision detection.
+						In this video, I try to explain how it works, how bodies do not have to match the cell size, and a possible implementation.</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "watch (youtube)", "Link": "http://www.youtube.com/watch?v=7HY_SqqaoL4\" target=\"_blank\"" }
+			]
+		}
+	]
+}

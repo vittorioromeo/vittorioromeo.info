@@ -1,0 +1,23 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "Solving the \"crack\" problem in 2D collision resolution",
+				"Text": "<img src=\"resources/img/Tutorials/Banners/crackProblem.png\">
+						<p>A common bug that occurs when developing 2D collision detection and resolution.<br>
+						In normal implementations, physical bodies will get \"stuck\" between two adjacent tiles.<br>
+						In the video, I show two possible solutions.</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "watch (youtube)", "Link": "http://www.youtube.com/watch?v=FkcuCHleiWo\" target=\"_blank\"" }
+			]
+		}
+	]
+}

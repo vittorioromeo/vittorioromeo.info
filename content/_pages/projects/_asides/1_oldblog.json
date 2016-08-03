@@ -1,0 +1,15 @@
+{
+    "elements": 
+    [
+        {
+			"template": "templates/asides/text.tpl",
+
+			"expand":
+			{
+				"Title": "old blog",
+				"Text": "Looking for my old game-dev blog?<br>
+						Click <a href=\"http://veegamedev.wordpress.com/\" target=\"_blank\"> here!</a>"
+			}
+		}
+	]
+}

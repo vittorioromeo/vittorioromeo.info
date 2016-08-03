@@ -1,0 +1,21 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "Dive into C++11/14",
+				"Text": "<img src=\"resources/img/Tutorials/Banners/dicpp1.png\">
+						<p>Modern C++11/14 video tutorials of various topic, ranging from language features to game development.</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "playlist", "Link": "http://www.youtube.com/playlist?list=PLTEcWGdSiQenl4YRPvSqW7UPC6SiGNN7e\" target=\"_blank\"" }
+			]
+		}
+	]
+}

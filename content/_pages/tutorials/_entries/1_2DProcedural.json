@@ -1,0 +1,21 @@
+{
+	"elements":
+	[
+		{
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "2D procedural dungeon generation",
+				"Text": "<img src=\"resources/img/Tutorials/Banners/2DProcedural_drod.png\">
+						<p>Ever wanted to create a dungeon-generating algorithm for your games?</p>"
+			}
+		},
+		{
+			"MenuItems":
+			[
+				{ "Title": "read", 					"Link": "/Tutorials/2DproceduralGeneration.html" }
+			]
+		}
+	]
+}

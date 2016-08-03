@@ -1,0 +1,18 @@
+{
+    "elements": 
+    [
+        {
+			"template": "templates/entries/text.tpl",
+
+			"expand":
+			{
+				"Title": "presentations",
+				"Text": "
+
+		<ul><li><strong>Game development with GNU/Linux </strong>-<strong> Linux Day 2013 </strong><em>(Messina)</em> - game development with GNU/Linux and C++11<strong></strong></li><li><strong>Quick game development with C++11/C++14 </strong>- <strong>CppCon 2014 </strong><em>(Bellevue)</em> - rapid game development using modern C++ features</li><li><strong>Introduction to Git and GitHub</strong> - <strong>Linux Day 2014 </strong><em>(Messina)</em> - basic Git and GitHub usage for development and study purposes</li><li><strong><code>for_each_argument</code> explained and expanded </strong>- <strong>C++Now 2015</strong> <em>(Aspen)</em> and <strong>CppCon 2015 </strong><em>(Bellevue)</em> - analysis and improvement of a powerful C++ code snippet</li><li><b>Introduction to game development with C++14 </b>- <b>it++ Meetup 2015 </b><em>(Florence) </em>- live coding of a playable game using modern C++</li><li><strong>Implementation of a component-based entity system in modern C++14 </strong><span >&#8203;- <strong>&#8203;CppCon 2015 </strong><span >&#8203;<em>&#8203;(Bellevue) <span >&#8203;</span></em><span >&#8203;- analysis and live coding of a cache-friendly ECS framework</span></span></span></li></ul>
+				
+						<hr>"
+			}
+		}
+	]
+}
