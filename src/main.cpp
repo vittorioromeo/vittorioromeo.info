@@ -196,6 +196,7 @@ namespace archetype
     struct entry : public impl::element
     {
         std::optional<std::string> _link_name;
+        std::vector<std::string> _tags;
     };
 
     struct page
@@ -568,6 +569,18 @@ void process_page_entries(context& ctx, const Path& output_path,
                         e_output_path += "/" + std::to_string(eid) + ".html";
                     }
 
+                    if(e_contents.has("tags"))
+                    {
+                        for(const auto& t : e_contents["tags"].forArrAs<Str>())
+                        {
+                            ae._tags.emplace_back(t);
+                        }
+                    }
+                    else
+                    {
+                        ae._tags.emplace_back("untagged");
+                    }
+
 
 
                     ae._template_path = e_template_path;
@@ -629,18 +642,15 @@ void process_page_asides(context& ctx, const Path& output_path,
 void clean_and_recreate_result_folder()
 {
     Path rp{constant::folder::path::result};
-    if(rp.exists<Type::Folder>())
-    {
-        utils::exec_cmd("rm -R ./"s + constant::folder::name::result);
-    }
+    assert(ssvu::endsWith(rp, "/"));
 
     if(!rp.exists<Type::Folder>())
     {
         ssvufs::createFolder(rp);
-
-        utils::exec_cmd(
-            "ln -s ../resources/ ./" + constant::folder::name::result);
     }
+
+    utils::exec_cmd("rm -R ./"s + rp.getStr() + "*");
+    utils::exec_cmd("ln -s ../resources/ ./" + rp.getStr());
 }
 
 void load_main_menu_data(context& ctx)
@@ -716,6 +726,17 @@ void process_pages(context& ctx)
                 return;
             }
 
+            // Tags
+            auto build_tag_expansion = [&](auto& ae)
+            {
+                for(const auto& t : ae._tags)
+                {
+                    Dictionary tag0;
+                    tag0["Link"] = "#";
+                    tag0["Label"] = t;
+                    ae._expand["Tags"] += tag0;
+                }
+            };
 
 
             // Expand permalinks (single-article pages)
@@ -757,12 +778,16 @@ void process_pages(context& ctx)
                     ae._expand["CommentsBox"] = expanded_disqus;
                 }
 
+
+
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
                     e_template, Settings::EraseUnexisting);
 
                 subpage._expanded_entries.emplace_back(e_expanded);
                 permalink_pe.produce_result(ctx, my_ap, permalink_output_path);
+
+                build_tag_expansion(ae);
             }
 
 
@@ -789,6 +814,8 @@ void process_pages(context& ctx)
 
                         auto e_template =
                             Path{ae._template_path}.getContentsAsStr();
+
+                        build_tag_expansion(ae);
 
                         // Has permalink
                         if(ae._link_name)

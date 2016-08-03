@@ -102,7 +102,7 @@ code {
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.09em;
   line-height: 0.8em; 
 }
 
@@ -139,13 +139,29 @@ section {
 .entryText {
   text-align: justify; }
 
-.blogDate {
-  float: right;
+.blogDate {  
+    color: #555555;
   font-style: italic;
-  font-size: 50%;
+  font-size: 75%;
   font-weight: normal;
   letter-spacing: 2px;
-  margin-top: 3px; }
+  }
+
+.blogTag{
+  background-color: #a0a0a0;
+  color: white;
+  margin-right: 4px;
+  padding: 2px;
+  letter-spacing: 0px;
+  font-weight: bold; 
+  font-size: 75%;
+  }
+
+.blogTag a
+{
+color: white;
+text-decoration: none;
+  }
 
 nav ul {
   margin: 0;
