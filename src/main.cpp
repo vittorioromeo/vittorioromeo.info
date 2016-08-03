@@ -777,6 +777,7 @@ void process_pages(context& ctx)
 
                     ae._expand["CommentsBox"] = expanded_disqus;
                 }
+                build_tag_expansion(ae);
 
 
 
@@ -787,7 +788,7 @@ void process_pages(context& ctx)
                 subpage._expanded_entries.emplace_back(e_expanded);
                 permalink_pe.produce_result(ctx, my_ap, permalink_output_path);
 
-                build_tag_expansion(ae);
+
             }
 
 
