@@ -19,6 +19,12 @@
   background: #b3d4fc;
   text-shadow: none; }
 
+.sourceCode
+{
+  line-height: 125%;
+  font-size: 90%;
+}
+
 hr {
   display: block;
   height: 1px;
