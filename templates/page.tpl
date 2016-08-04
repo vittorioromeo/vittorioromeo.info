@@ -18,6 +18,10 @@
 
         <script src="{{ResourcesPath}}/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
+
+
+
+
         <script type="text/javascript" async
             src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
         </script>
@@ -96,6 +100,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
         <div class="main-container">
             <div class="main wrapper clearfix">
                 {{Main}}
+
                     <aside>
                         <h3 style="text-align: justify">contact me</h3>
                         <div class="socialIcons">
@@ -216,5 +221,21 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 		ga('send', 'pageview');
 
 		</script>
+
+        <script>
+$(document).ready(function()
+{
+  var test = document.createElement('div');
+  test.innerHTML = '&nbsp;';
+  test.className = 'adsbox';
+  document.body.appendChild(test);
+  window.setTimeout(function() {
+    if (test.offsetHeight === 0) {
+      document.body.classList.add('adblock');
+    }
+    test.remove();
+  }, 100);
+});
+</script>
     </body>
 </html>

@@ -12,10 +12,15 @@
 			}
 		},
 		{
-			"MenuItems":
-			[
-				{ "Title": "playlist", "Link": "http://www.youtube.com/playlist?list=PLTEcWGdSiQenl4YRPvSqW7UPC6SiGNN7e\" target=\"_blank\"" }
-			]
+			"template": "templates/entries/menu.tpl",
+
+			"expand":
+			{
+				"MenuItems":
+				[
+					{ "Title": "playlist", "Link": "http://www.youtube.com/playlist?list=PLTEcWGdSiQenl4YRPvSqW7UPC6SiGNN7e\" target=\"_blank\"" }
+				]
+			}
 		}
 	]
 }

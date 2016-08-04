@@ -37,6 +37,7 @@
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
 
+	<aside class="blocked" style="padding-top: 12px; text-align: justify; background-color: #000000; color: white; font-weight: bold;">AdBlock is enabled. Please consider disabling it to support the website. The ads are not intrusive.</aside>
 	{{#Asides}}
 	    {{Aside}}
 	{{/Asides}}

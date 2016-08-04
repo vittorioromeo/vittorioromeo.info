@@ -1,3 +1,16 @@
+.notblocked {
+  display: block;
+}
+.blocked {
+  display: none;
+}
+.adblock .notblocked {
+  display: none;
+}
+.adblock .blocked {
+  display: block;
+}
+
 ::-moz-selection {
   background: #b3d4fc;
   text-shadow: none; }

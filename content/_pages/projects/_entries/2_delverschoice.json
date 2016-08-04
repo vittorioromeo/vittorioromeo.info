@@ -16,12 +16,17 @@
 			}
 		},
 		{
-			"MenuItems":
-			[
-				{ "Title": "RC7(win)", 			"Link": "/GGJ2015/DelversChoice_RC7_Full_Win32.7z" },
-				{ "Title": "GGJ entry", 		"Link": "http://globalgamejam.org/2015/games/delvers-choice\" target=\"_blank\"" },
-				{ "Title": "github", 			"Link": "https://github.com/SuperV1234/DelversChoice\" target=\"_blank\"" }
-			]
+			"template": "templates/entries/menu.tpl",
+
+			"expand":
+			{
+				"MenuItems":
+				[
+					{ "Title": "RC7(win)", 			"Link": "/GGJ2015/DelversChoice_RC7_Full_Win32.7z" },
+					{ "Title": "GGJ entry", 		"Link": "http://globalgamejam.org/2015/games/delvers-choice\" target=\"_blank\"" },
+					{ "Title": "github", 			"Link": "https://github.com/SuperV1234/DelversChoice\" target=\"_blank\"" }
+				]
+			}
 		}
 	]
 }

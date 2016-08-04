@@ -12,10 +12,15 @@
 			}
 		},
 		{
-			"MenuItems":
-			[
-				{ "Title": "read", 					"Link": "/Tutorials/2DproceduralGeneration.html" }
-			]
+			"template": "templates/entries/menu.tpl",
+
+			"expand":
+			{
+				"MenuItems":
+				[
+					{ "Title": "read", 					"Link": "/Tutorials/2DproceduralGeneration.html" }
+				]
+			}
 		}
 	]
 }

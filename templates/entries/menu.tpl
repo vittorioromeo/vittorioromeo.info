@@ -1,4 +1,4 @@
-<section>   
+<section>
     <div class="entryMenu">
         <nav>
             <ul>
@@ -6,6 +6,6 @@
                 <li class="menuButton"><a href="{{Link}}">{{Title}}</a></li>
             {{/MenuItems}}
             </ul>
-        </nav>                                      
+        </nav>
     </div>
-</section>   
+</section>

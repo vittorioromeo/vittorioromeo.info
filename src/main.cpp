@@ -99,24 +99,38 @@ namespace utils
         template <typename T>
         auto expand_kv_pair(const ssvufs::Path& working_directory, const T& p)
         {
-            if(ssvu::endsWith(p.value, ".md"))
+            if(ssvu::endsWith(p, ".md"))
             {
-                auto md_path = working_directory + ssvufs::Path{p.value};
+                auto md_path = working_directory + ssvufs::Path{p};
                 return html_from_md(md_path);
             }
 
-            return p.value;
+            return p;
         }
     }
 
-    auto expand_to_dictionary(
+    ssvu::TemplateSystem::Dictionary expand_to_dictionary(
         const ssvufs::Path& working_directory, const ssvj::Val& mVal)
     {
+        using namespace ssvj;
+
         ssvu::TemplateSystem::Dictionary result;
 
-        for(const auto& p : mVal.forObjAs<std::string>())
+        for(const auto& p : mVal.forObj())
         {
-            result[p.key] = impl::expand_kv_pair(working_directory, p);
+            if(p.value.is<Str>())
+            {
+                const auto& o = p.value.as<Str>();
+                result[p.key] = impl::expand_kv_pair(working_directory, o);
+            }
+            else if(p.value.is<std::vector<Val>>())
+            {
+                for(auto x : p.value.as<std::vector<Val>>())
+                {
+                    auto inner = expand_to_dictionary(working_directory, x);
+                    result[p.key] += inner;
+                }
+            }
         }
 
         return result;

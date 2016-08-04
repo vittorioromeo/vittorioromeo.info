@@ -1,5 +1,5 @@
 {
-	"elements":
+    "elements":
 	[
 		{
 			"template": "templates/entries/text.tpl",
@@ -18,19 +18,24 @@
 						extension to <code>.tar.xz</code>.</p>"
 			}
 		},
-		{ 
-			"MenuItems":
-			[
-				{ "Title": "2.0-RC2(win)", 		"Link": "/Misc/Temp/OpenHexagonV2.0-RC2-Win32.zip" },
-				{ "Title": "2.0-RC2(deb)", 		"Link": "/Misc/Temp/OpenHexagon2.0-RC2.deb" },
-				{ "Title": "2.0-RC1(linux)", 	"Link": "/Misc/Temp/OpenHexagon2.0-RC1.xz" },
-				{ "Title": "1.92(win)", 		"Link": "/Downloads/OpenHexagon/OpenHexagonV1.92.7z" },
-				{ "Title": "1.92(linux)",		"Link": "/Downloads/OpenHexagon/Linux/OpenHexagonV1.92.tar.gz" },
-				{ "Title": "readme", 			"Link": "/Downloads/OpenHexagon/README.html\" target=\"_blank\"" },
-				{ "Title": "fb", 				"Link": "http://www.facebook.com/OpenHexagon\" target=\"_blank\"" },
-				{ "Title": "packs", 			"Link": "/Downloads/OpenHexagon/LevelPacks\" target=\"_blank\"" },
-				{ "Title": "github", 			"Link": "https://github.com/SuperV1234/SSVOpenHexagon\" target=\"_blank\"" }
-			]
+		{
+			"template": "templates/entries/menu.tpl",
+
+			"expand":
+			{
+				"MenuItems":
+				[
+					{ "Title": "2.0-RC2(win)", 		"Link": "/Misc/Temp/OpenHexagonV2.0-RC2-Win32.zip" },
+					{ "Title": "2.0-RC2(deb)", 		"Link": "/Misc/Temp/OpenHexagon2.0-RC2.deb" },
+					{ "Title": "2.0-RC1(linux)", 	"Link": "/Misc/Temp/OpenHexagon2.0-RC1.xz" },
+					{ "Title": "1.92(win)", 		"Link": "/Downloads/OpenHexagon/OpenHexagonV1.92.7z" },
+					{ "Title": "1.92(linux)",		"Link": "/Downloads/OpenHexagon/Linux/OpenHexagonV1.92.tar.gz" },
+					{ "Title": "readme", 			"Link": "/Downloads/OpenHexagon/README.html\" target=\"_blank\"" },
+					{ "Title": "fb", 				"Link": "http://www.facebook.com/OpenHexagon\" target=\"_blank\"" },
+					{ "Title": "packs", 			"Link": "/Downloads/OpenHexagon/LevelPacks\" target=\"_blank\"" },
+					{ "Title": "github", 			"Link": "https://github.com/SuperV1234/SSVOpenHexagon\" target=\"_blank\"" }
+				]
+			}
 		}
 	]
 }

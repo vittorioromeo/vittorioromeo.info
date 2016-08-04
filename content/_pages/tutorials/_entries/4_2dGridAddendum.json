@@ -13,10 +13,15 @@
 			}
 		},
 		{
-			"MenuItems":
-			[
-				{ "Title": "watch (youtube)", "Link": "http://www.youtube.com/watch?v=vYB37BDtHuQ\" target=\"_blank\"" }
-			]
+			"template": "templates/entries/menu.tpl",
+
+			"expand":
+			{
+				"MenuItems":
+				[
+					{ "Title": "watch (youtube)", "Link": "http://www.youtube.com/watch?v=vYB37BDtHuQ\" target=\"_blank\"" }
+				]
+			}
 		}
 	]
 }
