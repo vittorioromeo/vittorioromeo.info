@@ -119,6 +119,10 @@ code {
   width: 35px;
 }
 
+nav ul li {  width: 90px;
+      float: left;
+      margin: 3px;}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   letter-spacing: 0.09em;
@@ -280,7 +284,11 @@ nav a {
     text-align: right; }
     nav ul li {
       display: inline-block;
-      padding: 0 3px; }
+      padding: 0 3px;
+
+      float: none;
+      margin: 0px;}
+      }
 
   .title {
     float: center;
