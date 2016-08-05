@@ -32,21 +32,7 @@
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
 
-        <div class="center-ad">
-
-           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- Responsive1 -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-2318296776122737"
-     data-ad-slot="8918063205"
-     data-ad-format="auto"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-
-         </div>
-
+  
         
         <div class="header-container">
             <header class="wrapper clearfix">       
@@ -125,17 +111,7 @@
 						  })();
 						</script>
    
-    <script type="text/javascript"><!--
-    google_ad_client = "ca-pub-2318296776122737";
-    /* AsideAd */
-    google_ad_slot = "1071294409";
-    google_ad_width = 250;
-    google_ad_height = 250;
-    //-->
-    </script>
-    <script type="text/javascript"
-    src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-    </script>
+
 
 					</div>
                 </div>
@@ -150,16 +126,6 @@
 
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="3CDK85YJC3RAA"><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!"><img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1"></form>
             
-               <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- Responsive0 -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-2318296776122737"
-     data-ad-slot="4627464409"
-     data-ad-format="auto"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
 
             </footer>
 
