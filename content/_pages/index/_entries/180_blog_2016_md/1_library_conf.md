@@ -1,7 +1,7 @@
 
 
 
-An interesting **header-only** logging library, spdlog, was recently posted on Reddit. A [comment by Sean Middleditch][reddit_sean_comment] sparked an interesting discussion on the thread:
+An interesting **header-only** logging library, *spdlog*, was recently posted on Reddit. A [comment by Sean Middleditch][reddit_sean_comment] sparked an interesting discussion on the thread:
 
 > "Header only" is an anti-feature. Fast compiles are important. PCHes only fix a fraction of the problems of header bloat. Avoiding 15 minutes of setup to get a library building/precompiled in exchange for months of lost productivity waiting for slow builds is a pretty bad trade off.
 

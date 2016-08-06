@@ -1,4 +1,8 @@
 
+<meta name="twitter:site" content="@supahvee1234" />
+<meta name="twitter:title" content="{{Title}}" />
+
+<meta name="twitter:image" content="http://vittorioromeo.info/resources/img/logoMain.png" />
 
 <section>
     <div class="entryTitle">
