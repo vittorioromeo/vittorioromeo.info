@@ -81,6 +81,8 @@ The library can be used in several modes:
 
     * The user must create a `.so` file *(e.g. by using `g++ -shared`)*.
 
+**[The code for the example library is available on GitHub.](https://github.com/SuperV1234/vittorioromeo.info/tree/master/extra/example_library)**
+
 ### API options
 
 The `api.hpp` file will contain required preprocessor definitions:
@@ -201,6 +203,33 @@ void func0()
 ```
 
 
+
+### Compilation/usage
+
+In this section we'll cover some examples on how users can include the library in their projects. Imagine the following user code files:
+
+```bash
+└── src
+    │
+    │   # Includes `./library.hpp`.
+    ├── main.cpp
+    │
+    │   # Includes `./library.hpp`.
+    ├── src0.cpp
+    │
+    │   # Includes `./library.hpp`.
+    └── src1.cpp
+```
+
+Every file will be compiled separately into its own object file and includes the entire library. This is where the `LIBRARY_API` macro is essential: if the library is being used in *header-only mode* it is **mandatory** to decorate `func0` and `func1` with `inline` to prevent "multiple definition" compilation errors.
+
+#### Header-only mode
+
+```bash
+g++ -DLIBRARY_HEADER_ONLY -c ./src/src0.cpp -o ./src0.o
+g++ -DLIBRARY_HEADER_ONLY -c ./src/src1.cpp -o ./src1.o
+g++ -DLIBRARY_HEADER_ONLY ./src0.o ./src1.o ./src/main.cpp
+```
 
 
 
