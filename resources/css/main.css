@@ -51,6 +51,7 @@ textarea {
   resize: vertical; }
 
 code {
+  padding: 2px;
   font-size: 13px;
 }
 
