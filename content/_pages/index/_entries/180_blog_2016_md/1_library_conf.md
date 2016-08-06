@@ -223,7 +223,7 @@ In this section we'll cover some examples on how users can include the library i
 
 Every file will be compiled separately into its own object file and includes the entire library. This is where the `LIBRARY_API` macro is essential: if the library is being used in *header-only mode* it is **mandatory** to decorate `func0` and `func1` with `inline` to prevent "multiple definition" compilation errors.
 
-The following examples were tested both with `g++ 6.1.1` and `clang++ 3.8.1`. You can find the test script [here on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/example_library/test.sh).
+The following examples were tested both with `g++ 6.1.1` and `clang++ 3.8.1`. You can find the test script [here on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/example_library/test.sh). 
 
 #### Header-only mode
 
@@ -265,6 +265,20 @@ g++ ./src/main.cpp ./src0.o ./src1.o ./example_lib.so
 ```
 
 
+#### CMake
+
+The "opt-in header-only" approach can also be easily used with CMake. You may find [this StackOverflow question][stackoverflow_cmake_gen_makefile] I asked a while ago interesting.
+
+You can see a real-life example in the `fmtlib/fmt` library:
+
+* [`fmtlib/fmt/format.h`](https://github.com/fmtlib/fmt/blob/master/fmt/CMakeLists.txt).
+
+    * This is where `FMT_API` is defined, which is analogous to the example `LIBRARY_API` macro.
+
+* [`CMakeLists.txt`](https://github.com/fmtlib/fmt/blob/master/fmt/CMakeLists.txt).
+
+    * This is where `FMT_HEADER_ONLY` is conditionally defined. 
+
 
 
 [reddit_sean_comment]: https://www.reddit.com/r/cpp/comments/4vtyq2/first_official_version_of_spdlog_a_super_fast_c/d61mcdw
@@ -275,6 +289,3 @@ g++ ./src/main.cpp ./src0.o ./src1.o ./example_lib.so
 
 [stackoverflow_cmake_gen_makefile]: http://stackoverflow.com/questions/27866669
     StackOverflow: "Preventing CMake-generated makefile for optional-header-only library from compiling source files in header-only mode"
-
-[fmtlib_fmt_format_h]: https://github.com/fmtlib/fmt/blob/master/fmt/format.h
-    "fmtlib/fmt/format.h"
