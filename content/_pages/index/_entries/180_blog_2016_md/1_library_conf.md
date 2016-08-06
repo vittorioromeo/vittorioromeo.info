@@ -223,16 +223,46 @@ In this section we'll cover some examples on how users can include the library i
 
 Every file will be compiled separately into its own object file and includes the entire library. This is where the `LIBRARY_API` macro is essential: if the library is being used in *header-only mode* it is **mandatory** to decorate `func0` and `func1` with `inline` to prevent "multiple definition" compilation errors.
 
+The following examples were tested both with `g++ 6.1.1` and `clang++ 3.8.1`. You can find the test script [here on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/example_library/test.sh).
+
 #### Header-only mode
 
 ```bash
+# Build user application
 g++ -DLIBRARY_HEADER_ONLY -c ./src/src0.cpp -o ./src0.o
 g++ -DLIBRARY_HEADER_ONLY -c ./src/src1.cpp -o ./src1.o
 g++ -DLIBRARY_HEADER_ONLY ./src0.o ./src1.o ./src/main.cpp
 ```
 
 
+#### Static-linking mode
 
+```bash
+# Build library
+g++ -c ./example_lib/library/module0/module0.cpp -o ./module0.o
+g++ -c ./example_lib/library/module1/module1.cpp -o ./module1.o
+ar rs ./example_lib.a ./module0.o ./module1.o
+
+# Build user application
+g++ -c ./src/src0.cpp -o ./src0.o
+g++ -c ./src/src1.cpp -o ./src1.o
+g++ ./src/main.cpp ./src0.o ./src1.o ./example_lib.a
+```
+
+
+#### Dynamic-linking mode
+
+```bash
+# Build library
+g++ -c -fPIC ./example_lib/library/module0/module0.cpp -o ./module0.o
+g++ -c -fPIC ./example_lib/library/module1/module1.cpp -o ./module1.o
+g++ -shared -o ./example_lib.so ./module0.o ./module1.o
+
+# Build user application
+g++ -c ./src/src0.cpp -o ./src0.o
+g++ -c ./src/src1.cpp -o ./src1.o
+g++ ./src/main.cpp ./src0.o ./src1.o ./example_lib.so
+```
 
 
 
