@@ -25,6 +25,11 @@
   font-size: 90%;
 }
 
+.entryText h3
+{
+  padding-top: 45px
+  }
+
 hr {
   display: block;
   height: 1px;
