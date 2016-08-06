@@ -8,7 +8,7 @@
             "tags": ["c++", "c++14", "library", "cmake", "api", "tutorial", "article"],
             "expand":
             {
-                "Title": "library configuration - optional header-only",
+                "Title": "opt-in header-only libraries",
                 "Text": "180_blog_2016_md/1_library_conf.md",
                 "Date": "6 august 2016"
             }

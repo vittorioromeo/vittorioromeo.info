@@ -1,20 +1,23 @@
-An interesting **header-only** logging library, spdlog, was recently posted on Reddit. A [reddit_sean_comment][comment by Sean Middleditch] sparked an interesting discussion on the thread:
+
+
+
+An interesting **header-only** logging library, spdlog, was recently posted on Reddit. A [comment by Sean Middleditch][reddit_sean_comment] sparked an interesting discussion on the thread:
 
 > "Header only" is an anti-feature. Fast compiles are important. PCHes only fix a fraction of the problems of header bloat. Avoiding 15 minutes of setup to get a library building/precompiled in exchange for months of lost productivity waiting for slow builds is a pretty bad trade off.
 
 Here are some of the replies:
 
-> Honestly, I lost months of productivity trying to handle the compilation of twenty libraries on X different platforms with Y different link flags, with X and Y both > 10
-
-> Respectfully, I disagree. Header-only libraries save a lot of setup stage time and they were a real breeze to work with when it comes down to cross-platform development. Some may argue that CMake solves that problem, but I would argue that CMake is a problem itself.
+> "Honestly, I lost months of productivity trying to handle the compilation of twenty libraries on X different platforms with Y different link flags, with X and Y both > 10"
+<br><br>
+> "Respectfully, I disagree. Header-only libraries save a lot of setup stage time and they were a real breeze to work with when it comes down to cross-platform development. Some may argue that CMake solves that problem, but I would argue that CMake is a problem itself."
 
 Another reply is particularly interesting, and inspired me to write this article:
 
 > Header only is an anti-feature for large projects and production environments, but is really nice for quick setups, small and test projects (tutorial, workshops...), or having users evaluating the library easily. I like the http://fmtlib.net/latest/index.html approach to opt-in for header only, you can have both things.
 
-Libraries can be designed and implemented in order to allow users to choose between **header-only usage**, **static linking** or **dynamic linking**. I've been doing this in all of my libraries since I've posted [this question on StackOverflow][stackoverflow_lib_design], which gave me a lot of great insight.
+Libraries can be designed and implemented in order to allow users to choose between **header-only usage**, **static linking** or **dynamic linking**. I've been doing this in all of my libraries since I've posted [this question on StackOverflow][stackoverflow_lib_design] and [this question on Reddit][reddit_library_architecture], both of which gave me a lot of great insight.
 
-The main idea is **conditionally include `.cpp` files** depending on a preprocessor macro, which can be defined during compilation. Functions also have to be **conditionally decorated with the [`inline` specifier](http://en.cppreference.com/w/cpp/language/inline)**.
+The main idea is to **conditionally include `.cpp` files** depending on a preprocessor macro, which can be defined during compilation. Functions also have to be **conditionally decorated with the [`inline` specifier](http://en.cppreference.com/w/cpp/language/inline)**.
 
 ### Example library
 
@@ -53,11 +56,11 @@ In this article/tutorial we'll see how this is implemented using an example libr
 
 This is the physical structure model I use in my latest libraries.
 
-* *Public* header files like `library.hpp`, `module0.hpp` or `module1.hpp` are meant to be included by users in their projects and automatically include all their required dependencies.
+* *Public* header files like `library.hpp`, `module0.hpp` or `module1.hpp` are meant to be included by users in their projects and to automatically include all their required dependencies.
 
     * My rule of thumb is to have a folder with the same name as the header file, containing all included implementation files.
 
-* `.cpp` files are **included conditionally** by their respective header files, if the library is being used in *header-only mode*.
+* `.cpp` files are **conditionally included** by their respective header files, **only if** the library is being used in *header-only mode*.
 
 * `.inl` files are **unconditionally included**, and usually contain `template` definitions or are required to avoid circular dependencies.
 
@@ -65,19 +68,19 @@ The library can be used in several modes:
 
 * **Header-only mode**:
 
-    * The user has to define `-DLIBRARY_HEADER_ONLY`during compilation.
+    * The user has to define `-DLIBRARY_HEADER_ONLY` during compilation.
 
     * The user must not compile `.cpp` files.
 
 * **Static-linking mode**:
 
-    * The user has to compile `.cpp` files to `.o` files.
+    * The user has to compile `.cpp` files into `.o` files.
 
     * The user must archive the compiled object files together *(e.g. by using `ar`)*.
 
 * **Dynamic-linking mode**:
 
-    * The user has to compile `.cpp` files to `.o` files, using `-fPIC`.
+    * The user has to compile `.cpp` files into `.o` files, using `-fPIC`.
 
     * The user must create a `.so` file *(e.g. by using `g++ -shared`)*.
 
@@ -137,7 +140,7 @@ Public module header files will take care of including all the implementation fi
 
 // Include `.cpp` files only if `LIBRARY_HEADER_ONLY` is defined.
 #if defined(LIBRARY_HEADER_ONLY)
-#include "./module0/module0.cpp"
+    #include "./module0/module0.cpp"
 #endif
 ```
 
@@ -155,14 +158,14 @@ Implementation module header files will contain declarations. Functions that wil
 
 #include "../../api.hpp"
 
-// Will be defined in `./module0/module0.cpp`.
-// (Requires `LIBRARY_API`.)
-LIBRARY_API void func0();
-
 // Will be defined in `./module0/module0.inl`.
 // (No need for `LIBRARY_API`.)
 template <typename T>
 void t_func0();
+
+// Will be defined in `./module0/module0.cpp`.
+// (Requires `LIBRARY_API`.)
+LIBRARY_API void func0();
 ```
 
 
@@ -221,7 +224,7 @@ In this section we'll cover some examples on how users can include the library i
     └── src1.cpp
 ```
 
-Every file will be compiled separately into its own object file and includes the entire library. This is where the `LIBRARY_API` macro is essential: if the library is being used in *header-only mode* it is **mandatory** to decorate `func0` and `func1` with `inline` to prevent "multiple definition" compilation errors.
+Every file will be compiled separately into its own object file and includes the entire library. This is where the `LIBRARY_API` macro becomes essential: if the library is being used in *header-only mode* it is **mandatory** to decorate `func0` and `func1` with `inline` to prevent *"multiple definition"* compilation errors.
 
 The following examples were tested both with `g++ 6.1.1` and `clang++ 3.8.1`. You can find the test script [here on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/example_library/test.sh). 
 
@@ -281,11 +284,13 @@ You can see a real-life example in the `fmtlib/fmt` library:
 
 
 
-[reddit_sean_comment]: https://www.reddit.com/r/cpp/comments/4vtyq2/first_official_version_of_spdlog_a_super_fast_c/d61mcdw
-    Reddit: "First official version of spdlog, a super fast C++ logging library, released" - comment by /u/SeanMiddleditch
+[reddit_sean_comment]: https://www.reddit.com/r/cpp/comments/4vtyq2/first_official_version_of_spdlog_a_super_fast_c/d61mcdw 
 
-[stackoverflow_lib_design]: http://stackoverflow.com/questions/25606736
-    StackOverflow: "Library design: allow user to decide between “header-only” and dynamically linked?"
+[stackoverflow_lib_design]: http://stackoverflow.com/questions/25606736 
+  StackOverflow: "Library design: allow user to decide between “header-only” and dynamically linked?"
 
-[stackoverflow_cmake_gen_makefile]: http://stackoverflow.com/questions/27866669
-    StackOverflow: "Preventing CMake-generated makefile for optional-header-only library from compiling source files in header-only mode"
+[stackoverflow_cmake_gen_makefile]: http://stackoverflow.com/questions/27866669 
+  StackOverflow: "Preventing CMake-generated makefile for optional-header-only library from compiling source files in header-only mode"
+
+[reddit_library_architecture]: https://www.reddit.com/r/cpp/comments/3f1ryj/optionallyheaderonly_library/
+  Optionally-header-only library architecture/structure/design discussion
