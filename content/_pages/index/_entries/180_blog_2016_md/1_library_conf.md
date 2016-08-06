@@ -274,23 +274,23 @@ The "opt-in header-only" approach can also be easily used with CMake. You may fi
 
 You can see a real-life example in the `fmtlib/fmt` library:
 
-* [`fmtlib/fmt/format.h`](https://github.com/fmtlib/fmt/blob/master/fmt/CMakeLists.txt).
+* [`fmtlib/fmt/format.h`](https://github.com/fmtlib/fmt/blob/master/fmt/format.h).
 
     * This is where `FMT_API` is defined, which is analogous to the example `LIBRARY_API` macro.
 
 * [`CMakeLists.txt`](https://github.com/fmtlib/fmt/blob/master/fmt/CMakeLists.txt).
 
-    * This is where `FMT_HEADER_ONLY` is conditionally defined. 
+    * This is where `FMT_HEADER_ONLY` is conditionally defined.
 
 
 
-[reddit_sean_comment]: https://www.reddit.com/r/cpp/comments/4vtyq2/first_official_version_of_spdlog_a_super_fast_c/d61mcdw 
 
-[stackoverflow_lib_design]: http://stackoverflow.com/questions/25606736 
-  StackOverflow: "Library design: allow user to decide between “header-only” and dynamically linked?"
 
-[stackoverflow_cmake_gen_makefile]: http://stackoverflow.com/questions/27866669 
-  StackOverflow: "Preventing CMake-generated makefile for optional-header-only library from compiling source files in header-only mode"
 
-[reddit_library_architecture]: https://www.reddit.com/r/cpp/comments/3f1ryj/optionallyheaderonly_library/
-  Optionally-header-only library architecture/structure/design discussion
+[reddit_sean_comment]: https://www.reddit.com/r/cpp/comments/4vtyq2/first_official_version_of_spdlog_a_super_fast_c/d61mcdw 'Reddit: "First official version of spdlog, a super fast C++ logging library, released" - comment by /u/SeanMiddleditch'
+
+[stackoverflow_lib_design]: http://stackoverflow.com/questions/25606736 'StackOverflow: "Library design: allow user to decide between “header-only” and dynamically linked?"'
+
+[stackoverflow_cmake_gen_makefile]: http://stackoverflow.com/questions/27866669 'StackOverflow: "Preventing CMake-generated makefile for optional-header-only library from compiling source files in header-only mode"'
+
+[reddit_library_architecture]: https://www.reddit.com/r/cpp/comments/3f1ryj/optionallyheaderonly_library/ 'Optionally-header-only library architecture/structure/design discussion'
