@@ -176,6 +176,16 @@ namespace utils
             f(i_split, i_begin, i_end);
         }
     }
+
+
+    auto expand_to_str(
+        ssvu::TemplateSystem::Dictionary& d, const std::string& p)
+    {
+        // TODO: memoize templates
+
+        return d.getExpanded(ssvufs::Path{p}.getContentsAsStr(),
+            ssvu::TemplateSystem::Settings::EraseUnexisting);
+    }
 }
 
 
@@ -306,8 +316,8 @@ void for_all_page_json_files(TF&& f)
 namespace impl
 {
     template <typename TF>
-    void for_all_page_element_files(
-        const std::string& element_folder_name, ssvufs::Path page_path, TF&& f)
+    void for_all_page_element_files(const std::string& element_folder_name,
+        const ssvufs::Path& page_path, TF&& f)
     {
         ssvufs::Path elements_path =
             page_path.getParent() + element_folder_name;
@@ -339,11 +349,11 @@ namespace impl
     }
 
     template <typename TF>
-    void for_all_elements(
-        const std::string& element_folder_name, ssvufs::Path page_path, TF&& f)
+    void for_all_elements(const std::string& element_folder_name,
+        const ssvufs::Path& page_path, TF&& f)
     {
         for_all_page_element_files(element_folder_name, page_path,
-            [&f](auto path, auto name, auto full_name, Val element_json)
+            [&f](auto path, auto name, auto full_name, const Val& element_json)
             {
                 // Force link/output name of a group of entries.
                 if(element_json.has("link_name"))
@@ -355,39 +365,34 @@ namespace impl
 
                 for(Val element : element_json["elements"].forArr())
                 {
-                    // TODO:
-                    if(!element.has("MenuItems"))
-                    {
-
-                        f(path, name, full_name, element);
-                    }
+                    f(path, name, full_name, element);
                 }
             });
     }
 }
 
 template <typename TF>
-void for_all_entry_json_files(ssvufs::Path page_path, TF&& f)
+void for_all_entry_json_files(const ssvufs::Path& page_path, TF&& f)
 {
     impl::for_all_page_element_files(
         constant::folder::name::entries, page_path, FWD(f));
 }
 
 template <typename TF>
-void for_all_aside_json_files(ssvufs::Path page_path, TF&& f)
+void for_all_aside_json_files(const ssvufs::Path& page_path, TF&& f)
 {
     impl::for_all_page_element_files(
         constant::folder::name::asides, page_path, FWD(f));
 }
 
 template <typename TF>
-void for_all_entries(ssvufs::Path page_path, TF&& f)
+void for_all_entries(const ssvufs::Path& page_path, TF&& f)
 {
     impl::for_all_elements(constant::folder::name::entries, page_path, FWD(f));
 }
 
 template <typename TF>
-void for_all_asides(ssvufs::Path page_path, TF&& f)
+void for_all_asides(const ssvufs::Path& page_path, TF&& f)
 {
     impl::for_all_elements(constant::folder::name::asides, page_path, FWD(f));
 }
@@ -410,31 +415,28 @@ struct subpage_expansion
     std::vector<std::string> _expanded_entries;
     std::string _link;
 
-    auto produce_result(context& ctx, const archetype::page& ap,
-        const std::vector<subpage_expansion>& subpages, const Path& output_path,
-        const std::vector<std::string>& expanded_asides)
+    auto produce_expanded_main(const archetype::page& ap,
+        const std::vector<subpage_expansion>& subpages,
+        const std::vector<std::string>& expanded_asides) const
     {
-        (void)output_path;
+        Dictionary d_main;
 
-        Dictionary dict;
-
+        // Add expanded entries.
         for(const auto& e : _expanded_entries)
         {
-            dict["Entries"] += Dictionary{"Entry", e};
+            d_main["Entries"] += Dictionary{"Entry", e};
         }
 
+        // Add expanded asides.
         for(const auto& a : expanded_asides)
         {
-            dict["Asides"] += Dictionary{"Aside", a};
+            d_main["Asides"] += Dictionary{"Aside", a};
         }
 
-
-
-        // Pagination controls
-
+        // Add pagination controls.
         if(ap._subpaging && subpages.size() > 1)
         {
-            int aidx = 0;
+            sz_t page_idx = 0;
             for(const auto& a : subpages)
             {
                 Dictionary inner_dict;
@@ -442,62 +444,62 @@ struct subpage_expansion
                 inner_dict["Subpage"] =
                     ssvu::getReplaced(a._link, "result/", "/");
 
-                if(a._link == _link)
-                {
-                    inner_dict["SubpageLabel"] =
-                        "[" + std::to_string(aidx++) + "]";
-                }
-                else
-                {
-                    inner_dict["SubpageLabel"] = std::to_string(aidx++);
-                }
+                inner_dict["SubpageLabel"] =
+                    a._link == _link ? "[" + std::to_string(page_idx++) + "]"
+                                     : std::to_string(page_idx++);
 
-                dict["Subpages"] += inner_dict;
+                d_main["Subpages"] += inner_dict;
             }
         }
 
+        return utils::expand_to_str(d_main, "templates/base/main.tpl");
+    }
 
+    auto produce_expanded_main_menu(context& ctx) const
+    {
+        Dictionary d_mainmenu;
 
-        auto main_exp =
-            dict.getExpanded(Path{"templates/base/main.tpl"}.getContentsAsStr(),
-                Settings::EraseUnexisting);
-
-        Dictionary dict2;
-
-
-
-        // Expand main menu to string
-
-        auto mm_template =
-            Path{"templates/base/mainMenu.tpl"}.getContentsAsStr();
-
-        Dictionary mm_dict;
         for(const auto& mm_e : ctx._main_menu._menu_entries)
         {
-            Dictionary mm_inner_dict;
-            mm_inner_dict["Link"] = mm_e._href;
-            mm_inner_dict["Title"] = mm_e._label;
+            Dictionary d_button;
+            d_button["Link"] = mm_e._href;
+            d_button["Title"] = mm_e._label;
 
-            mm_dict["MenuItems"] += mm_inner_dict;
+            d_mainmenu["MenuItems"] += d_button;
         }
 
-        auto mm_res =
-            mm_dict.getExpanded(mm_template, Settings::EraseUnexisting);
+        return utils::expand_to_str(d_mainmenu, "templates/base/mainMenu.tpl");
+    }
 
-        dict2["MainMenu"] = mm_res;
+    auto produce_expanded_page(const std::string& expanded_main,
+        const std::string& expanded_main_menu) const
+    {
+        Dictionary d_page;
+        d_page["Main"] = expanded_main;
+        d_page["MainMenu"] = expanded_main_menu;
+        d_page["ResourcesPath"] = constant::folder::path::resources;
 
+        return utils::expand_to_str(d_page, "templates/page.tpl");
+    }
 
-        dict2["Main"] = main_exp;
-        dict2["ResourcesPath"] = constant::folder::path::resources;
-        return dict2.getExpanded(Path{"templates/page.tpl"}.getContentsAsStr(),
-            Settings::EraseUnexisting);
+    auto produce_result(context& ctx, const archetype::page& ap,
+        const std::vector<subpage_expansion>& subpages, const Path& output_path,
+        const std::vector<std::string>& expanded_asides) const
+    {
+        (void)output_path;
+
+        auto expanded_main =
+            produce_expanded_main(ap, subpages, expanded_asides);
+
+        auto expanded_main_menu = produce_expanded_main_menu(ctx);
+
+        return produce_expanded_page(expanded_main, expanded_main_menu);
     }
 };
 
 struct page_expansion
 {
     std::vector<std::string> _expanded_asides;
-
     std::vector<subpage_expansion> _subpages;
 
     auto produce_result(
@@ -517,13 +519,9 @@ struct page_expansion
         for(auto aid : ap._asides)
         {
             auto aa = ctx._aside_mapping.get(aid);
-            auto& dict = aa._expand;
 
-            auto aside_exp =
-                dict.getExpanded(Path{aa._template_path}.getContentsAsStr(),
-                    Settings::EraseUnexisting);
-
-            _expanded_asides.emplace_back(std::move(aside_exp));
+            _expanded_asides.emplace_back(
+                utils::expand_to_str(aa._expand, aa._template_path));
         }
 
 
@@ -552,9 +550,10 @@ struct page_expansion
 
         for(sz_t i = 1; i < _subpages.size(); ++i)
         {
-            utils::write_to_file(_subpages[i]._link,
-                _subpages[i].produce_result(ctx, ap, _subpages,
-                    Path{_subpages[i]._link}, _expanded_asides));
+            const auto& s = _subpages[i];
+
+            utils::write_to_file(s._link, s.produce_result(ctx, ap, _subpages,
+                                              Path{s._link}, _expanded_asides));
         }
     }
 };
@@ -562,8 +561,9 @@ struct page_expansion
 void process_page_entries(context& ctx, const Path& output_path,
     const Path& path, page_id pid, archetype::page& ap)
 {
-    for_all_entries(path, [&ctx, &output_path, &pid, &ap](auto e_path,
-                              auto e_name, auto e_full_name, Val e_contents)
+    for_all_entries(path,
+        [&ctx, &output_path, &pid, &ap](auto e_path, auto e_name,
+                        auto e_full_name, const Val& e_contents)
         {
             ctx._entry_mapping.create([&](auto eid, auto& ae)
                 {
@@ -622,9 +622,6 @@ void process_page_entries(context& ctx, const Path& output_path,
                     ssvu::lo("Entry|output_path") << e_output_path << "\n";
                     ssvu::lo("Entry|template") << e_template_path << "\n";
                     ssvu::lo("Entry|expand") << e_expand_data << "\n";
-
-
-
                     ssvu::lo() << "\n";
                 });
         });
@@ -633,8 +630,9 @@ void process_page_entries(context& ctx, const Path& output_path,
 void process_page_asides(context& ctx, const Path& output_path,
     const Path& path, page_id pid, archetype::page& ap)
 {
-    for_all_asides(path, [&ctx, &pid, &ap, &output_path](auto a_path,
-                             auto a_name, auto a_full_name, Val a_contents)
+    for_all_asides(path,
+        [&ctx, &pid, &ap, &output_path](auto a_path, auto a_name,
+                       auto a_full_name, const Val& a_contents)
         {
             ctx._aside_mapping.create([&](auto aid, auto& aa)
                 {
@@ -807,10 +805,10 @@ void process_pages(context& ctx)
 
                     ae._expand["CommentsBox"] = expanded_disqus;
                 }
+
+
+
                 build_tag_expansion(ae);
-
-
-
                 auto e_template = Path{ae._template_path}.getContentsAsStr();
                 auto e_expanded = ae._expand.getExpanded(
                     e_template, Settings::EraseUnexisting);
@@ -842,10 +840,7 @@ void process_pages(context& ctx)
 
                         auto ae = ctx._entry_mapping.get(entry_ids[ei]);
 
-                        auto e_template =
-                            Path{ae._template_path}.getContentsAsStr();
 
-                        build_tag_expansion(ae);
 
                         // Has permalink
                         if(ae._link_name)
@@ -881,9 +876,11 @@ void process_pages(context& ctx)
                             ae._expand["PermalinkEnd"] = "</a>";
                         }
 
+                        build_tag_expansion(ae);
+                        auto e_template =
+                            Path{ae._template_path}.getContentsAsStr();
                         auto e_expanded = ae._expand.getExpanded(
                             e_template, Settings::EraseUnexisting);
-
                         subpage._expanded_entries.emplace_back(e_expanded);
                     }
                 });
