@@ -348,7 +348,7 @@ nav a {
     text-align: left; }
     @media only screen and (min-width: 600px) {
       .entryMenu ul {
-        overflow-x: hidden; } }
+        overflow-x: scroll; } }
     .entryMenu ul li {
       text-align: center;
       display: inline-block;
