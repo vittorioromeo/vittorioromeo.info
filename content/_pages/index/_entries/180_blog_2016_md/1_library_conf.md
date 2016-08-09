@@ -282,6 +282,8 @@ You can see a real-life example in the `fmtlib/fmt` library:
 
     * This is where `FMT_HEADER_ONLY` is conditionally defined.
 
+*EDIT:* [Steveire](https://twitter.com/steveire), a CMake maintainer, wrote a great response/follow-up to this article. [His blog post](https://steveire.wordpress.com/2016/08/09/opt-in-header-only-libraries-with-cmake/) shows an elegant way of setting up your `CMakeLists.txt` file to allow users to very easily switch between the *static*/*dynamic*/*header-only* modes.
+
 
 
 
