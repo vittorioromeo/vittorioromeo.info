@@ -1,6 +1,11 @@
 {
-    "subpaging": 
+    "subpaging":
     {
         "entries_per_subpage": 8
+    },
+
+    "rss":
+    {
+        "output": "feed.rss"
     }
 }

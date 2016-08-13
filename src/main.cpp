@@ -234,6 +234,7 @@ namespace archetype
         std::string _full_name;
         ssvufs::Path _output_path;
         std::optional<sz_t> _subpaging;
+        std::optional<std::string> _rss;
         std::vector<entry_id> _entries;
         std::vector<aside_id> _asides;
     };
@@ -413,7 +414,68 @@ struct context
 struct subpage_expansion
 {
     std::vector<std::string> _expanded_entries;
+    std::vector<entry_id> _expanded_entry_ids;
     std::string _link;
+
+    void write_rss_feed(
+        bool first, context& ctx, const archetype::page& ap) const
+    {
+        if(!ap._rss)
+        {
+            return;
+        }
+
+
+
+        Dictionary d;
+
+        if(first)
+        {
+            d["FeedLink"] = ssvu::getReplaced(
+                ssvu::getReplaced(ap._output_path, ".html", ".rss"),
+                constant::folder::path::result, "http://vittorioromeo.info/");
+        }
+        else
+        {
+            d["FeedLink"] = ssvu::getReplaced(
+                ssvu::getReplaced(_link, ".html", ".rss"),
+                constant::folder::path::result, "http://vittorioromeo.info/");
+        }
+
+        for(const auto& ei : _expanded_entry_ids)
+        {
+            const archetype::entry& ae = ctx._entry_mapping.get(ei);
+            const auto& aee = ae._expand;
+
+            if(!aee.has("Title") || !aee.has("Date"))
+            {
+                continue;
+            }
+
+            auto atag_href = ssvu::getReplaced(ae._output_path,
+                constant::folder::path::result, "http://vittorioromeo.info/");
+
+            Dictionary d_item;
+            d_item["Title"] = aee["Title"].asStr();
+            d_item["Link"] = atag_href;
+            // d_item["PubDate"] = aee["Date"].asStr();
+
+            d["Items"] += d_item;
+        }
+
+        auto res = utils::expand_to_str(d, "templates/other/rss.tpl");
+
+        if(first)
+        {
+            utils::write_to_file(
+                ssvu::getReplaced(Path{ap._output_path}, ".html", ".rss"), res);
+        }
+        else
+        {
+            utils::write_to_file(
+                ssvu::getReplaced(Path{_link}, ".html", ".rss"), res);
+        }
+    }
 
     auto produce_expanded_main(const archetype::page& ap,
         const std::vector<subpage_expansion>& subpages,
@@ -482,11 +544,13 @@ struct subpage_expansion
         return utils::expand_to_str(d_page, "templates/page.tpl");
     }
 
-    auto produce_result(context& ctx, const archetype::page& ap,
+    auto produce_result(bool first, context& ctx, const archetype::page& ap,
         const std::vector<subpage_expansion>& subpages, const Path& output_path,
         const std::vector<std::string>& expanded_asides) const
     {
         (void)output_path;
+
+        write_rss_feed(first, ctx, ap);
 
         auto expanded_main =
             produce_expanded_main(ap, subpages, expanded_asides);
@@ -544,7 +608,7 @@ struct page_expansion
         // ---
         // Write to file
         auto first_subpage_html = first_subpage.produce_result(
-            ctx, ap, _subpages, output_path, _expanded_asides);
+            true, ctx, ap, _subpages, output_path, _expanded_asides);
 
         utils::write_to_file(output_path, first_subpage_html);
 
@@ -552,8 +616,9 @@ struct page_expansion
         {
             const auto& s = _subpages[i];
 
-            utils::write_to_file(s._link, s.produce_result(ctx, ap, _subpages,
-                                              Path{s._link}, _expanded_asides));
+            utils::write_to_file(
+                s._link, s.produce_result(false, ctx, ap, _subpages,
+                             Path{s._link}, _expanded_asides));
         }
     }
 };
@@ -735,6 +800,12 @@ void load_page_data(context& ctx)
                         ssvu::lo("Page|eps") << eps << "\n";
                     }
 
+                    // Check for RSS options.
+                    if(contents.has("rss"))
+                    {
+                        ap._rss = contents["rss"]["output"].as<Str>();
+                    }
+
                     process_page_entries(ctx, output_path, path, pid, ap);
                     process_page_asides(ctx, output_path, path, pid, ap);
                 });
@@ -771,9 +842,10 @@ void process_pages(context& ctx)
             for(auto eid : entry_ids)
             {
                 // Create copy of page archetype for the single-article pages
-                // and disable automatic pagination
+                // and disable automatic pagination/RSS
                 auto my_ap = ap;
                 my_ap._subpaging = std::nullopt;
+                my_ap._rss = std::nullopt;
 
                 auto ae = ctx._entry_mapping.get(eid);
                 if(!ae._link_name)
@@ -881,6 +953,8 @@ void process_pages(context& ctx)
                             Path{ae._template_path}.getContentsAsStr();
                         auto e_expanded = ae._expand.getExpanded(
                             e_template, Settings::EraseUnexisting);
+
+                        subpage._expanded_entry_ids.emplace_back(entry_ids[ei]);
                         subpage._expanded_entries.emplace_back(e_expanded);
                     }
                 });
