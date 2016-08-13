@@ -446,6 +446,7 @@ struct subpage_expansion
         {
             const archetype::entry& ae = ctx._entry_mapping.get(ei);
             const auto& aee = ae._expand;
+            if(!ae._link_name) continue;
 
             if(!aee.has("Title") || !aee.has("Date"))
             {
