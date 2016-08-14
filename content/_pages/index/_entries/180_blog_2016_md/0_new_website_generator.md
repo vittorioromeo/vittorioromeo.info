@@ -63,3 +63,42 @@ Table: Example table demonstration.
 The generator is still experimental and not yet finished. The source code is [available here](https://github.com/SuperV1234/vittorioromeo.info) but currently is an **horribly hacked-together mess**. I will work on making it nicer in the future.
 
 I am planning to start writing and sharing small articles/tutorials on here, now that I can permalink stuff!
+
+
+
+
+TEST - TODO
+
+
+## Object-oriented composition
+
+A flexible way of solving the aforementioned *repetition* and *diamond* issues requires a point-of-view shift from a hierarchical approach to a **composition-based** one. Entities will be defined as containers of small reusable **behaviors**[^behaviors_vs_components], with the following characteristics:
+
+* Behaviors **store data** and **handle logic**;
+
+* Behavior types **conform to the same interface** and polymorphically inherit from a base `behavior` class;
+
+* Behaviors can be added and removed from entities at run-time.
+
+From a high-level perspective, object-oriented composition looks like this:
+
+\dot(resources/example { width=75% })
+(Object-oriented composition: hypotetical entity hierarchy)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+digraph
+{
+    BehaviorA0 [shape="rectangle", style="rounded", label="BehaviorA"]
+    BehaviorB0 [shape="rectangle", style="rounded", label="BehaviorB"]
+    BehaviorC0 [shape="rectangle", style="rounded", label="BehaviorC"]
+
+    BehaviorA1 [shape="rectangle", style="rounded", label="BehaviorA"]
+    BehaviorC1 [shape="rectangle", style="rounded", label="BehaviorC"]
+
+    BehaviorA0 -> EntityA
+    BehaviorB0 -> EntityA
+    BehaviorC0 -> EntityA
+
+    BehaviorA1 -> EntityB
+    BehaviorC1 -> EntityB
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
