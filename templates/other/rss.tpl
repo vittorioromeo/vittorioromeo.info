@@ -13,6 +13,7 @@
             <title>{{Title}}</title>
             <link>{{Link}}</link>
             <guid>{{Link}}</guid>
+            <date>{{Date}}</date>
         </item>
     {{/Items}}
 
