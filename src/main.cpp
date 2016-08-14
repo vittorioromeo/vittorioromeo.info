@@ -139,6 +139,9 @@ namespace utils
                 utils::exec_cmd(oss.str());
             }
 
+            // TODO: nasty hack: find "resources/" and replace with
+            // "/resources/" for `pp` diagram generation
+
             std::ifstream ifs{tempf + "temp.html"};
             return ssvu::getReplacedAll(
                 std::string{std::istreambuf_iterator<char>(ifs),
