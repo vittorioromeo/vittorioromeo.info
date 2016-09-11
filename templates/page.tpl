@@ -105,17 +105,9 @@
 </form>
 
 
-	                    <!-- Place this tag where you want the +1 button to render. -->
-						<div style="float: left" class="g-plusone"></div>
+	                    <script src="https://apis.google.com/js/platform.js" async defer></script>
+                        <div class="g-plusone" data-href="http://vittorioromeo.info"></div>
 
-						<!-- Place this tag after the last +1 button tag. -->
-						<script type="text/javascript">
-						  (function() {
-						    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-						    po.src = 'https://apis.google.com/js/plusone.js';
-						    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-						  })();
-						</script>
    
 
 
@@ -144,8 +136,16 @@
         <script src="{{ResourcesPath}}/js/jquery.animate-colors-min.js"></script> <script src="{{ResourcesPath}}/js/main.js"></script>
         <link rel="stylesheet" href="{{ResourcesPath}}/js/styles/github.css">
 
-        <script src="https://apis.google.com/js/platform.js" async defer></script>
-        <div class="g-plusone" data-href="http://vittorioromeo.info"></div>
+        <script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		i[r].q=i[r].q||[].push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-43376035-1', 'vittorioromeo.info');
+		ga('send', 'pageview');
+
+		</script>
 
         <script>
 $(document).ready(function()
