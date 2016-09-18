@@ -141,6 +141,7 @@ namespace utils
 
             // TODO: nasty hack: find "resources/" and replace with
             // "/resources/" for `pp` diagram generation
+            // TODO: consider special variable such as "$RESOURCES"?
 
             std::ifstream ifs{tempf + "temp.html"};
             return ssvu::getReplacedAll(
