@@ -2,15 +2,26 @@
     "link_name": "blog",
     "elements": 
     [
+//        {
+//            "template": "templates/entries/blog.tpl",
+//            "link_name": "2016_camomilla_released",
+//            "tags": ["c++", "c++14", "library", "cmake", "api", "tutorial", "article"],
+//            "expand":
+//            {
+//                "Title": "camomilla: C++ error simplication script",
+//                "Text": "180_blog_2016_md/2_camomilla_release.md",
+//                "Date": "? august 2016"
+//            }
+//        },
         {
             "template": "templates/entries/blog.tpl",
-            "link_name": "2016_camomilla_released",
-            "tags": ["c++", "c++14", "library", "cmake", "api", "tutorial", "article"],
+            "link_name": "cppcon2016_trip_report",
+            "tags": ["cppcon", "c++", "conference", "talk", "tutorial", "experience", "report"],
             "expand":
             {
-                "Title": "camomilla: C++ error simplication script",
-                "Text": "180_blog_2016_md/2_camomilla_release.md",
-                "Date": "? august 2016"
+                "Title": "trip report - CppCon 2016",
+                "Text": "180_blog_2016_md/3_cppcon2016_report.md",
+                "Date": "25 september 2016"
             }
         },
         {

@@ -119,11 +119,11 @@ The most important lessons I learned from the talk are:
     By defining two empty *"tag"* structs, we can inform the type system of our intent of sanitizing the form data:
 
     ```cpp
-    struct sanitized 
+    struct sanitized
     {
     };
 
-    struct unsanitized 
+    struct unsanitized
     {
     };
     ```
@@ -132,7 +132,7 @@ The most important lessons I learned from the talk are:
 
     ```cpp
     template <typename T>
-    struct FormData 
+    struct FormData
     {
         explicit FormData(const string& input) : m_input(input) {}
         std::string m_input;
@@ -212,7 +212,7 @@ Questions regarding the possibility of implementing these data structures using 
 
 *([Slides available here.](https://github.com/CppCon/CppCon2016/blob/master/Presentations/Constant%20Fun/Constant%20Fun%20-%20Dietmar%20Kuehl%20-%20CppCon%202016.pdf))*
 
-An in-depth analysis of [*"constant expressions"*](http://en.cppreference.com/w/cpp/language/constant_expression) and [`constexpr`](http://en.cppreference.com/w/cpp/language/constexpr) in both C++11 and C++14. 
+An in-depth analysis of [*"constant expressions"*](http://en.cppreference.com/w/cpp/language/constant_expression) and [`constexpr`](http://en.cppreference.com/w/cpp/language/constexpr) in both C++11 and C++14.
 
 If you have never used `constexpr` in the past and want to implement useful compile-time functions and structures *(e.g. mapping strings to types or factory functions)*, this is a fantastic introduction to the `constexpr` specifier.
 
@@ -231,7 +231,7 @@ If you have used `constexpr` and are still not completely confident on when `con
 
 Patrick implements an hierarchy of iterator concepts *(using ["concepts lite"](https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)))* and various generic functions that show how powerful this abstraction is. The audience is guided from a very simple and naive *pointer-based* `copy` function to the definition and implementation of a `CacheAwareIterator` concept that can be used to automatically parallelize algorithms *(potentially avoiding ["false sharing"](http://mechanical-sympathy.blogspot.com/2011/07/false-sharing.html) with [C++17 features](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0154r1.html))*.
 
-If that doesn't sound exciting to you, I recommend watching the first minutes of this talk when it becomes available - I guarantee you'll be hooked. 
+If that doesn't sound exciting to you, I recommend watching the first minutes of this talk when it becomes available - I guarantee you'll be hooked.
 
 Patrick's heavy "concepts lite" usage also shows their benefits and drawbacks clearly. If you haven't yet made up your mind on this feature that could be part of C++20, this talk is also a great place to start developing an opinion.
 
@@ -245,3 +245,72 @@ Patrick's heavy "concepts lite" usage also shows their benefits and drawbacks cl
 #### [Implementing `static` control flow in C++14 - *Vittorio Romeo*](https://cppcon2016.sched.org/event/7nKy/implementing-static-control-flow-in-c14)
 
 *([Slides and code available here.](https://cppcon2016.sched.org/event/7nKy/implementing-static-control-flow-in-c14))*
+
+*Abstract:*
+
+> There has always been great interest in imperative compile-time control flow: as an example, consider all the existing `static_if` proposals and the recently accepted `constexpr_if` construct for C++17.
+>
+> What if you were told that it is actually possible to implement imperative control flow in C++14?
+>
+> In this tutorial, the implementation and design of a compile-time `static_if` branching construct and of a compile-time `static_for` iteration construct will be shown and analyzed. These constructs will then be compared to traditional solutions and upcoming C++17 features, examining advantages and drawbacks.
+
+I've previously talked about *"`static` control flow"* in a [lightning talk at Meeting C++ 2015](https://www.youtube.com/watch?v=hDwhfjBPKv8) and at [C++Now 2015](https://www.youtube.com/watch?v=tMuXZkPiVOY). I realized that this topic is of more general interest and that it would be a great fit for CppCon's program - I'm really glad my submission got accepted and that I had a chance to show developers how C++14 makes it reasonably easy to implement *imperative-like* compile-time control flow.
+
+In short, this talk shows how to implement a `static_if` C++14 construct similar to C++17's `if constexpr`:
+
+```cpp
+template <typename T>
+auto consume(T&& x)
+{
+    static_if(bool_v<is_solid<T>>)
+        .then([](auto&& y)
+            {
+                y.eat();
+                std::cout << "eating solid\n";
+            })
+        .else_if(bool_v<is_liquid<T>>)
+        .then([](auto&& y)
+            {
+                y.drink();
+                std::cout << "drinking liquid\n";
+            })
+        .else_([](auto&&)
+            {
+                std::cout << "cannot consume\n";
+            })(FWD(x));
+}
+```
+
+It also covers two techniques that can be used to implement compile-time iteration:
+
+* A `for_args` function, similar to the previously covered [`for_each_argument`](https://www.youtube.com/watch?v=2l83JlqkzBk), which uses the ellipsis `...` operator to avoid recursion in order to prevent significantly increasing compilation times.
+
+* A more advanced and feature-rich `static_for` function, which allows users to keep track of the iteration index and use *imperative-like* `continue` and `break` instructions. This is implemented recursively and has a bigger impact on compilation times but is way more flexible than `for_args`.
+
+In constrast to the previous versions, which were 100% code, I added some animated slides that clearly show the idea of the implementation behind `static_if`, giving the audience a visual representation of how branches are *"collapsed"* and how execution is *"deferred"* in order to prevent unmatched branches to generate compiler errors.
+
+Additionally, I covered the history of `static` control flow proposals in the C++ standards, and the rules *(plus some usage examples)* of the upcoming `if constexpr`, which makes `static_if` obsolete.
+
+I'm really happy about the talk: I finished right in time with a few extra minutes for questions, the audience looked engaged and was interested in knowing more about the patterns. I received only positive feedback so far and I'm looking forward to more of that and to constructive criticism.
+
+
+
+#### [C++ in Colleges - *(panel)*](https://cppcon2016.sched.org/event/8NUc/c-in-colleges-panel)
+
+*Abstract:*
+
+> Join a panel of college professors, recent and current undergraduates, and professionals with teaching and outreach experience as we discuss how to engage students in C++. Why is it important to teach C++ early, and is it an appropriate choice for a first programming language? Are colleges teaching C++ less than they used to? Are colleges teaching C++ well? How can the C++ community better engage students in open source and in industry?
+
+I was very lucky to be part of this panel moderated by [Jackie Kay](https://twitter.com/jackayline) as a recent college graudate, surrounded by professors and students with many interesting stories and opinions to share *(Bjarne joined the panel as well!)*.
+
+I think that the way C++ is being taught is a **huge** issue that needs to be effectively addressed by the community in order to prevent spreading misinformation about the language and to bring professors up-to-date with the newest standards and best practices. In way too many classes, mine included, C++ is introduced as an *old* and *outdated* language, still alive only for legacy reasons.
+
+In other classes, C++ is taught unidiomatically, excessively using dynamical memory allocations and Java-like idioms. 
+
+I really really would love to see all college professors in the world get up-to-date with the newest standards and with idiomatic C++ code: it's a shame that many students avoid the language or even despise it due to improper teaching and misconceptions. Making this a reality is a big problem that I do not know how to solve - interesting suggestions and possible solutions were discussed during the panel, but the only thing that I'm sure will help is **doing your small part**: tell your coworkers and classmates about modern C++, spread the word on how powerful and safe idiomatic C++ is, and make an effort to clear misconceptions away.
+
+One of this year's keynotes by *Dan Saks*, [Keynote: extern "C": Talking to C Programmers About C++](https://cppcon2016.sched.org/event/7opp/keynote-extern-c-talking-to-c-programmers-about-c), is an unvaluable resource on how to speak to people who truly believe incorrect information about the language, and I think that the lessons learned from that keynote can be effectively applied in the context of college education as well.
+
+I really enjoyed being part of the discussion on this panel, and also being able to share a very interesting story heard at **++it Florence Meetup 2015**: [*Marco Foco* taught C++14 using Raspberry Pi2](https://www.youtube.com/watch?v=qMRxNQO3qbI) to a class containing students with no previous C++ experience starting from modern code and idioms, **achieving very positive results**. This is, in my opinion, a very remarkable experience that shows how teaching the complexity of the language *(which exists due to compatibility reasons)* can be deferred to a later step in the teaching process.
+
+Another resource that you might find interesting is *Kate Gregory*'s [CppCon 2015 "Stop Teaching C" talk](https://www.youtube.com/watch?v=YnWhqhNdYyk).
