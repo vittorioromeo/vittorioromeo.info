@@ -1,10 +1,12 @@
 
 
-[CppCon 2016](http://cppcon.org) ended yesterday - I had the pleasure of attending and presenting at this amazing conference again this year. I'm really grateful to [Jon Kalb](https://twitter.com/_JonKalb), [Bryce Lelbach](https://twitter.com/blelbach), the conference staff, the speakers, [my company](https://www.techatbloomberg.com/events/cppcon/) and everyone else involved for making this possible.
+[CppCon 2016](http://cppcon.org) ended yesterday - I had the pleasure of attending and presenting at this amazing conference again this year. 
+
+I'm really grateful to [Jon Kalb](https://twitter.com/_JonKalb), [Bryce Lelbach](https://twitter.com/blelbach), the conference staff, the speakers, [my company](https://www.techatbloomberg.com/events/cppcon/) and everyone else involved for making this possible.
 
 In the same vein as [my C++Now 2016 trip report](https://github.com/SuperV1234/cppnow2016/blob/master/trip_report.md), I wanted to share my thoughts regarding the talks I liked the most and regarding my session.
 
-
+-------
 
 ### Favorite talks & lessons learned
 
@@ -94,23 +96,23 @@ The most important lessons I learned from the talk are:
 
     The intended chain of calls for the user of this hypotetical library is:
 
-        1. Get the form data.
+    1. Get the form data.
 
-            ```cpp
-            auto formData = GetFormData();
-            ```
+        ```cpp
+        auto formData = GetFormData();
+        ```
 
-        2. Sanitize the form data.
+    2. Sanitize the form data.
 
-            ```cpp
-            auto sanitizedFormData = SanitizeFormData(formData);
-            ```
+        ```cpp
+        auto sanitizedFormData = SanitizeFormData(formData);
+        ```
 
-        3. Execute the query.
+    3. Execute the query.
 
-            ```cpp
-            ExecuteQuery(sanitizedFormData);
-            ```
+        ```cpp
+        ExecuteQuery(sanitizedFormData);
+        ```
 
     Can you spot the problem here? **There is nothing preventing the user from calling `ExecuteQuery` with unsanitized form data.**
 
@@ -153,6 +155,7 @@ The most important lessons I learned from the talk are:
 Ben gave another talk which I didn't attend in person: ["`std::accumulate`: Exploring an Algorithmic Empire"](https://cppcon2016.sched.org/event/7nLN/stdaccumulate-exploring-an-algorithmic-empire) - I'm really looking forward to see the video when it's uploaded on [CppCon's official YouTube channel](https://www.youtube.com/user/CppCon).
 
 
+-------
 
 
 
@@ -193,6 +196,9 @@ No major programming paradigm shifts will be introduced by the new standard, but
 
 
 
+-------
+
+
 #### [Hybrid Data Structures - *Chandler Carruth*](https://cppcon2016.sched.org/event/7nM4/high-performance-code-201-hybrid-data-structures)
 
 An enlightening overview of some high-performance data structures used in LLVM's codebase. I really liked the idea of a *"small vector"* class that uses [SBO *("small buffer optimization")*](https://akrzemi1.wordpress.com/2014/04/14/common-optimizations/#sbo) to prevent unnecessary allocations. This is sadly [impossible for `std::vector`](http://stackoverflow.com/questions/8190950/may-stdvector-make-use-of-small-buffer-optimization) and I think that code making use of many small vector instantiations could greatly benefit from SBO.
@@ -204,6 +210,7 @@ Questions regarding the possibility of implementing these data structures using 
 
 
 
+-------
 
 
 
@@ -220,6 +227,7 @@ If you have used `constexpr` and are still not completely confident on when `con
 
 
 
+-------
 
 
 
@@ -235,6 +243,8 @@ If that doesn't sound exciting to you, I recommend watching the first minutes of
 
 Patrick's heavy "concepts lite" usage also shows their benefits and drawbacks clearly. If you haven't yet made up your mind on this feature that could be part of C++20, this talk is also a great place to start developing an opinion.
 
+
+-------
 
 
 
@@ -292,6 +302,9 @@ In constrast to the previous versions, which were 100% code, I added some animat
 Additionally, I covered the history of `static` control flow proposals in the C++ standards, and the rules *(plus some usage examples)* of the upcoming `if constexpr`, which makes `static_if` obsolete.
 
 I'm really happy about the talk: I finished right in time with a few extra minutes for questions, the audience looked engaged and was interested in knowing more about the patterns. I received only positive feedback so far and I'm looking forward to more of that and to constructive criticism.
+
+
+-------
 
 
 
