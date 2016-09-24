@@ -4,7 +4,7 @@
 
 I'm really grateful to [Jon Kalb](https://twitter.com/_JonKalb), [Bryce Lelbach](https://twitter.com/blelbach), the conference staff, the speakers, [my company](https://www.techatbloomberg.com/events/cppcon/) and everyone else involved for making this possible.
 
-In the same vein as [my C++Now 2016 trip report](https://github.com/SuperV1234/cppnow2016/blob/master/trip_report.md), I wanted to share my thoughts regarding the talks I liked the most and regarding my session.
+In the same vein as [my C++Now 2016 trip report](https://github.com/SuperV1234/cppnow2016/blob/master/trip_report.md), I wanted to share my thoughts regarding the talks I liked the most and regarding my sessions.
 
 -------
 
