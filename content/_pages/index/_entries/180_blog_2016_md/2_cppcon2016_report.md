@@ -47,7 +47,7 @@ The most important lessons I learned from the talk are:
     };
     ```
 
-    Only some of the fields inside `Connection` are used for specific `ConnectionState` values. If `m_connectionState == ConnectionState::DISCONNECTED`, why should we be able to access and modify `m_id`?
+    Only some of the fields inside `Connection` are used for specific `ConnectionState` values. If `m_connectionState` equals `ConnectionState::DISCONNECTED`, why should we be able to access and modify `m_id`?
 
     We can use the type system and `std::variant` to prevent representing illegal states, and also to improve the memory layout of our `Connection` class:
 
@@ -235,7 +235,7 @@ If you have used `constexpr` and are still not completely confident on when `con
 
 *([Slides available here.](https://github.com/CppCon/CppCon2016/tree/master/Presentations/From%20Zero%20To%20Iterators))*
 
-[Patrick](https://pniedzielski.wordpress.com/) really **loves** iterators. If you don't already feel the same way, I'm confident you'll start loving them after watching this very well-presented and informative talk.
+[Patrick](http://pniedzielski.net/) really **loves** iterators. If you don't already feel the same way, I'm confident you'll start loving them after watching this very well-presented and informative talk.
 
 Patrick implements an hierarchy of iterator concepts *(using ["concepts lite"](https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)))* and various generic functions that show how powerful this abstraction is. The audience is guided from a very simple and naive *pointer-based* `copy` function to the definition and implementation of a `CacheAwareIterator` concept that can be used to automatically parallelize algorithms *(potentially avoiding ["false sharing"](http://mechanical-sympathy.blogspot.com/2011/07/false-sharing.html) with [C++17 features](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0154r1.html))*.
 
