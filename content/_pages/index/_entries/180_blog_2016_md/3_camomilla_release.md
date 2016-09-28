@@ -1,22 +1,21 @@
 
 
 
-I've recently released a script on my GitHub page that simplifies errors output by C++ compilers: [**`camomilla`**](https://github.com/SuperV1234/camomilla).
+I've recently released a script on my GitHub page that simplifies C++ compiler error messages: [**`camomilla`**](https://github.com/SuperV1234/camomilla).
 
 > What does it do?
 
-`camomilla` uses simple text transformations to make `gcc` and `clang` errors easier to read and smaller. During the development of [`ecst`](https://github.com/SuperV1234/ecst), a compile-time *Entity-Component-System* C++14 library developed for [my BCS thesis](https://github.com/SuperV1234/bcs_thesis), I encountered a lot of huge undeciphrable errors that sometimes completely filled my terminal buffer. Here's an example
+`camomilla` uses simple text transformations to make `gcc` and `clang` errors smaller and easier to read. During the development of [`ecst`](https://github.com/SuperV1234/ecst), a compile-time *Entity-Component-System* C++14 library developed for [my BCS thesis](https://github.com/SuperV1234/bcs_thesis), I encountered a lot of huge undeciphrable errors that sometimes completely filled my terminal buffer. Here's an example:
 
 * Before:
 
-    ![g++: before camomilla](resources/img/blog/camomilla_release_gcc_before.png)
+    ![*g++: before camomilla*](resources/img/blog/camomilla_release_gcc_before.png)
 
 * After:
 
-    ![g++: after camomilla](resources/img/blog/camomilla_release_gcc_after.png)
+    ![*g++: after camomilla*](resources/img/blog/camomilla_release_gcc_after.png)
 
-
-The reason for these enormous outputs is the fact that both `gcc` and `clang` completely expand all nested typename definitions in the context of the error. 
+The reason for these enormous outputs is the fact that both `gcc` and `clang` completely expand all nested typename definitions in the context of the error.
 
 ### Transformations
 
@@ -71,13 +70,13 @@ g++ ./totally_real_file.cpp |& camomilla -c ./test_config.json
 
 ### Reprocessing
 
-Ever felt like you were *"debugging an error"* when dealing with a huge template-heavy compiler output? `camomilla` helps with that by automatically caching the last processed original error, so that the user can play around with different transformations and options. Example:
+Ever felt like you were *"debugging an error"* when dealing with huge template-heavy compiler outputs? `camomilla` helps with that by automatically caching the last processed original error, so that the user can play around with different transformations and options. Example:
 
 ```bash
 # Let's compile this `Boost.Hana`-heavy project:
-g++ ./bhtest.cpp |& camomilla 
+g++ ./bhtest.cpp |& camomilla
 
-# Error output: huge list of nested `boost::hana::tuple` 
+# Error output: huge list of nested `boost::hana::tuple`
 # and `boost::hana::integral_constant` instances.
 
 # No problem! Reprocess the last error with additional options.
