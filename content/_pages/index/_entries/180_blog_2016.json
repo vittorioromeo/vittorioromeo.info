@@ -1,7 +1,18 @@
 {
     "link_name": "blog",
     "elements": 
-    [
+    [   
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppcon_2016_talk_video_available",
+            "tags": ["c++", "c++14", "cppcon", "cppcon2016", "conference", "talk", "video"],
+            "expand":
+            {
+                "Title": "video of my CppCon 2016 talk available",
+                "Text": "180_blog_2016_md/4_cppcon_2016_talk_video_available.md",
+                "Date": "01 october 2016"
+            }
+        },
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "2016_camomilla_released",

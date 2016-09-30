@@ -1,0 +1,1 @@
+The video of my *CppCon 2016* talk, **Implementing `static` control flow in C++14**, is [now available on YouTube](https://www.youtube.com/watch?v=aXSsUqVSe2k). Enjoy!
