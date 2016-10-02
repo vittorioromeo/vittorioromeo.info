@@ -6,12 +6,18 @@
 #pragma once
 
 #include <utility>
+
+#ifndef FWD
 #define FWD(...) ::std::forward<decltype(__VA_ARGS__)>(__VA_ARGS__)
+#endif
 
 #if !defined(VR_USE_BOOST_VARIANT) && __has_include(<variant>)
 
+#include <variant>
+
 namespace vr
 {
+
     template <typename... Ts>
     using variant = ::std::variant<Ts...>;
 

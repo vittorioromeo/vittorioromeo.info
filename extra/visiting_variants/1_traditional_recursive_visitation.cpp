@@ -28,32 +28,16 @@ using impl::varr;
 // clang-format off
 struct vnum_printer
 {
-    std::size_t _depth = 0;
-    
-    auto& cout_depth() const
-    {
-        for(std::size_t i = 0; i < _depth; ++i)
-        {
-            std::cout << "\t";
-        }
-
-        return std::cout;
-    }
-
-    void operator()(int x) const    { cout_depth() << x << "i\n"; }
-    void operator()(float x) const  { cout_depth() << x << "f\n"; }
-    void operator()(double x) const { cout_depth() << x << "d\n"; }
+    void operator()(int x) const    { std::cout << x << "i\n"; }
+    void operator()(float x) const  { std::cout << x << "f\n"; }
+    void operator()(double x) const { std::cout << x << "d\n"; }
 
     void operator()(const varr& arr)
     {
-        ++_depth;
-
         for(const auto& x : arr)
         {
             vr::visit(*this, x);
         }
-
-        --_depth;
     }
 };
 // clang-format on
