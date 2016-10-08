@@ -17,7 +17,6 @@
 
 namespace vr
 {
-
     template <typename... Ts>
     using variant = ::std::variant<Ts...>;
 
