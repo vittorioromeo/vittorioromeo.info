@@ -81,7 +81,7 @@ vr::visit(vnum_printer{}, v0);
 
 This works, but requires us to define a new `vnum_printer` visitor type - this boilerplate can be avoided.
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/0_traditional_visitation.hpp).
+You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/0_traditional_visitation.cpp).
 
 
 
@@ -180,13 +180,13 @@ my_variant = 5.f;
 vr::visit(my_visitor, my_variant);
 ```
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.hpp).
+You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).
 
 
 
 ### *"Fire-and-forget"* visitation
 
-Sometimes you might want to visit a single variant with a *fire-and-forget* anonymous overload set of lambdas. That's very easy to implement, as well. We'll create a function that takes a variant as its first argument, then any number of callable objects:
+Sometimes you might want to visit a single variant with a *"fire-and-forget"* anonymous overload set of lambdas. That's very easy to implement, as well. We'll create a function that takes a variant as its first argument, then any number of callable objects:
 
 ```cpp
 template <typename TVariant, typename... TVisitors>
