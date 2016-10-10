@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 Vittorio Romeo
+// Copyright(c)2015 - 2016 Vittorio Romeo
 // License: Academic Free License ("AFL") v. 3.0
 // AFL License page: http://opensource.org/licenses/AFL-3.0
 // http://vittorioromeo.info | vittorio.romeo@outlook.com
@@ -90,8 +90,6 @@ struct function_traits<ReturnType (ClassType::*)(Args...) const>
     struct arg
     {
         typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-        // the i-th argument is equivalent to the i-th tuple element of a tuple
-        // composed of those arguments.
     };
 };
 
@@ -121,27 +119,16 @@ auto make_recursive_visitor(TFs&&... fs)
 
     auto final_overload = overload_tuple(alltpl);
 
-    /*
-    auto final_overload = bh::overload(
-        [nrc = std::move(non_rec_overload)](auto, auto&& x)
-            ->decltype(non_rec_overload(FWD(x)))
-        {
-            return nrc(FWD(x));
-        },
-        rec_overload);
-    */
-
-    return boost::hana::fix([fo = std::move(final_overload)](
-                                auto self, auto&& x)
-                                ->TReturn
-                            {
-                                return fo(
-                                    [&self](auto&& v)
-                                    {
-                                        return vr::visit(self, v);
-                                    },
-                                    FWD(x));
-                            });
+    return bh::fix([fo = std::move(final_overload)](auto self, auto&& x)
+                       ->TReturn
+                   {
+                       return fo(
+                           [&self](auto&& v)
+                           {
+                               return vr::visit(self, v);
+                           },
+                           FWD(x));
+                   });
 }
 
 template <typename TF>
