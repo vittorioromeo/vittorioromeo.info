@@ -113,9 +113,7 @@ auto make_recursive_visitor(TFs&&... fs)
 template <typename TF>
 auto recurse(TF&& f)
 {
-    auto res = recurse_wrapper<TF>{FWD(f)};
-    static_assert(is_recurse_wrapper<std::decay_t<decltype(res)>>{}, "");
-    return res;
+    return recurse_wrapper<TF>{FWD(f)};
 }
 
 int main()
