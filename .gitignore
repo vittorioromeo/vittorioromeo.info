@@ -2,3 +2,5 @@ temp/
 result/
 build/
 CMakeLists.txt.user
+*.swp
+*.swo

@@ -22,7 +22,7 @@ struct vnum_printer
 int main()
 {
     vnum_printer vnp;
-    
+
     vnum v0{0};
     vr::visit(vnp, v0);
 
