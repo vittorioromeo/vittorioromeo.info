@@ -93,12 +93,22 @@ struct function_traits<ReturnType (ClassType::*)(Args...) const>
     };
 };
 
-template <typename TReturn, typename... TFs>
-auto make_recursive_visitor(TFs&&... fs)
+struct any_type
+{
+    template <typename T>
+    constexpr operator T() noexcept
+    {
+        return {};
+    }
+};
+
+// Added single 'f' due to gcc61 segfault
+template <typename TF, typename... TFs>
+auto make_recursive_visitor(TF&& f, TFs&&... fs)
 {
     namespace bh = boost::hana;
 
-    auto fns_tuple = bh::make_basic_tuple(FWD(fs)...);
+    auto fns_tuple = bh::make_tuple(FWD(f), FWD(fs)...);
 
     auto non_recs = bh::remove_if(fns_tuple, is_recurse_wrapper);
 
@@ -119,8 +129,11 @@ auto make_recursive_visitor(TFs&&... fs)
 
     auto final_overload = overload_tuple(alltpl);
 
+    // Probably need to assert tthat every lambda returns same type
+    using return_type = decltype(f(any_type{}));
+
     return bh::fix([fo = std::move(final_overload)](auto self, auto&& x)
-                       ->TReturn
+                       ->return_type
                    {
                        return fo(
                            [&self](auto&& v)
@@ -140,7 +153,7 @@ auto recurse(TF&& f)
 int main()
 {
     // clang-format off
-    auto vnp = make_recursive_visitor<void>
+    auto vnp = make_recursive_visitor
     (
         [](int x)    { std::cout << x << "i\n"; },
         [](float x)  { std::cout << x << "f\n"; },
