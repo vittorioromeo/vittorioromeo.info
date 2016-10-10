@@ -9,10 +9,7 @@
 #include <vector>
 #include <type_traits>
 #include <boost/hana.hpp>
-// #include <vrm/core/static_if.hpp>
 #include "variant_aliases.hpp"
-
-// TODO: mention this works poorly with state
 
 namespace impl
 {
@@ -62,7 +59,6 @@ namespace impl
     };
 }
 
-
 constexpr impl::is_recurse_wrapper_t is_recurse_wrapper;
 
 template <typename TTpl>
@@ -71,6 +67,34 @@ auto overload_tuple(TTpl&& x)
     return boost::hana::unpack(FWD(x), boost::hana::overload);
 }
 
+template <typename T>
+struct function_traits : public function_traits<decltype(&T::operator())>
+{
+};
+// For generic types, directly use the result of the signature of its
+// 'operator()'
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType (ClassType::*)(Args...) const>
+// we specialize for pointers to member function
+{
+    enum
+    {
+        arity = sizeof...(Args)
+    };
+    // arity is the number of arguments.
+
+    typedef ReturnType result_type;
+
+    template <size_t i>
+    struct arg
+    {
+        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+        // the i-th argument is equivalent to the i-th tuple element of a tuple
+        // composed of those arguments.
+    };
+};
+
 template <typename TReturn, typename... TFs>
 auto make_recursive_visitor(TFs&&... fs)
 {
@@ -78,17 +102,34 @@ auto make_recursive_visitor(TFs&&... fs)
 
     auto fns_tuple = bh::make_basic_tuple(FWD(fs)...);
 
-    auto non_rec_overload =
-        overload_tuple(bh::remove_if(fns_tuple, is_recurse_wrapper));
+    auto non_recs = bh::remove_if(fns_tuple, is_recurse_wrapper);
 
-    auto rec_overload =
-        overload_tuple(bh::filter(fns_tuple, is_recurse_wrapper));
+    auto recs = bh::filter(fns_tuple, is_recurse_wrapper);
 
-    auto final_overload = bh::overload_linearly(rec_overload,
+    auto rnrecs = bh::transform(non_recs, [](auto&& f)
+        {
+            using argt = typename function_traits<
+                std::decay_t<decltype(f)>>::template arg<0>::type;
+
+            return [&f](auto, argt x)
+            {
+                return f(FWD(x));
+            };
+        });
+
+    auto alltpl = bh::concat(rnrecs, recs);
+
+    auto final_overload = overload_tuple(alltpl);
+
+    /*
+    auto final_overload = bh::overload(
         [nrc = std::move(non_rec_overload)](auto, auto&& x)
+            ->decltype(non_rec_overload(FWD(x)))
         {
             return nrc(FWD(x));
-        });
+        },
+        rec_overload);
+    */
 
     return boost::hana::fix([fo = std::move(final_overload)](
                                 auto self, auto&& x)
