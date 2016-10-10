@@ -40,24 +40,24 @@ struct recurse_wrapper : public TF
     }
 };
 
+template <typename, template <typename...> class>
+struct is_specialization_of : boost::hana::false_
+{
+};
+
+template <template <typename...> class TTemplate, typename... Ts>
+struct is_specialization_of<TTemplate<Ts...>, TTemplate> : boost::hana::true_
+{
+};
+
 namespace impl
 {
-    template <typename T>
-    struct is_recurse_wrapper : boost::hana::false_
-    {
-    };
-
-    template <typename TF>
-    struct is_recurse_wrapper<recurse_wrapper<TF>> : boost::hana::true_
-    {
-    };
-
     struct is_recurse_wrapper_t
     {
         template <typename T>
         constexpr auto operator()(const T&) const
         {
-            return is_recurse_wrapper<T>{};
+            return is_specialization_of<T, recurse_wrapper>{};
         }
     };
 }
