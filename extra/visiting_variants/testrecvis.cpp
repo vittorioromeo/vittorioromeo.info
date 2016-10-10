@@ -40,15 +40,30 @@ struct recurse_wrapper : public TF
     }
 };
 
-template <typename T>
-struct is_recurse_wrapper : std::false_type
+namespace impl
 {
-};
+    template <typename T>
+    struct is_recurse_wrapper : boost::hana::false_
+    {
+    };
 
-template <typename TF>
-struct is_recurse_wrapper<recurse_wrapper<TF>> : std::true_type
-{
-};
+    template <typename TF>
+    struct is_recurse_wrapper<recurse_wrapper<TF>> : boost::hana::true_
+    {
+    };
+
+    struct is_recurse_wrapper_t
+    {
+        template <typename T>
+        constexpr auto operator()(const T&) const
+        {
+            return is_recurse_wrapper<T>{};
+        }
+    };
+}
+
+
+constexpr impl::is_recurse_wrapper_t is_recurse_wrapper;
 
 template <typename TTpl>
 auto overload_tuple(TTpl&& x)
@@ -63,16 +78,11 @@ auto make_recursive_visitor(TFs&&... fs)
 
     auto fns_tuple = bh::make_tuple(FWD(fs)...);
 
-    auto non_rec_overload = overload_tuple(bh::filter(fns_tuple,
-        [](const auto& x)
-        {
-            return bh::bool_c<!is_recurse_wrapper<std::decay_t<decltype(x)>>{}>;
-        }));
+    auto non_rec_overload =
+        overload_tuple(bh::remove_if(fns_tuple, is_recurse_wrapper));
 
-    auto rec_overload = overload_tuple(bh::filter(fns_tuple, [](const auto& x)
-        {
-            return is_recurse_wrapper<std::decay_t<decltype(x)>>{};
-        }));
+    auto rec_overload =
+        overload_tuple(bh::filter(fns_tuple, is_recurse_wrapper));
 
     auto final_overload = bh::overload_linearly(rec_overload,
         [nrc = std::move(non_rec_overload)](auto, auto&& x)
@@ -91,24 +101,7 @@ auto make_recursive_visitor(TFs&&... fs)
                                     },
                                     FWD(x));
                             });
-
-    /* return 0;
-        auto rec_overload =
-
-        auto res = boost::hana::fix([&fs...](auto self, auto&& x) -> TReturn
-                                    {
-                                        return
-        boost::hana::overload(FWD(fs)...)(
-                                            [&self](auto&& v)
-                                            {
-                                                vr::visit(self, v);
-                                            },
-                                            FWD(x));
-                                    });
-
-        return res;*/
 }
-
 
 template <typename TF>
 auto recurse(TF&& f)
