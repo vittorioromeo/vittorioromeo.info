@@ -76,7 +76,7 @@ auto make_recursive_visitor(TFs&&... fs)
 {
     namespace bh = boost::hana;
 
-    auto fns_tuple = bh::make_tuple(FWD(fs)...);
+    auto fns_tuple = bh::make_basic_tuple(FWD(fs)...);
 
     auto non_rec_overload =
         overload_tuple(bh::remove_if(fns_tuple, is_recurse_wrapper));
