@@ -9,7 +9,7 @@
 #include <vector>
 #include <type_traits>
 #include <boost/hana.hpp>
-#include <vrm/core/static_if.hpp>
+// #include <vrm/core/static_if.hpp>
 #include "variant_aliases.hpp"
 
 // TODO: mention this works poorly with state
@@ -85,14 +85,14 @@ template <typename TReturn, typename... TFs>
 auto make_recursive_visitor(TFs&&... fs)
 {
     auto res = boost::hana::fix([&fs...](auto self, auto&& x) -> TReturn
-        {
-            return boost::hana::overload(FWD(fs)...)(
-                [&self](auto&& v)
-                {
-                    vr::visit(self, v);
-                },
-                FWD(x));
-        });
+                                {
+                                    return boost::hana::overload(FWD(fs)...)(
+                                        [&self](auto&& v)
+                                        {
+                                            vr::visit(self, v);
+                                        },
+                                        FWD(x));
+                                });
 
     return res;
 }
@@ -106,7 +106,7 @@ auto recurse(TF&& f)
 */
 
 int main()
-{
+
     // clang-format off
     auto vnp = make_recursive_visitor<void>
     (
@@ -122,20 +122,20 @@ int main()
             }
         }
     );
-    // clang-format on
+// clang-format on
 
-    vnum v0{0};
-    vr::visit(vnp, v0);
+vnum v0{0};
+vr::visit(vnp, v0);
 
-    v0 = 5.f;
-    vr::visit(vnp, v0);
+v0 = 5.f;
+vr::visit(vnp, v0);
 
-    v0 = 33.51;
-    vr::visit(vnp, v0);
+v0 = 33.51;
+vr::visit(vnp, v0);
 
-    v0 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
-    vr::visit(vnp, v0);
+v0 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
+vr::visit(vnp, v0);
 
-    v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
-    vr::visit(vnp, v0);
+v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
+vr::visit(vnp, v0);
 }
