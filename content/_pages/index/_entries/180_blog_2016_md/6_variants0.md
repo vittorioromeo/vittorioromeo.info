@@ -160,6 +160,14 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 
 
+### *"Lambda-based"* recursive visitation - take two
+
+
+
+
+
+
+
 # TODO
 
 * link to previous article
