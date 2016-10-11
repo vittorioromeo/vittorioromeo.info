@@ -127,6 +127,37 @@ You can find a similar example [on GitHub](https://github.com/SuperV1234/vittori
 
 
 
+### *"Lambda-based"* recursive visitation - take one
+
+The first thing to try is to apply our previous solution to recursive variants.
+
+```cpp
+auto my_visitor = boost::hana::overload
+(
+    [](int x)    { cout << x << "i\n"; },
+    [](float x)  { cout << x << "f\n"; },
+    [](double x) { cout << x << "d\n"; },
+
+    [&](const varr& arr)
+    {
+        for(const auto& x : arr)
+        {
+            vr::visit(my_visitor, x);
+        }
+    }
+);
+```
+
+Unfortunately, we are greeted with a *compiler error*:
+
+> error: variable 'my_visitor' declared with 'auto' type cannot appear in its own initializer
+
+You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/5_lambda_visitation_notworking.cpp).
+
+In short, the problem is that `my_visitor`'s type will be deduced from its own initialization... but `my_visitor` is also part of the initialization! If we could explicitly specify the lambda's type in place of `auto`, the above code snippet could compile. [More details can be found here.](http://stackoverflow.com/questions/7861506/recursive-call-in-lambda-c11)
+
+One common solution that is used to implement recursive lambdas is using [`std::function`](http://en.cppreference.com/w/cpp/utility/functional/function), which allows `auto` to be replaced with an explicit type that does not need to be deduced. Unfortunately `std::function` **is not a zero-cost abstraction**, as it's a general-purpose polymorphic wrapper.
+
 
 
 # TODO
