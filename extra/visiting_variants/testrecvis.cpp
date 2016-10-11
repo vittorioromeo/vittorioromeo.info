@@ -130,7 +130,8 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
     auto final_overload = overload_tuple(alltpl);
 
     // Probably need to assert tthat every lambda returns same type
-    using return_type = decltype(f(any_type{}));
+    using return_type = std::common_type_t<decltype(f(any_type{})),
+        decltype(fs(any_type{}))...>;
 
     return bh::fix([fo = std::move(final_overload)](auto self, auto&& x)
                        ->return_type

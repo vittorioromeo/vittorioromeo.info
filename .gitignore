@@ -4,3 +4,4 @@ build/
 CMakeLists.txt.user
 *.swp
 *.swo
+*.swn
