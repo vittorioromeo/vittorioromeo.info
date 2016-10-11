@@ -3,16 +3,20 @@
 
 In [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) I wrote about a simple `boost::hana`-based implementation of lambda variant visitation.
 
-The technique consisted in using [`boost::hana::overload`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga83e71bae315e299f9f5f9de77b012139) in order to create a valid visitor with a variadic amount of lambdas, without having to define a `class`/`struct`. Here's an example:
+The technique consisted in using [`boost::hana::overload`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga83e71bae315e299f9f5f9de77b012139) in order to create a valid visitor with a variadic amount of lambdas, without having to define a `class`/`struct`.
+
+<p></p>
+
+Here's an example:
 
 ```cpp
 using vnum = vr::variant<int, float, double>;
 
 auto vnp = make_visitor
 (
-	[](int x)    { std::cout << x << "i\n"; },
-	[](float x)  { std::cout << x << "f\n"; },
-	[](double x) { std::cout << x << "d\n"; }
+    [](int x)    { std::cout << x << "i\n"; },
+    [](float x)  { std::cout << x << "f\n"; },
+    [](double x) { std::cout << x << "d\n"; }
 );
 
 // Prints "0i"
@@ -27,7 +31,6 @@ vr::visit(vnp, v0);
 v0 = 33.51;
 vr::visit(vnp, v0);
 ```
-
 
 You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).
 
@@ -49,7 +52,7 @@ namespace impl
     using varr = std::vector<vnum_wrapper>;
     using vnum = vr::variant<int, float, double, varr>;
 
-	// `vnum_wrapper` provides the same interface/semantics as `vnum`
+    // `vnum_wrapper` provides the same interface/semantics as `vnum`
     struct vnum_wrapper : public vnum
     {
         using vnum::vnum;
@@ -70,6 +73,57 @@ vnum v2 = 33.51;
 vnum v3 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
 vnum v4 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 ```
+
+Let's take a look at various visitation techniques in the following sections.
+
+
+
+### *"Traditional"* recursive visitation
+
+As seen in the last article, this technique requires the definition of a separate `class`/`struct`. The implementation is straightforward:
+
+```cpp
+struct vnum_printer
+{
+    void operator()(int x)    { cout << x << "i\n"; }
+    void operator()(float x)  { cout << x << "f\n"; }
+    void operator()(double x) { cout << x << "d\n"; }
+
+    void operator()(const varr& arr)
+    {
+        for(const auto& x : arr)
+        {
+            vr::visit(*this, x);
+        }
+    }
+};
+```
+
+All that's left is invoking `vr::visit`, and everything *just works*:
+
+```cpp
+// Prints "0i".
+vnum v0{0};
+vr::visit(vnum_printer{}, v0);
+
+// Prints "5f".
+v0 = 5.f;
+vr::visit(vnum_printer, v0);
+
+// Prints "33.51d".
+v0 = 33.51;
+vr::visit(vnum_printer, v0);
+
+// Prints "1i 2d 3f".
+v0 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
+vr::visit(vnp, v0);
+
+// Prints "5i 7i 8d 9d 4f".
+v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
+vr::visit(vnp, v0);
+```
+
+You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/1_traditional_recursive_visitation.cpp).
 
 
 
