@@ -13,6 +13,7 @@
 
 #if !defined(VR_USE_BOOST_VARIANT) && __has_include(<variant>)
 
+#pragma message("Using std::variant")
 #include <variant>
 
 namespace vr
@@ -29,6 +30,7 @@ namespace vr
 
 #else
 
+#pragma message("Using boost::variant")
 #include <boost/variant.hpp>
 
 namespace vr
