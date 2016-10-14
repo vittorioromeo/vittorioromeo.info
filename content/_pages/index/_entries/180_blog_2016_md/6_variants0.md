@@ -99,7 +99,7 @@ struct vnum_printer
 };
 ```
 
-All that's left is invoking `vr::visit`, and everything *just works*:
+All that's left is invoking `vr::visit`, and everything *just works™*:
 
 ```cpp
 // Prints "0i".
@@ -162,6 +162,23 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 ### *"Lambda-based"* recursive visitation - take two
 
+TODO: all auto, hana::fix
+
+TODO: mention addendum benchmarks
+
+
+### *"Lambda-based"* recursive visitation - take three 
+
+TODO: recurse(...)? 
+
+TODO: mention addendum so
+
+
+### Addendum
+
+TODO: std::function vs hana::fix asm
+
+TODO: libc++ fix, SO question
 
 
 
@@ -170,7 +187,8 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 # TODO
 
-* link to previous article
+* libc++ workaround (with SO link)
+*
 * simple solution (repeat 'auto' in every lambda)
 * hard solution (recurse(...) ((((((((
 (
