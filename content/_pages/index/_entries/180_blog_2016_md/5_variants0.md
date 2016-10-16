@@ -81,7 +81,7 @@ vr::visit(vnum_printer{}, v0);
 
 This works, but requires us to define a new `vnum_printer` visitor type - this boilerplate can be avoided.
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/0_traditional_visitation.cpp).
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/0_traditional_visitation.cpp).)*
 
 
 
@@ -180,7 +180,7 @@ my_variant = 5.f;
 vr::visit(my_visitor, my_variant);
 ```
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).)*
 
 
 

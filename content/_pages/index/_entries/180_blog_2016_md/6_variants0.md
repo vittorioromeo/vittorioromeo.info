@@ -32,13 +32,13 @@ v0 = 33.51;
 vr::visit(vnp, v0);
 ```
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_visitation.cpp).)*
 
 
 
 ### "Recursive" variants
 
-Variants are often used to represent recursive structures *(e.g. JSON objects)*. Since variants have a fixed size, a trivial way of implementing such structures consists in using **indirection with dynamically-allocated memory**.
+Variants can be used to represent recursive structures *(e.g. JSON objects)*. Since variants have a fixed size, a trivial way of implementing such structures consists in using **indirection with dynamically-allocated memory**.
 
 As an example, let's extend our previous `vnum` variant type to support vectors of other `vnum` instances.
 
@@ -123,13 +123,13 @@ v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 vr::visit(vnp, v0);
 ```
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/1_traditional_recursive_visitation.cpp).
+You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_recursive_variants/0_traditional.cpp).
 
 
 
 ### *"Lambda-based"* recursive visitation - take one
 
-The first thing to try is to apply our previous solution to recursive variants.
+Applying the solution seen in [part one](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) to recursive variants seems like a reasonable solution.
 
 ```cpp
 auto my_visitor = boost::hana::overload
@@ -152,7 +152,7 @@ Unfortunately, we are greeted with a *compiler error*:
 
 > error: variable 'my_visitor' declared with 'auto' type cannot appear in its own initializer
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/5_lambda_visitation_notworking.cpp).
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/5_lambda_visitation_notworking.cpp).)*
 
 In short, the problem is that `my_visitor`'s type will be deduced from its own initialization... but `my_visitor` is also part of the initialization! If we could explicitly specify the lambda's type in place of `auto`, the above code snippet could compile. [More details can be found here.](http://stackoverflow.com/questions/7861506/recursive-call-in-lambda-c11)
 
@@ -173,8 +173,12 @@ TODO: recurse(...)?
 
 TODO: mention addendum so
 
+[test addendum link](#stdfunction_vs_ycombinator)
+
 
 ### Addendum
+
+#### `std::function` vs Y-combinator {#stdfunction_vs_ycombinator}
 
 TODO: std::function vs hana::fix asm
 
@@ -192,3 +196,5 @@ TODO: libc++ fix, SO question
 * simple solution (repeat 'auto' in every lambda)
 * hard solution (recurse(...) ((((((((
 (
+
+* TODO: Check Arthur's solution for recursive variants
