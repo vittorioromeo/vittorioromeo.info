@@ -9,27 +9,19 @@
 #include <vector>
 #include "variant_aliases.hpp"
 
-namespace impl
+struct vnum
 {
-    struct vnum_wrapper;
+    using varr = std::vector<vnum>;
+    vr::variant<int, float, double, varr> _data;
 
-    using varr = std::vector<vnum_wrapper>;
-    using vnum = vr::variant<int, float, double, varr>;
-
-    struct vnum_wrapper
+    template <typename... Ts>
+    vnum(Ts&&... xs)
+        : _data{FWD(xs)...}
     {
-        vnum _data;
+    }
+};
 
-        template <typename... Ts>
-        vnum_wrapper(Ts&&... xs)
-            : _data{FWD(xs)...}
-        {
-        }
-    };
-}
-
-using vnum = impl::vnum;
-using impl::varr;
+using varr = vnum::varr;
 
 // clang-format off
 struct vnum_printer
@@ -42,7 +34,7 @@ struct vnum_printer
     {
         for(const auto& x : arr)
         {
-            vr::visit_recursively(*this, x);
+           // vr::visit(*this, x);
         }
     }
 };

@@ -42,7 +42,7 @@ Variants can be used to represent recursive structures *(e.g. JSON objects)*. Si
 
 As an example, let's extend our previous `vnum` variant type to support vectors of other `vnum` instances.
 
-The first problem is that the variant will have to refer to itself in its own type alias definition - this can be solved by **forward-declaring** a `vnum_wrapper` class *(which can be safely "stored" in `std::vector` since the approval of [N4510](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4510.html))*:
+The first problem is that the variant will have to refer to itself in its own type alias definition - one possible solution is **forward-declaring** a `vnum_wrapper` class *(which can be safely "stored" in `std::vector` since the approval of [N4510](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4510.html))*:
 
 ```cpp
 namespace impl
@@ -52,15 +52,20 @@ namespace impl
     using varr = std::vector<vnum_wrapper>;
     using vnum = vr::variant<int, float, double, varr>;
 
-    // `vnum_wrapper` provides the same interface/semantics as `vnum`
-    struct vnum_wrapper : public vnum
+    struct vnum_wrapper
     {
-        using vnum::vnum;
+        vnum _data;
+
+        template <typename... Ts>
+        vnum_wrapper(Ts&&... xs) 
+            : _data{std::forward<Ts>(xs)...}
+        {
+        }
     };
 }
 
 // Expose `vnum` and `varr` to the user
-using vnum = impl::vnum_wrapper;
+using vnum = impl::vnum;
 using impl::varr;
 ```
 
@@ -73,6 +78,8 @@ vnum v2 = 33.51;
 vnum v3 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
 vnum v4 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 ```
+
+*(Note that creating something similar to `vnum_wrapper` works well with both `boost::variant` and `std::variant`. There is a small caveat: it does not compile with `libc++` unless the constructor is constrained. See [the addendum section](#libcpp_constraint) for more information.)*
 
 Let's take a look at various visitation techniques in the following sections.
 
@@ -93,10 +100,24 @@ struct vnum_printer
     {
         for(const auto& x : arr)
         {
-            vr::visit(*this, x);
+            vr::visit_recursively(*this, x);
         }
     }
 };
+```
+
+The `vr::visit_recursively` function is a simple wrapper or `vr::visit` that hides the `vnum_wrapper::_data` access:
+
+```cpp
+template <typename TVisitor, typename TVariant>
+decltype(auto) visit_recursively(TVisitor&& visitor, TVariant&& variant)
+{
+    return vr::visit
+    (
+        std::forward<TVisitor>(visitor),
+        std::forward<TVariant>(variant)._data
+    );
+}
 ```
 
 All that's left is invoking `vr::visit`, and everything *just works™*:
@@ -123,7 +144,7 @@ v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 vr::visit(vnp, v0);
 ```
 
-You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_recursive_variants/0_traditional.cpp).
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_recursive_variants/0_traditional.cpp).)*
 
 
 
@@ -142,7 +163,7 @@ auto my_visitor = boost::hana::overload
     {
         for(const auto& x : arr)
         {
-            vr::visit(my_visitor, x);
+            vr::visit_recursively(my_visitor, x);
         }
     }
 );
@@ -162,9 +183,51 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 ### *"Lambda-based"* recursive visitation - take two
 
+Bringing [algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type) from the functional programming world into C++ isn't enough - we're also going to adopt another powerful construct: the [**Y Combinator**](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
+
+Long story short, this *fixed-point combinator* allows recursion to be impemented in languages that do not support it natively. **This applies to C++ lambdas:** we can use the Y Combinator to implement recursion. *(A very good in-depth explanation of the combinator [is available here](http://mvanier.livejournal.com/2897.html).)*
+
+Thankfully, a production-ready implementation of the Y Combinator is available as [`boost::hana::fix`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga1393f40da2e8da6e0c12fce953e56a6c). Here's an example of its usage:
+
+```cpp
+auto factorial = boost::hana::fix([](auto self, auto n) -> int
+    {
+        if(n == 0)
+        {
+            return 1;
+        }
+
+        return n * self(n - 1);
+    });
+
+assert(factorial(5) == 120);
+```
+
+Here are some important points you need to take note of:
+
+* `factorial`'s type is deduced through `auto`. No additional indirection a-la `std::function` is required here.
+
+* `boost::hana::fix` requires a function with the *desired arity plus one* as its argument, because **"the lambda is passed to itself"** on every recursive step as the `self` parameter.
+
+* The recursive step is implemented by calling `self`, not `factorial`.
+
+    * Note that `factorial` does not appear in the body of the lambda, thus avoiding the previously seen compiler error.
+
+* `boost::hana::fix` requires a [*trailing return type*](http://en.cppreference.com/w/cpp/language/function).
+
+* Calling `factorial` does not require any additional parameter.
+
+*(If you are interested in learning how to implement your own Y Combinator, check out [this question](http://stackoverflow.com/questions/35608977/understanding-y-combinator-through-generic-lambdas) I asked on StackOverflow when trying to understand the construct and write my own version of it.)*
+
+Now that we have a way of defining recursive lambdas, we can finally implement a recursive lambda-based visitor.
+
+
+
+
 TODO: all auto, hana::fix
 
 TODO: mention addendum benchmarks
+
 
 
 ### *"Lambda-based"* recursive visitation - take three 
@@ -178,7 +241,10 @@ TODO: mention addendum so
 
 ### Addendum
 
+#### Fixing `vnum_wrapper` in `libc++` {#libcpp_constraint}
+
 #### `std::function` vs Y-combinator {#stdfunction_vs_ycombinator}
+
 
 TODO: std::function vs hana::fix asm
 
