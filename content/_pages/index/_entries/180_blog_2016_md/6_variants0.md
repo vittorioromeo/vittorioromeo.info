@@ -1,7 +1,7 @@
 
 
 
-In [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) I wrote about a simple `boost::hana`-based implementation of lambda variant visitation.
+In my previous article, [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html), I wrote about a simple technique *(using [`boost::hana`](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/index.html))* that allows variant visitation using lambdas.
 
 The technique consisted in using [`boost::hana::overload`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga83e71bae315e299f9f5f9de77b012139) in order to create a valid visitor with a variadic amount of lambdas, without having to define a `class`/`struct`.
 
@@ -14,9 +14,9 @@ using vnum = vr::variant<int, float, double>;
 
 auto vnp = make_visitor
 (
-    [](int x)    { std::cout << x << "i\n"; },
-    [](float x)  { std::cout << x << "f\n"; },
-    [](double x) { std::cout << x << "d\n"; }
+    [](int x)    { cout << x << "i\n"; },
+    [](float x)  { cout << x << "f\n"; },
+    [](double x) { cout << x << "d\n"; }
 );
 
 // Prints "0i"
@@ -38,7 +38,7 @@ vr::visit(vnp, v0);
 
 ### "Recursive" variants
 
-Variants can be used to represent recursive structures *(e.g. JSON objects)*. Since variants have a fixed size, a trivial way of implementing such structures consists in using **indirection with dynamically-allocated memory**.
+Variants can be used to represent recursive structures *(e.g. JSON objects)*. Since variants have a fixed size, a trivial way of implementing such structures consists of using **indirection with dynamically-allocated memory**.
 
 As an example, let's extend our previous `vnum` variant type to support vectors of other `vnum` instances.
 
@@ -106,7 +106,7 @@ struct vnum_printer
 };
 ```
 
-The `vr::visit_recursively` function is a simple wrapper or `vr::visit` that hides the `vnum_wrapper::_data` access:
+The `vr::visit_recursively` function is a simple wrapper for `vr::visit` that hides the `vnum_wrapper::_data` access:
 
 ```cpp
 template <typename TVisitor, typename TVariant>
@@ -150,7 +150,7 @@ vr::visit(vnp, v0);
 
 ### *"Lambda-based"* recursive visitation - take one
 
-Applying the solution seen in [part one](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) to recursive variants seems like a reasonable solution.
+Applying the `boost::hana::overload` solution seen in [part one](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) to recursive variants seems reasonable.
 
 ```cpp
 auto my_visitor = boost::hana::overload
@@ -205,7 +205,7 @@ assert(factorial(5) == 120);
 
 Here are some important points you need to take note of:
 
-* `factorial`'s type is deduced through `auto`. No additional indirection a-la `std::function` is required here.
+* `factorial`'s type is deduced through `auto`. No additional indirection a-la `std::function` is introduced here.
 
 * `boost::hana::fix` requires a function with the *desired arity plus one* as its argument, because **"the lambda is passed to itself"** on every recursive step as the `self` parameter.
 
@@ -219,15 +219,119 @@ Here are some important points you need to take note of:
 
 *(If you are interested in learning how to implement your own Y Combinator, check out [this question](http://stackoverflow.com/questions/35608977/understanding-y-combinator-through-generic-lambdas) I asked on StackOverflow when trying to understand the construct and write my own version of it.)*
 
-Now that we have a way of defining recursive lambdas, we can finally implement a recursive lambda-based visitor.
+Now that we have a way of defining recursive lambdas, we can finally implement a recursive lambda-based visitor. In order to make it easy for the user to implement its own visitors, a `make_recursive_visitor` function will be provided, which can be used as follows:
 
+```cpp
+// The desired return type must be explicitly specified.
+auto vnp = make_recursive_visitor<void>
+(
+    // Non-recursive cases.
+    // The first argument is ignored.
+    [](auto, int x)    { cout << x << "i\n"; },
+    [](auto, float x)  { cout << x << "f\n"; },
+    [](auto, double x) { cout << x << "d\n"; },
+
+    // Recursive case.
+    // The first argument allows recursive visitation.
+    [](auto visit_self, const varr& arr)
+    {
+        for(const auto& x : arr)
+        {
+            visit_self(x);
+        }
+    }
+);
+```
+
+Here's the commented implementation of `make_recursive_visitor`:
+
+
+```cpp
+template <typename TReturn, typename... TFs>
+auto make_recursive_visitor(TFs&&... fs)
+{
+    // Create and return a Y Combinator that allows the visitor to call itself.
+    // The trailing return type is required.
+    return boost::hana::fix([&fs...](auto self, auto&& x) -> TReturn
+        {
+            // Immediately build and call an overload of all visitor "branches".
+            // The created overload is called with:
+            // * A function that takes a variant and visits it recursively as
+            //   the first argument.
+            // * The current value of the variant as the second argument.
+            return boost::hana::overload(std::forward<TFs>(fs)...)(
+                [&self](auto&& v)
+                {
+                    return vr::visit_recursively(self, v);
+                },
+                std::forward<decltype(x)>(x));
+        });
+}
+```
+
+*(Note that the return type could probably be deduced inside `make_recursive_visitor` by inspecting the return type of every passed lambda using `decltype`.)*
+
+Now we can put everything together to finally **visit a recursive variant using lambdas!**
+
+```cpp
+auto vnp = make_recursive_visitor<void>
+(
+    [](auto, int x)    { cout << x << "i\n"; },
+    [](auto, float x)  { cout << x << "f\n"; },
+    [](auto, double x) { cout << x << "d\n"; },
+
+    [](auto visit_self, const varr& arr)
+    {
+        for(const auto& x : arr)
+        {
+            visit_self(x);
+        }
+    }
+);
+
+// Prints "0i".
+vnum v0{0};
+vr::visit(vnp, v0);
+
+// Prints "5f".
+v0 = 5.f;
+vr::visit(vnp, v0);
+
+// Prints "33.51d".
+v0 = 33.51;
+vr::visit(vnp, v0);
+
+// Prints "1i 2d 3f".
+v0 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
+vr::visit(vnp, v0);
+
+// Prints "5i 7i 8d 9d 4f".
+v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
+vr::visit(vnp, v0);
+```
+
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_recursive_variants/1_lambda.cpp).)*
+
+
+You're probably now asking...
+
+> Why go through all that trouble? Why not just use `std::function`?
+
+As I mentioned earlier, `std::function` is not a *zero-cost abstraction*. To prove it, [I've written a simple factorial lambda test](https://github.com/SuperV1234/Experiments/blob/master/recursive_lambda_asm/x.cpp) that can be conditionally compiled to either use `std::function` or `boost::hana::fix`. The [results are available in the addendum section](#stdfunction_vs_ycombinator). In short:
+
+* `g++ -O3` produces **4572** bytes of assembly for `std::function`. *(!)*
+
+* `g++ -O3` produces **1583** bytes of assembly for `boost::hana::fix`.
+
+* `clang++ -O3` produces **7146** bytes of assembly for `std::function`. *(!)*
+
+* `clang++ -O3` produces **765** bytes of assembly for `boost::hana::fix`.
 
 
 
 TODO: all auto, hana::fix
 
 TODO: mention addendum benchmarks
-
 
 
 ### *"Lambda-based"* recursive visitation - take three 

@@ -36,17 +36,15 @@ using impl::varr;
 template <typename TReturn, typename... TFs>
 auto make_recursive_visitor(TFs&&... fs)
 {
-    auto res = boost::hana::fix([&fs...](auto self, auto&& x) -> TReturn
+    return boost::hana::fix([&fs...](auto self, auto&& x) -> TReturn
         {
             return boost::hana::overload(FWD(fs)...)(
                 [&self](auto&& v)
                 {
-                    vr::visit_recursively(self, v);
+                    return vr::visit_recursively(self, v);
                 },
                 FWD(x));
         });
-
-    return res;
 }
 
 int main()
