@@ -81,15 +81,17 @@ struct any_type
 };
 
 template<class T>
-using callable2 = decltype(std::declval<T>()(any_type{}, any_type{}));
+using is_binary_callable_impl = decltype(std::declval<T>()(any_type{}, any_type{}));
 
+template <typename T>
+using is_binary_callable = std::experimental::is_detected<is_binary_callable_impl, T>;
 
 struct arity_detector_t
 {
     template <typename TF>
     constexpr auto operator()(TF&&) const
     {
-        return std::experimental::is_detected<callable2, TF>{};
+        return is_binary_callable<TF>{};
     }
 };
 
