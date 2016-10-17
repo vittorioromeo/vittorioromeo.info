@@ -48,41 +48,31 @@ template <typename T>
 struct function_traits : public function_traits<decltype(&T::operator())>
 {
 };
-// For generic types, directly use the result of the signature of its
-// 'operator()'
 
+template <typename T, typename TReturn, typename... TArgs>
+struct function_traits<TReturn (T::*)(TArgs...) const>
+{
+    static constexpr std::size_t arity = sizeof...(TArgs);
 
-/*
-template <typename T, typename TVoid = void>
-struct is_overloaded : std::true_type { };
+    using result_type = TReturn;
 
-template <typename T>
-struct is_overloaded<T, std::void_t<decltype(&std::decay_t<T>::operator())>>: std::false_type { };
-*/
+    template <std::size_t TI>
+    using arg = std::tuple_element_t<TI, std::tuple<TArgs...>>;
+};
 
 template <typename T>
 using is_not_overloaded_impl = decltype(&std::decay_t<T>::operator());
 
-template <typename T> 
+template <typename T>
 using is_not_overloaded = std::experimental::is_detected<is_not_overloaded_impl, T>;
 
-template <typename ClassType, typename ReturnType, typename... Args>
-struct function_traits<ReturnType (ClassType::*)(Args...) const>
-// we specialize for pointers to member function
-{
-    static constexpr std::size_t arity = sizeof...(Args); 
- 
-    typedef ReturnType result_type;
 
-    template <std::size_t TI>
-    using arg = typename std::tuple_element<TI, std::tuple<Args...>>::type;
-};
 
 struct any_type
 {
     template <typename... Ts>
     constexpr auto operator()(Ts&&...){}
-    
+
     template <typename T>
     constexpr operator T() noexcept
     {
@@ -92,7 +82,7 @@ struct any_type
 
 template<class T>
 using callable2 = decltype(std::declval<T>()(any_type{}, any_type{}));
- 
+
 
 struct arity_detector_t
 {
@@ -129,7 +119,7 @@ struct adapt_helper<false>
     {
         using argt = typename function_traits<
             std::decay_t<decltype(f)>>::template arg<0>;
-        
+
         return [f = FWD(f)](auto, argt x) -> decltype(f(x))
         {
             return f(x);
@@ -180,7 +170,7 @@ int main()
     // clang-format off
     auto vnp = make_recursive_visitor<void>
     (
-        [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}>  { std::cout << x << "N\n"; },
+        [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}> { std::cout << x << "N\n"; },
         [](int x)    { std::cout << x << "i\n"; },
         [](float x)  { std::cout << x << "f\n"; },
         [](double x) { std::cout << x << "d\n"; },
@@ -206,7 +196,7 @@ int main()
 
     v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
     vr::visit(vnp, v0);
-    
+
     v0 = varr{vnum{1}, vmap{{1, vnum{2.0}}}, vnum{3.f}};
     vr::visit(vnp, v0);
 }
