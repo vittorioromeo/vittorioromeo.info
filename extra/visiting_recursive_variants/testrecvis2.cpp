@@ -49,30 +49,30 @@ struct function_traits : public function_traits<decltype(&T::operator())>
 // 'operator()'
 
 
+/*
 template <typename T, typename TVoid = void>
 struct is_overloaded : std::true_type { };
 
 template <typename T>
 struct is_overloaded<T, std::void_t<decltype(&std::decay_t<T>::operator())>>: std::false_type { };
+*/
 
+template <typename T>
+using is_not_overloaded_impl = decltype(&std::decay_t<T>::operator());
+
+template <typename T> 
+using is_not_overloaded = std::experimental::is_detected<is_not_overloaded_impl, T>;
 
 template <typename ClassType, typename ReturnType, typename... Args>
 struct function_traits<ReturnType (ClassType::*)(Args...) const>
 // we specialize for pointers to member function
 {
-    enum
-    {
-        arity = sizeof...(Args)
-    };
-    // arity is the number of arguments.
-
+    static constexpr std::size_t arity = sizeof...(Args); 
+ 
     typedef ReturnType result_type;
 
-    template <size_t i>
-    struct arg
-    {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-    };
+    template <std::size_t TI>
+    using arg = typename std::tuple_element<TI, std::tuple<Args...>>::type;
 };
 
 struct any_type
@@ -125,9 +125,9 @@ struct adapt_helper<false>
     auto operator()(TF&& f)
     {
         using argt = typename function_traits<
-            std::decay_t<decltype(f)>>::template arg<0>::type;
+            std::decay_t<decltype(f)>>::template arg<0>;
         
-        return [f = FWD(f)](auto, argt x)
+        return [f = FWD(f)](auto, argt x) -> decltype(f(x))
         {
             return f(x);
         };
@@ -148,7 +148,7 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
     auto rnrecs = bh::transform(non_recs, [](auto&& f)
         {
-           return adapt_helper<is_overloaded<decltype(f)>{}>{}(FWD(f));
+           return adapt_helper<!is_not_overloaded<decltype(f)>{}>{}(FWD(f));
         });
 
     auto alltpl = bh::concat(rnrecs, recs);
@@ -177,10 +177,10 @@ int main()
     // clang-format off
     auto vnp = make_recursive_visitor<void>
     (
-         [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}>  { std::cout << x << "N\n"; },
-         [](int x)    { std::cout << x << "i\n"; },
-         [](float x)  { std::cout << x << "f\n"; },
-         [](double x) { std::cout << x << "d\n"; },
+        [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}>  { std::cout << x << "N\n"; },
+        [](int x)    { std::cout << x << "i\n"; },
+        [](float x)  { std::cout << x << "f\n"; },
+        [](double x) { std::cout << x << "d\n"; },
         [](auto self, const varr& x) { for(const auto& y : x) self(y); }
     );
     // clang-format on
