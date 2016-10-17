@@ -46,3 +46,12 @@ namespace vr
 }
 
 #endif
+
+namespace vr
+{
+    template <typename TVisitor, typename TVariant>
+    decltype(auto) visit_recursively(TVisitor&& visitor, TVariant&& variant)
+    {
+        return vr::visit(FWD(visitor), FWD(variant)._data);
+    }
+}

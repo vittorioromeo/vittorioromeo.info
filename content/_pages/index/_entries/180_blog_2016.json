@@ -4,6 +4,17 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "variants_lambdas_part_2",
+            "tags": ["c++", "c++14", "c++17", "boost", "variant", "lambda", "tutorial"],
+            "expand":
+            {
+                "Title": "visiting variants using lambdas - part 2",
+                "Text": "180_blog_2016_md/6_variants0.md",
+                "Date": "TODO"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "variants_lambdas_part_1",
             "tags": ["c++", "c++14", "c++17", "boost", "variant", "lambda", "tutorial"],
             "expand":
