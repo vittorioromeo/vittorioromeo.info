@@ -38,7 +38,15 @@ vr::visit(vnp, v0);
 
 ### "Recursive" variants
 
-Variants can be used to represent recursive structures *(e.g. JSON objects)*. Since variants have a fixed size, a trivial way of implementing such structures consists of using **indirection with dynamically-allocated memory**.
+TODO: ?
+
+A *"recursive" variant* is a variant which can **contain itself**, and can be used to **represent recursive structures** *(e.g. JSON objects)*.
+
+All variants need to **have a fixed size** - in order to allow the definition of recursive variants, **indirection must be used**. Making use of dynamically-allocated memory is a trivial way of introducing a layer of indirection: `std::unique_ptr` or `std::vector` are examples of data structures that can be used to define recursive variants.
+
+TODO: ?
+
+Since variants have a fixed size, a trivial way of implementing such structures consists of using **indirection with dynamically-allocated memory**.
 
 As an example, let's extend our previous `vnum` variant type to support vectors of other `vnum` instances.
 
@@ -57,7 +65,7 @@ namespace impl
         vnum _data;
 
         template <typename... Ts>
-        vnum_wrapper(Ts&&... xs) 
+        vnum_wrapper(Ts&&... xs)
             : _data{std::forward<Ts>(xs)...}
         {
         }
@@ -215,11 +223,11 @@ Here are some important points you need to take note of:
 
 * `boost::hana::fix` requires a [*trailing return type*](http://en.cppreference.com/w/cpp/language/function).
 
-* Calling `factorial` does not require any additional parameter.
+* Calling `factorial` does not require any additional parameters.
 
 *(If you are interested in learning how to implement your own Y Combinator, check out [this question](http://stackoverflow.com/questions/35608977/understanding-y-combinator-through-generic-lambdas) I asked on StackOverflow when trying to understand the construct and write my own version of it.)*
 
-Now that we have a way of defining recursive lambdas, we can finally implement a recursive lambda-based visitor. In order to make it easy for the user to implement its own visitors, a `make_recursive_visitor` function will be provided, which can be used as follows:
+Now that we have a way of defining recursive lambdas, we can finally implement a recursive lambda-based visitor. In order to make it easy for the user to implement their own visitors, a `make_recursive_visitor` function will be provided, which can be used as follows:
 
 ```cpp
 // The desired return type must be explicitly specified.
@@ -334,9 +342,9 @@ TODO: all auto, hana::fix
 TODO: mention addendum benchmarks
 
 
-### *"Lambda-based"* recursive visitation - take three 
+### *"Lambda-based"* recursive visitation - take three
 
-TODO: recurse(...)? 
+TODO: recurse(...)?
 
 TODO: mention addendum so
 
