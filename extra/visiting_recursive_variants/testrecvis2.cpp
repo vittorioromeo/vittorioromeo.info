@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <experimental/type_traits>
 #include <tuple>
+#include <map>
 #include <boost/hana.hpp>
 #include "variant_aliases.hpp"
 
@@ -18,7 +19,8 @@ namespace impl
     struct vnum_wrapper;
 
     using varr = std::vector<vnum_wrapper>;
-    using vnum = vr::variant<int, float, double, varr, long>;
+    using vmap = std::map<int, vnum_wrapper>;
+    using vnum = vr::variant<int, float, double, varr, long, vmap>;
 
     struct vnum_wrapper
     {
@@ -34,6 +36,7 @@ namespace impl
 
 using vnum = impl::vnum;
 using impl::varr;
+using impl::vmap;
 
 template <typename TTpl>
 auto overload_tuple(TTpl&& x)
@@ -181,7 +184,8 @@ int main()
         [](int x)    { std::cout << x << "i\n"; },
         [](float x)  { std::cout << x << "f\n"; },
         [](double x) { std::cout << x << "d\n"; },
-        [](auto self, const varr& x) { for(const auto& y : x) self(y); }
+        [](auto recurse, const varr& x) { for(const auto& y : x) recurse(y); },
+        [](auto recurse, const vmap& x) { for(const auto& y : x) recurse(y.second); }
     );
     // clang-format on
 
@@ -201,5 +205,8 @@ int main()
     vr::visit(vnp, v0);
 
     v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
+    vr::visit(vnp, v0);
+    
+    v0 = varr{vnum{1}, vmap{{1, vnum{2.0}}}, vnum{3.f}};
     vr::visit(vnp, v0);
 }
