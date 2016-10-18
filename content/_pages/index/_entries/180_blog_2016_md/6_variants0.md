@@ -396,9 +396,9 @@ The code above can be successfully used to visit a recursive variant. The lambda
 
 When attempting to visit *(either "traditionally" or with lambdas)* a recursive variant defined using a wrapper similar to `vnum_wrapper`, everything seems to work properly... until you try compiling with **libc++**. That's when you get an **horrible error**...
 
-![*Recursive variant on libc++*](resources/img/blog/variants_libcpp_error.png)
+![*Recursive variant visitation error on libc++*](resources/img/blog/variants_libcpp_error.png)
 
-...and that's when you [open a question on StackOverflow](http://stackoverflow.com/questions/40018753).
+...and that's when you [ask a question on StackOverflow](http://stackoverflow.com/questions/40018753).
 
 Thank's to [T.C.](http://stackoverflow.com/users/2756719/t-c)'s extremely helpful and in-depth reply, I did not only manage to solve the issue, but also to understand its obscure cause. I strongly recommend going through the SO thread to learn more about this.
 
@@ -416,4 +416,99 @@ std::enable_if_t
 
 A complete minimal example is available [here on **wandbox**](http://melpon.org/wandbox/permlink/VKwUbJOPAatY0kYY).
 
-#### `std::function` vs Y-combinator {#stdfunction_vs_ycombinator}
+#### `std::function` vs Y combinator {#stdfunction_vs_ycombinator}
+
+Here are the full results for the simple benchmark I ran. The goal of the benchmark was to show people the overhead introduced by `std::function`, which is a very generic callable object wrapper that can introduce dynamic memory allocation and `virtual`-like function call overhead.
+
+The benchmarks compares the size of the generated assembly between these two *recursive factorial* implementations:
+
+```cpp
+#ifndef USE_YCOMBINATOR
+
+std::function<int(int)> f = [&](int x)
+{
+    if(x == 0)
+        return 1;
+    return x * f(x - 1);
+};
+
+#else
+
+auto f = boost::hana::fix([](auto self, int x) -> int
+{
+    if(x == 0)
+        return 1;
+    return x * self(x - 1);
+});
+
+#endif
+```
+
+The tested compilers were:
+
+* `g++ 6.2.1`
+
+* `clang++ 3.8.1`
+
+The code and the assembly output [is available here](https://github.com/SuperV1234/Experiments/tree/master/recursive_lambda_asm).
+
+##### `g++ -O1`
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 257   |   0                  |
+| `hana::fix`      | 1983  |   +671%              |
+| `std::function`  | 4531  |   +1663%             |
+
+
+
+##### `g++ -O2`
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 307   |   0                  |
+| `hana::fix`      | 1583  |   +415%              |
+| `std::function`  | 4572  |   +1389%             |
+
+
+
+##### `g++ -O3` *(and `-Ofast`)
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 307   |   0                  |
+| `hana::fix`      | 1583  |   +415%              |
+| `std::function`  | 4572  |   +1389%             |
+
+
+
+
+
+
+##### `clang++ -O1`
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 680   |   0                  |
+| `hana::fix`      | 2347  |   +245%              |
+| `std::function`  | 18638 |   +2640%             |
+
+
+
+##### `clang++ -O2`
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 680   |   0                  |
+| `hana::fix`      | 1848  |   +171%              |
+| `std::function`  | 7146  |   +950%              |
+
+
+
+##### `clang++ -O3` *(and `-Ofast`)
+
+|                  | Bytes | Relative size change |
+|:----------------:|:-----:|:--------------------:|
+| Baseline         | 680   |   0                  |
+| `hana::fix`      | 765   |   +12.5%             |
+| `std::function`  | 7146  |   +950%              |

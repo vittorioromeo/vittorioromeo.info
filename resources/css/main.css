@@ -25,6 +25,12 @@
   font-size: 90%;
 }
 
+.figure .caption
+{
+  font-size:smaller;
+  margin-top: -3px
+}
+
 .entryText h3
 {
   padding-top: 45px
