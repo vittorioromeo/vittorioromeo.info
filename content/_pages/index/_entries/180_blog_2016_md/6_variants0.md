@@ -99,7 +99,7 @@ vnum v3 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
 vnum v4 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 ```
 
-*(Note that creating something similar to `vnum_wrapper` works well with both `boost::variant` and `std::variant`. There is a small caveat: it does not compile with `libc++` unless the constructor is constrained using `enable_if`. See [the addendum section](#libcpp_constraint) for more information.)*
+*(Note that creating something similar to `vnum_wrapper` works well with both `boost::variant` and `std::variant`. There is a small caveat: it does not compile with `libc++` unless the constructor is constrained using [`enable_if`](http://en.cppreference.com/w/cpp/types/enable_if). See [the addendum section](#libcpp_constraint) for more information.)*
 
 Let's take a look visitation techniques in the following sections.
 
@@ -394,24 +394,26 @@ The code above can be successfully used to visit a recursive variant. The lambda
 
 #### Fixing `vnum_wrapper` in `libc++` {#libcpp_constraint}
 
+When attempting to visit *(either "traditionally" or with lambdas)* a recursive variant defined using a wrapper similar to `vnum_wrapper`, everything seems to work properly... until you try compiling with **libc++**. That's when you get an **horrible error**...
+
+![*Recursive variant on libc++*](resources/img/blog/variants_libcpp_error.png)
+
+...and that's when you [open a question on StackOverflow](http://stackoverflow.com/questions/40018753).
+
+Thank's to [T.C.](http://stackoverflow.com/users/2756719/t-c)'s extremely helpful and in-depth reply, I did not only manage to solve the issue, but also to understand its obscure cause. I strongly recommend going through the SO thread to learn more about this.
+
+In the end, adding this [`std::enable_if_t`](http://en.cppreference.com/w/cpp/types/enable_if) to the wrapper's constructor did the trick:
+
+```cpp
+std::enable_if_t
+<
+    !std::disjunction_v
+    <
+        std::is_same<std::decay_t<Ts>, my_variant_wrapper>...
+    >
+>
+```
+
+A complete minimal example is available [here on **wandbox**](http://melpon.org/wandbox/permlink/VKwUbJOPAatY0kYY).
+
 #### `std::function` vs Y-combinator {#stdfunction_vs_ycombinator}
-
-
-TODO: std::function vs hana::fix asm
-
-TODO: libc++ fix, SO question
-
-
-
-
-
-
-# TODO
-
-* libc++ workaround (with SO link)
-*
-* simple solution (repeat 'auto' in every lambda)
-* hard solution (recurse(...) ((((((((
-(
-
-* TODO: Check Arthur's solution for recursive variants
