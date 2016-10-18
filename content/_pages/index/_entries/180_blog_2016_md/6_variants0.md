@@ -472,7 +472,7 @@ The code and the assembly output [is available here](https://github.com/SuperV12
 
 
 
-##### `g++ -O3` *(and `-Ofast`)
+##### `g++ -O3` *(and `-Ofast`)*
 
 |                  | Bytes | Relative size change |
 |:----------------:|:-----:|:--------------------:|
@@ -505,7 +505,7 @@ The code and the assembly output [is available here](https://github.com/SuperV12
 
 
 
-##### `clang++ -O3` *(and `-Ofast`)
+##### `clang++ -O3` *(and `-Ofast`)*
 
 |                  | Bytes | Relative size change |
 |:----------------:|:-----:|:--------------------:|
