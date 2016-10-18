@@ -193,7 +193,7 @@ Unfortunately, we are greeted with a *compiler error*:
 
 > error: variable 'my_visitor' declared with 'auto' type cannot appear in its own initializer
 
-*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/5_lambda_visitation_notworking.cpp).)*
+*(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/2_lambda_notworking.cpp).)*
 
 In short, the problem is that `my_visitor`'s type will be deduced from its own initialization... but `my_visitor` is also part of the initialization! If we had a way to explicitly specify the lambda's type in place of `auto`, the above code snippet could compile. [More details about this issue can be found here.](http://stackoverflow.com/questions/7861506/recursive-call-in-lambda-c11)
 
