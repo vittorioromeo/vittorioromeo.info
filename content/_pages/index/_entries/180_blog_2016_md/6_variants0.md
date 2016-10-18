@@ -3,7 +3,7 @@
 
 In my previous article, [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html), I wrote about a simple technique *(using [`boost::hana`](http://www.boost.org/doc/libs/1_62_0/libs/hana/doc/html/index.html))* that allows variant visitation using lambdas.
 
-The technique consisted in using [`boost::hana::overload`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga83e71bae315e299f9f5f9de77b012139) in order to create a valid visitor with a variadic amount of lambdas, without having to define a `class`/`struct`.
+The technique consisted in passing several lambdas to [`boost::hana::overload`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga83e71bae315e299f9f5f9de77b012139) in order to create a *"local"* visitor, without having to define a `class`/`struct`.
 
 <p></p>
 
@@ -38,17 +38,29 @@ vr::visit(vnp, v0);
 
 ### "Recursive" variants
 
-TODO: ?
-
 A *"recursive" variant* is a variant which can **contain itself**, and can be used to **represent recursive structures** *(e.g. JSON objects)*.
 
-All variants need to **have a fixed size** - in order to allow the definition of recursive variants, **indirection must be used**. Making use of dynamically-allocated memory is a trivial way of introducing a layer of indirection: `std::unique_ptr` or `std::vector` are examples of data structures that can be used to define recursive variants.
+Neither [`std::variant`](http://en.cppreference.com/w/cpp/utility/variant) nor [`boost::variant`](http://www.boost.org/doc/libs/1_62_0/doc/html/variant.html) make use of dynamic memory allocation, however - you can think of them as [tagged unions](https://en.wikipedia.org/wiki/Tagged_union). This means that variants **have fixed size**, and that the snippet below will not compile:
 
-TODO: ?
+```cpp
+struct my_variant
+{
+    // ...what is `sizeof(_data)`?
+    vr::variant<int, my_variant> _data;
+};
+```
 
-Since variants have a fixed size, a trivial way of implementing such structures consists of using **indirection with dynamically-allocated memory**.
+Therefore, in order to allow the definition of recursive variants, **indirection must be used**. Making use of dynamic memory allocation is a straightforward way of achieving this: [`std::unique_ptr`](http://en.cppreference.com/w/cpp/memory/unique_ptr) or [`std::vector`](http://en.cppreference.com/w/cpp/container/vector) are examples of data structures that can be used to define recursive variants. Here's an example that compiles:
 
-As an example, let's extend our previous `vnum` variant type to support vectors of other `vnum` instances.
+```cpp
+struct my_variant
+{
+    // OK!
+    vr::variant<int, std::unique_ptr<my_variant>> _data;
+};
+```
+
+Let's move on by extending the `vnum` variant type *(seen in [part 1](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html))* to support vectors of other `vnum` instances.
 
 The first problem is that the variant will have to refer to itself in its own type alias definition - one possible solution is **forward-declaring** a `vnum_wrapper` class *(which can be safely "stored" in `std::vector` since the approval of [N4510](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4510.html))*:
 
@@ -87,9 +99,9 @@ vnum v3 = varr{vnum{1}, vnum{2.0}, vnum{3.f}};
 vnum v4 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 ```
 
-*(Note that creating something similar to `vnum_wrapper` works well with both `boost::variant` and `std::variant`. There is a small caveat: it does not compile with `libc++` unless the constructor is constrained. See [the addendum section](#libcpp_constraint) for more information.)*
+*(Note that creating something similar to `vnum_wrapper` works well with both `boost::variant` and `std::variant`. There is a small caveat: it does not compile with `libc++` unless the constructor is constrained using `enable_if`. See [the addendum section](#libcpp_constraint) for more information.)*
 
-Let's take a look at various visitation techniques in the following sections.
+Let's take a look visitation techniques in the following sections.
 
 
 
@@ -158,7 +170,7 @@ vr::visit(vnp, v0);
 
 ### *"Lambda-based"* recursive visitation - take one
 
-Applying the `boost::hana::overload` solution seen in [part one](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) to recursive variants seems reasonable.
+Applying the `boost::hana::overload` solution seen in [part one](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html) to recursive variants seems like a reasonable plan.
 
 ```cpp
 auto my_visitor = boost::hana::overload
@@ -183,9 +195,9 @@ Unfortunately, we are greeted with a *compiler error*:
 
 *(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_variants/5_lambda_visitation_notworking.cpp).)*
 
-In short, the problem is that `my_visitor`'s type will be deduced from its own initialization... but `my_visitor` is also part of the initialization! If we could explicitly specify the lambda's type in place of `auto`, the above code snippet could compile. [More details can be found here.](http://stackoverflow.com/questions/7861506/recursive-call-in-lambda-c11)
+In short, the problem is that `my_visitor`'s type will be deduced from its own initialization... but `my_visitor` is also part of the initialization! If we had a way to explicitly specify the lambda's type in place of `auto`, the above code snippet could compile. [More details about this issue can be found here.](http://stackoverflow.com/questions/7861506/recursive-call-in-lambda-c11)
 
-One common solution that is used to implement recursive lambdas is using [`std::function`](http://en.cppreference.com/w/cpp/utility/functional/function), which allows `auto` to be replaced with an explicit type that does not need to be deduced. Unfortunately `std::function` **is not a zero-cost abstraction**, as it's a general-purpose polymorphic wrapper.
+One common solution that is used to implement recursive lambdas is using [`std::function`](http://en.cppreference.com/w/cpp/utility/functional/function), which allows `auto` to be replaced with an explicit type that does not need to be deduced. Unfortunately `std::function` **is not a zero-cost abstraction**, as it's a general-purpose polymorphic wrapper. *(Benchmarks supporting my claim will be shown later in this article.)*
 
 
 
@@ -193,7 +205,7 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 Bringing [algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type) from the functional programming world into C++ isn't enough - we're also going to adopt another powerful construct: the [**Y Combinator**](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
 
-Long story short, this *fixed-point combinator* allows recursion to be impemented in languages that do not support it natively. **This applies to C++ lambdas:** we can use the Y Combinator to implement recursion. *(A very good in-depth explanation of the combinator [is available here](http://mvanier.livejournal.com/2897.html).)*
+Long story short, this *fixed-point combinator* allows recursion to be impemented in programming languages that do not natively support it. The previous statement **applies to C++ lambdas**: we can use the Y Combinator to implement recursion. *(A very good in-depth explanation of the combinator [is available here](http://mvanier.livejournal.com/2897.html).)*
 
 Thankfully, a production-ready implementation of the Y Combinator is available as [`boost::hana::fix`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga1393f40da2e8da6e0c12fce953e56a6c). Here's an example of its usage:
 
@@ -213,17 +225,17 @@ assert(factorial(5) == 120);
 
 Here are some important points you need to take note of:
 
-* `factorial`'s type is deduced through `auto`. No additional indirection a-la `std::function` is introduced here.
+* `factorial`'s type is deduced through `auto`. No additional indirection *a la* `std::function` is introduced here.
 
-* `boost::hana::fix` requires a function with the *desired arity plus one* as its argument, because **"the lambda is passed to itself"** on every recursive step as the `self` parameter.
+* `boost::hana::fix` takes a callable object with the *desired arity plus one* as its argument, because **"the lambda is passed to itself"** on every recursive step as the `self` parameter.
 
-* The recursive step is implemented by calling `self`, not `factorial`.
+* The recursive step is implemented by calling `self`, **not** `factorial`.
 
     * Note that `factorial` does not appear in the body of the lambda, thus avoiding the previously seen compiler error.
 
 * `boost::hana::fix` requires a [*trailing return type*](http://en.cppreference.com/w/cpp/language/function).
 
-* Calling `factorial` does not require any additional parameters.
+* The `factorial` function can be called as usual - the user does not have to pass any additional argument to it.
 
 *(If you are interested in learning how to implement your own Y Combinator, check out [this question](http://stackoverflow.com/questions/35608977/understanding-y-combinator-through-generic-lambdas) I asked on StackOverflow when trying to understand the construct and write my own version of it.)*
 
@@ -241,17 +253,17 @@ auto vnp = make_recursive_visitor<void>
 
     // Recursive case.
     // The first argument allows recursive visitation.
-    [](auto visit_self, const varr& arr)
+    [](auto recurse, const varr& arr)
     {
         for(const auto& x : arr)
         {
-            visit_self(x);
+            recurse(x);
         }
     }
 );
 ```
 
-Here's the commented implementation of `make_recursive_visitor`:
+All the *magic* is inside `make_recursive_visitor` - here's its commented implementation:
 
 
 ```cpp
@@ -264,9 +276,12 @@ auto make_recursive_visitor(TFs&&... fs)
         {
             // Immediately build and call an overload of all visitor "branches".
             // The created overload is called with:
+            //
             // * A function that takes a variant and visits it recursively as
             //   the first argument.
+            //
             // * The current value of the variant as the second argument.
+            //
             return boost::hana::overload(std::forward<TFs>(fs)...)(
                 [&self](auto&& v)
                 {
@@ -287,13 +302,9 @@ auto vnp = make_recursive_visitor<void>
     [](auto, int x)    { cout << x << "i\n"; },
     [](auto, float x)  { cout << x << "f\n"; },
     [](auto, double x) { cout << x << "d\n"; },
-
-    [](auto visit_self, const varr& arr)
+    [](auto recurse, const varr& arr)
     {
-        for(const auto& x : arr)
-        {
-            visit_self(x);
-        }
+        for(const auto& x : arr) recurse(x);
     }
 );
 
@@ -318,6 +329,8 @@ v0 = varr{vnum{5}, varr{vnum{7}, vnum{8.0}, vnum{9.}}, vnum{4.f}};
 vr::visit(vnp, v0);
 ```
 
+Again, keep in mind that this technique does not work well if you require *stateful* visitors - use a `class`/`struct` in that situation.
+
 *(You can find a similar example [on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/visiting_recursive_variants/1_lambda.cpp).)*
 
 
@@ -325,7 +338,7 @@ You're probably now asking...
 
 > Why go through all that trouble? Why not just use `std::function`?
 
-As I mentioned earlier, `std::function` is not a *zero-cost abstraction*. To prove it, [I've written a simple factorial lambda test](https://github.com/SuperV1234/Experiments/blob/master/recursive_lambda_asm/x.cpp) that can be conditionally compiled to either use `std::function` or `boost::hana::fix`. The [results are available in the addendum section](#stdfunction_vs_ycombinator). In short:
+As I mentioned earlier, `std::function` is not a *zero-cost abstraction*. To prove it, [I've written a simple factorial lambda test](https://github.com/SuperV1234/Experiments/blob/master/recursive_lambda_asm/x.cpp) that can be conditionally compiled to either use `std::function` or `boost::hana::fix`. The [complete results are available in the addendum section](#stdfunction_vs_ycombinator). In short:
 
 * `g++ -O3` produces **4572** bytes of assembly for `std::function`. *(!)*
 
@@ -337,18 +350,44 @@ As I mentioned earlier, `std::function` is not a *zero-cost abstraction*. To pro
 
 
 
-TODO: all auto, hana::fix
+### *"Lambda-based"* recursive visitation - *take three?*
 
-TODO: mention addendum benchmarks
+If you value minimalist and elegant interfaces, you may have noticed that the user is forced to add an extra `auto` parameter to every non-recursive visitor lambda. This is a very annoying problem which is not easy to solve.
 
+I am working on a solution that detects the arity of lambdas at compile-time *(yes, even generic lambdas)*. I am also experimenting with detecting whether or not a lambda is generic in order to automatically deduce the return type of the recursive visitor.
 
-### *"Lambda-based"* recursive visitation - take three
+So far, the following code seems to work properly on both major compilers and with both `std::variant` and `boost::variant`:
 
-TODO: recurse(...)?
+```cpp
+make_recursive_visitor<void>
+(
+    // "Base cases", unary.
+    [](int x)    { cout << x << "i\n"; },
+    [](float x)  { cout << x << "f\n"; },
+    [](double x) { cout << x << "d\n"; },
 
-TODO: mention addendum so
+    // "Special case", constrained.
+    [](auto x) -> enable_if_t<is_arithmetic<decay_t<decltype(x)>>{}> 
+    { 
+        cout << x << "n\n"; 
+    },
 
-[test addendum link](#stdfunction_vs_ycombinator)
+    // Recursive case, `std::vector`.
+    [](auto recurse, const varr& x) 
+    { 
+        for(const auto& y : x) recurse(y); 
+    },
+
+    // Recursive case, `std::map`.
+    [](auto recurse, const vmap& x) 
+    { 
+        for(const auto& y : x) recurse(y.second); 
+    }
+);
+```
+
+The code above can be successfully used to visit a recursive variant. The lambdas can be passed in any order to `make_recursive_visitor`. As soon as I clean it up and make sure that there are no hidden *gotchas*, I will write an article about its implementation.
+
 
 
 ### Addendum
