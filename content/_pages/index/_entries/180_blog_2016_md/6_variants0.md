@@ -205,7 +205,7 @@ One common solution that is used to implement recursive lambdas is using [`std::
 
 Bringing [algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type) from the functional programming world into C++ isn't enough - we're also going to adopt another powerful construct: the [**Y Combinator**](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
 
-Long story short, this *fixed-point combinator* allows recursion to be impemented in programming languages that do not natively support it. The previous statement **applies to C++ lambdas**: we can use the Y Combinator to implement recursion. *(A very good in-depth explanation of the combinator [is available here](http://mvanier.livejournal.com/2897.html).)*
+Long story short, this *fixed-point combinator* allows recursion to be implemented in programming languages that do not natively support it. The previous statement **applies to C++ lambdas**: we can use the Y Combinator to implement recursion. *(A very good in-depth explanation of the combinator [is available here](http://mvanier.livejournal.com/2897.html).)*
 
 Thankfully, a production-ready implementation of the Y Combinator is available as [`boost::hana::fix`](http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/group__group-functional.html#ga1393f40da2e8da6e0c12fce953e56a6c). Here's an example of its usage:
 
