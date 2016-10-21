@@ -2,7 +2,7 @@
 
 *"An Empirical Study on the Impact of C++ Lambdas and Programmer Experience"*, a recent research paper presented at [ICSE' 16](http://2016.icse.cs.txstate.edu/), sparked a lot of controversy *(e.g on [reddit](https://www.reddit.com/r/cpp/comments/588qap/c_lambdas_negatively_impact_novices_and_dont/) and [Hacker News](https://news.ycombinator.com/item?id=12741229))* after claiming that the use of [C++11 lambda functions](http://en.cppreference.com/w/cpp/language/lambda) is **harmful to beginners** and **unhelpful to professionals**. 
 
-After carefully reading the paper, which is available on [Andreas Stefik, Ph.D.'s website](http://web.cs.unlv.edu/stefika/research.html) for free, I genuinely think that it is **misinformative** and that **the drawn conclusions are inaccurate** due to the naive approach taken for the experiments and due to the small sample size.
+After carefully reading the paper, which is available on [Andreas Stefik, Ph.D.'s website](http://web.cs.unlv.edu/stefika/research.html) for free, I genuinely think that it is **misinformative** and that **the drawn conclusions are inaccurate** due to the flawed approach taken for the experiments and due to the small sample size.
 
 In this article, I will support my claims by quoting the original paper and explaining why the authors' work/conclusions are subpar. All blockquotes in this post are citations of [doi>10.1145/2884781.2884849](http://dl.acm.org/citation.cfm?doid=2884781.2884849).
 
