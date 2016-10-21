@@ -218,7 +218,7 @@ struct response_failure
 
 // ...
 
-using http_response = vr::variant<RequestSuccess, RequestFailure>;
+using http_response = vr::variant<response_success, response_failure>;
 http_response send_http_request(/* ... */);
 
 // ...
