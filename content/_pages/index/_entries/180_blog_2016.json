@@ -4,6 +4,17 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "TODO_lambdas_paper",
+            "tags": ["c++", "c++11", "lambda", "TODO"],
+            "expand":
+            {
+                "Title": "TODOTODOTODOTODO",
+                "Text": "180_blog_2016_md/7_lambdas_paper.md",
+                "Date": "TODO"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "variants_lambdas_part_2",
             "tags": ["c++", "c++14", "c++17", "boost", "variant", "lambda", "tutorial"],
             "expand":
