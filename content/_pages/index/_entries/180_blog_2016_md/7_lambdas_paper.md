@@ -129,24 +129,18 @@ Since I've already explained why *(1)* is wrong, I'd like to focus on *(2)*: dif
 > \[...\]
 >
 > Participants in this case had to create a lambda expression that is of the type function<void (item)> and that added to the already provided retVal variable
->
-> \[...\]
 
 Again, lambdas are not the same thing as `std::function`. The wording here is very misleading.
 
 > \[...\]
 >
 > After instructions, participants were given printouts of sample code they could refer to while solving tasks. Group Lambda got code of a C++ program using lambda expressions and group Iterator received code of the same program written using iterators. They then had time to study the samples before starting the tasks and could refer to these samples later.
->
-> \[...\]
 
 I think that giving the readers access to the sample code is of utmost importance here, as test subjects used it to implement their solutions. I couldn't find a link to it in the paper.
 
 > \[...\]
 >
 > A noteworthy detail is that the participants had to use \[&\] for their lambda function, which indicates to the compiler that the function captures the variables around it as reference, in contrast to \[\], which does not capture any variables, and \[=\], which captures variables by value. The code samples did not show any way to do this other than the \[&\] so that participants would not be confused and delayed.
->
-> \[...\]
 
 I believe that testing the effectiveness of a feature, independently of the subjects' skill level, is inherently flawed if the way the feature works isn't explained. *Capture lists* are not a "detail", they are a fundamental part of lambdas - participants would be **less** confused by understanding the meaning of `[&]`.
 
@@ -160,7 +154,7 @@ Let's now take a look at *task 1*.
 
     ![*Task 1 - iterator: given code*](resources/img/blog/lambdas_paper_0.png)
 
-    ...which is an **horrible unidiomatic** implementation of something resembling an iterator, that I personally find confusing and unfamiliar. The following code is the solution they were supposed to write:
+    ...which is an **unidiomatic** implementation of something resembling an iterator, that I personally find confusing and unfamiliar. The following code is the solution they were supposed to write:
 
     ![*Task 1 - iterator: expected solution*](resources/img/blog/lambdas_paper_1.png)
 
@@ -184,7 +178,7 @@ Let's now take a look at *task 1*.
     auto retVal = accumulate(begin(mb), end(mb), 0);
     ```
 
-    A lambda isn't even required. The point is: **if your container interface is horrible and unidiomatic, why are you using it to evaluate the effectiveness of a language feature?**
+    A lambda isn't even required. The point is: **if your container interface is poor and unidiomatic, why are you using it to evaluate the effectiveness of a language feature?**
 
     2. The lambda is being used to construct an `std::function`, `func`, which is then passed to `iterateOverItems`. Major benefits of using lambdas in similar situations include **avoiding named functions** and **not paying any extra cost**. This is how it's done:
 
