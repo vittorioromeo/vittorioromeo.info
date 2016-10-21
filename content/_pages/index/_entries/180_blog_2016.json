@@ -4,13 +4,13 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
-            "link_name": "TODO_lambdas_paper",
-            "tags": ["c++", "c++11", "lambda", "TODO"],
+            "link_name": "on_lambda_vs_iterator_paper",
+            "tags": ["c++", "c++11", "lambda"],
             "expand":
             {
-                "Title": "TODOTODOTODOTODO",
+                "Title": "on the recent 'lambda vs iterator' paper",
                 "Text": "180_blog_2016_md/7_lambdas_paper.md",
-                "Date": "TODO"
+                "Date": "22 october 2016"
             }
         },
         {
