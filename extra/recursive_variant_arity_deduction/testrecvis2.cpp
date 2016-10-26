@@ -55,22 +55,32 @@ auto make_visitor_great_again(TFs... fs)
 
 namespace impl
 {
+    template <typename T, typename TDerived>
+    struct wrapper_impl
+    {
+        T _data;
+
+         template <typename... Ts,
+              typename = std::enable_if_t<!std::disjunction_v<
+                  std::is_same<std::decay_t<Ts>, TDerived>...>>>
+        wrapper_impl(Ts&&... xs) : _data{FWD(xs)...}
+        {
+        }
+    };
+}
+
+namespace impl
+{
     struct vnum_wrapper;
 
     using varr = std::vector<vnum_wrapper>;
     using vmap = std::map<int, vnum_wrapper>;
     using vnum = vr::variant<int, float, double, varr, long, vmap>;
 
-    struct vnum_wrapper
+    struct vnum_wrapper : wrapper_impl<vnum, vnum_wrapper>
     {
-        vnum _data;
-
-   template <typename... Ts,
-          typename = std::enable_if_t<!std::disjunction_v<
-              std::is_same<std::decay_t<Ts>, vnum_wrapper>...>>>
-    vnum_wrapper(Ts&&... xs) : _data{FWD(xs)...}
-    {
-    }
+        // seems to work on libc++
+        using wrapper_impl::wrapper_impl;
     };
 }
 
