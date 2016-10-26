@@ -112,6 +112,12 @@ using is_binary_callable_impl = decltype(std::declval<T>()(any_type{}, any_type{
 template <typename T>
 using is_binary_callable = std::experimental::is_detected<is_binary_callable_impl, T>;
 
+template<class T>
+using is_unary_callable_impl = decltype(std::declval<T>()(any_type{}));
+
+template <typename T>
+using is_unary_callable = std::experimental::is_detected<is_unary_callable_impl, T>;
+
 struct arity_detector_t
 {
     template <typename TF>
@@ -155,6 +161,38 @@ struct adapt_helper<false>
     }
 };
 
+namespace vr
+{
+    struct recursive_tag_t {};
+    constexpr recursive_tag_t recursive;
+
+    template<typename TF>
+    struct recursive_visitor_branch : TF
+    {
+        template<typename TFFwd>
+        recursive_visitor_branch(TFFwd&& f) : TF(FWD(f))
+        {
+        }
+    };
+
+    template <typename T>
+    auto operator|(recursive_tag_t, T&& x) { return recursive_visitor_branch<std::decay_t<T>>{x}; }
+}
+
+template <typename, template <typename...> class>
+struct is_specialization_of : boost::hana::false_
+{
+};
+
+template <template <typename...> class TTemplate, typename... Ts>
+struct is_specialization_of<TTemplate<Ts...>, TTemplate> : boost::hana::true_
+{
+};
+
+template <typename T>
+using is_tagged_as_recursive = is_specialization_of<T, vr::recursive_visitor_branch>;
+
+
 namespace impl
 {
     struct arity_deducer_t
@@ -164,7 +202,19 @@ namespace impl
         {
             using f_type = std::decay_t<TF>;
 
-            if constexpr(is_not_overloaded<f_type>{})
+            if constexpr(is_tagged_as_recursive<f_type>{})
+            {
+                return deduced_arity::binary;
+            }
+            else if constexpr(is_binary_callable<f_type>{})
+            {
+                return deduced_arity::binary;
+            }
+            else if constexpr(is_unary_callable<f_type>{})
+            {
+                return deduced_arity::unary;
+            }
+            else if constexpr(is_not_overloaded<f_type>{})
             {
                 constexpr auto arity = function_traits<f_type>::arity;
 
@@ -186,23 +236,6 @@ namespace impl
             {
                 return deduced_arity::undeducible;
             }
-
-            /*if constexpr(is_explicitly_tagged<TF>{})
-            {
-                return to_deduced_arity(TF::arity);
-            }
-            else if constexpr(is_not_overloaded<TF>{})
-            {
-                return to_deduced_arity(function_traits<TF>::arity);
-            }
-            else if constexpr(arity_can_be_deduced<TF>{})
-            {
-                return to_deduced_arity(arity_detector<TF>{}());
-            }
-            else
-            {
-                return deduced_arity::undeducible;
-            }*/
         }
     };
 }
@@ -263,14 +296,7 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 }
 
 
-namespace vr
-{
-    struct tag {};
-    constexpr tag recursive;
 
-    template <typename T>
-    auto operator|(tag, T&& x) { return x; }
-}
 
 
 int main()
@@ -283,7 +309,7 @@ int main()
         [](float x)  { std::cout << x << "f\n"; },
         [](double x) { std::cout << x << "d\n"; },
         [](auto recurse, const varr& x) { for(const auto& y : x) recurse(y); },
-      vr::recursive | [](auto recurse, const vmap& x) { for(const auto& y : x) recurse(y.second); }
+        [](auto recurse, const vmap& x) { for(const auto& y : x) recurse(y.second); }
     );
     // clang-format on
 
@@ -291,7 +317,6 @@ int main()
     vnum v0{0};
     vr::visit(vnp, v0);
 
-    /*
     v0 = 5.f;
     vr::visit(vnp, v0);
 
@@ -309,5 +334,4 @@ int main()
 
     v0 = varr{vnum{1}, vmap{{1, vnum{2.0}}}, vnum{3.f}};
     vr::visit(vnp, v0);
-    */
 }
