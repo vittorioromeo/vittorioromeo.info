@@ -323,6 +323,22 @@ int main()
     );
     // clang-format on
 
+    /*
+    // Alternative:
+    auto vnp = make_recursive_visitor<void>([](auto overload, auto recurse)
+    {
+        return overload
+        (
+            [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}> { std::cout << x << "N\n"; },
+            [](int x)          { std::cout << x << "i\n"; },
+            [](float x)        { std::cout << x << "f\n"; },
+            [](double x)       { std::cout << x << "d\n"; },
+            [&](const varr& x) { for(const auto& y : x) recurse(y); },
+            [&](const vmap& x) { for(const auto& y : x) recurse(y.second); }
+        );
+    });
+    */
+
     vnum v0{0};
     vr::visit(vnp, v0);
 
