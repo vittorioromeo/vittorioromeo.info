@@ -323,7 +323,6 @@ int main()
     );
     // clang-format on
 
-
     vnum v0{0};
     vr::visit(vnp, v0);
 

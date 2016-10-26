@@ -51,6 +51,13 @@ struct any_type
     constexpr any_type operator++(int)const noexcept;
     constexpr any_type operator--() const noexcept;
     constexpr any_type operator--(int)const noexcept;
+
+    constexpr any_type begin() const noexcept;
+    constexpr any_type end() const noexcept;
+    constexpr any_type cbegin() const noexcept;
+    constexpr any_type cend() const noexcept;
+    constexpr any_type rbegin() const noexcept;
+    constexpr any_type rend() const noexcept;
 };
 
 constexpr any_type operator+(any_type, any_type) noexcept;
