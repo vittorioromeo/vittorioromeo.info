@@ -324,6 +324,17 @@ int main()
     // clang-format on
 
     /*
+    #define MAKE_RECURSIVE_VISITOR(return_type, ...) \
+        make_recursive_visitor<return_type>([](auto overload, auto recurse) \
+        { \
+            return overload \
+            ( \
+                __VA_ARGS__ \
+            ); \
+        }
+    */
+
+    /*
     // Alternative:
     auto vnp = make_recursive_visitor<void>([](auto overload, auto recurse)
     {
