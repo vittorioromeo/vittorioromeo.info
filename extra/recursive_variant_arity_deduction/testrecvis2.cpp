@@ -116,17 +116,28 @@ using is_not_overloaded_impl = decltype(&std::decay_t<T>::operator());
 template <typename T>
 using is_not_overloaded = std::experimental::is_detected<is_not_overloaded_impl, T>;
 
-template<class T>
-using is_binary_callable_impl = decltype(std::declval<T>()(any_type{}, any_type{}));
+
+
+template <typename T, typename... Ts>
+using can_invoke_with_impl = decltype(std::declval<T>()(std::declval<Ts>()...));
+
+
+
 
 template <typename T>
-using is_binary_callable = std::experimental::is_detected<is_binary_callable_impl, T>;
-
-template<class T>
-using is_unary_callable_impl = decltype(std::declval<T>()(any_type{}));
+using is_binary_callable_impl = can_invoke_with_impl<T, any_type, any_type>;
 
 template <typename T>
-using is_unary_callable = std::experimental::is_detected<is_unary_callable_impl, T>;
+using is_unary_callable_impl = can_invoke_with_impl<T, any_type>;
+
+
+template <typename T>
+using is_binary_callable = std::is_callable<T(any_type, any_type)>;
+// using is_binary_callable = std::experimental::is_detected<is_binary_callable_impl, T>;
+
+template <typename T>
+using is_unary_callable = std::is_callable<T(any_type)>;
+// using is_unary_callable = std::experimental::is_detected<is_unary_callable_impl, T>;
 
 struct arity_detector_t
 {
