@@ -51,3 +51,7 @@ In this article I'll show how to implement the *pseudocode* in:
 
 ### C++11 implementation
 
+For the C++11 implementation, 
+
+TODO: mention https://www.youtube.com/watch?v=a0FliKwcwXE
+TODO: mention that it requires two overlaods of same function, out-of-place structs, etc...
