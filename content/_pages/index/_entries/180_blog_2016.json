@@ -4,6 +4,17 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "TODO_linkname",
+            "tags": ["c++", "c++14", "c++17", "lambda", "constexpr", "boost"],
+            "expand":
+            {
+                "Title": "TODO_title TODO_title TODO_title",
+                "Text": "180_blog_2016_md/8_in_place_expr_validity.md",
+                "Date": "XX TODO XXXX"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "on_lambda_vs_iterator_paper",
             "tags": ["c++", "c++11", "lambda"],
             "expand":
