@@ -2,6 +2,7 @@
 #include <utility>
 #include <boost/hana.hpp>
 
+
 struct Cat
 {
     Cat() = delete;

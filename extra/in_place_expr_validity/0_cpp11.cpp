@@ -57,8 +57,9 @@ auto make_noise(const T& x) -> typename std::enable_if<has_bark<T>{}>::type
     x.bark();
 }
 
-// ---
-
 int main()
 {
+    make_noise(Cat{});
+    make_noise(Dog{});
+    // make_noise(int{});
 }
