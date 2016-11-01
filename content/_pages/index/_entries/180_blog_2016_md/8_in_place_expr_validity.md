@@ -47,6 +47,8 @@ In this article I'll show how to implement the *pseudocode* in:
 
 * **C++17**: using [`if constexpr(...)`](http://en.cppreference.com/w/cpp/language/if#Constexpr_If), [`constexpr` lambdas](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4487.pdf), and [std::is_callable](http://en.cppreference.com/w/cpp/types/is_callable). This version will allow expression validity to be **checked in-place** *(i.e. directly in the `if constexpr` predicate)*. [Variadic preprocessor macros](http://en.cppreference.com/w/cpp/preprocessor/replace) will also be used to make the user code easier to read and maintain.
 
+*(Note: if you are familiar with C++11 and C++14 techniques for expression validity detection, you can [**directly skip to the in-place C++17 detection technique.**](TODO))*
+
 
 
 ### C++11 implementation
