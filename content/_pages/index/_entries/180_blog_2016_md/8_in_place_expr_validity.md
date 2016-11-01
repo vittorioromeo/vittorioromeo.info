@@ -73,13 +73,13 @@ struct has_meow<T, void_t<decltype(std::declval<T>().meow())>>
 
 The way this idiom works is not very complex: roughly speaking, instantiating `has_meow<T>` will attempt to evaluate `void_t<decltype(std::declval<T>().meow())>`.
 
-* If `declval<T>().meow()` is a *well-formed* expression, `void_t<decltype(declval<T>().meow())>>` will evaluate to `void`, and `has_meow`'s `std::true_type` specialization will be taken.
+* If `declval<T>().meow()` is *well-formed*, `void_t<decltype(declval<T>().meow())>>` will evaluate to `void`, and `has_meow`'s `std::true_type` specialization will be taken.
 
-* If `declval<T>().meow()` is an *ill-formed* expression, `void_t<decltype(declval<T>().meow())>>` will be *ill-formed* as well, thus removing the `std::true_type` specialization thanks to SFINAE - all that's left is the `std::false_type` specialization.
+* If `declval<T>().meow()` is *ill-formed*, `void_t<decltype(declval<T>().meow())>>` will be *ill-formed* as well, thus removing the `std::true_type` specialization thanks to SFINAE - all that's left is the `std::false_type` specialization.
 
 [`std::declval<T>()`](http://en.cppreference.com/w/cpp/utility/declval) is being used in place of `T{}` because it is not guaranteed that `T` is default-constructible. 
 
-After defining the `has_bark` detector class *(which is trivial to implement as well)*, all that's left to do is use `std::enable_if` to constrain `make_noise`:
+After defining the `has_bark` detector class *(which is trivial to implement, as well)*, all that's left to do is use `std::enable_if` to constrain `make_noise`:
 
 ```cpp
 template <typename T>
