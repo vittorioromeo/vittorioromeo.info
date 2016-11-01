@@ -23,11 +23,11 @@ void make_noise(const T& x)
 {
     // Pseudocode:
     /*
-        if(`x.meow()` is well formed)
+        if(`x.meow()` is well-formed)
         {
             execute `x.meow();`
         }
-        else if(`x.bark()` is well formed)
+        else if(`x.bark()` is well-formed)
         {
             execute `x.bark();`
         }
@@ -73,9 +73,9 @@ struct has_meow<T, void_t<decltype(std::declval<T>().meow())>>
 
 The way this idiom works is not very complex: roughly speaking, instantiating `has_meow<T>` will attempt to evaluate `void_t<decltype(std::declval<T>().meow())>`.
 
-* If `std::declval<T>().meow()` is a *well-formed* expression, `void_t<decltype(std::declval<T>().meow())>>` will evaluate to `void`, and `has_meow`'s `std::true_type` specialization will be taken.
+* If `declval<T>().meow()` is a *well-formed* expression, `void_t<decltype(declval<T>().meow())>>` will evaluate to `void`, and `has_meow`'s `std::true_type` specialization will be taken.
 
-* If `std::declval<T>().meow()` is an *ill-formed* expression, `void_t<decltype(std::declval<T>().meow())>>` will be *ill-formed* as well, thus removing the `std::true_type` specialization thanks to SFINAE - all that's left is the `std::false_type` specialization.
+* If `declval<T>().meow()` is an *ill-formed* expression, `void_t<decltype(declval<T>().meow())>>` will be *ill-formed* as well, thus removing the `std::true_type` specialization thanks to SFINAE - all that's left is the `std::false_type` specialization.
 
 [`std::declval<T>()`](http://en.cppreference.com/w/cpp/utility/declval) is being used in place of `T{}` because it is not guaranteed that `T` is default-constructible. 
 
