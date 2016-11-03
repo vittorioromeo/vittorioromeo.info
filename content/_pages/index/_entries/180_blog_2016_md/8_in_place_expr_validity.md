@@ -99,7 +99,7 @@ auto make_noise(const T& x)
 }
 ```
 
-That's it for C++11! [*You can find a complete example on GitHub.*](TODO)
+That's it for C++11! [*You can find a complete example on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/0_cpp11.cpp)
 
 
 
@@ -198,7 +198,7 @@ auto make_noise(const T& x)
 }
 ```
 
-[*You can find a complete example on GitHub.*](TODO)
+[*You can find a complete example on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/1_cpp14.cpp)
 
 Is this a better implementation compared to the C++11 version? That's debatable. There are, however, some objective advantages:
 
@@ -323,7 +323,7 @@ static_assert(
 );
 ```
 
-*Yikes.* This works and compiles, but it's verbose and full of noise/boilerplate. That's why a macro *\*shudders\** is needed here. Let's finally check out how `IS_VALID` is implemented. *(For simplicity, only the single-type version will be analyzed. A fully-variadic `IS_VALID` is simple to implement - [see the example on GitHub](TODO), which uses my [`vrm_pp` preprocessor metaprogramming](https://github.com/SuperV1234/vrm_pp) library.)*
+*Yikes.* This works and compiles, but it's verbose and full of noise/boilerplate. That's why a macro *\*shudders\** is needed here. Let's finally check out how `IS_VALID` is implemented. *(For simplicity, only the single-type version will be analyzed. A fully-variadic `IS_VALID` is simple to implement - [see the example on GitHub](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/2_cpp17.cpp), which uses my [`vrm_pp` preprocessor metaprogramming](https://github.com/SuperV1234/vrm_pp) library.)*
 
 ```cpp
 template <typename T, typename TF>
@@ -378,7 +378,7 @@ Finally, `some_validity_checker(type_c<int*>)` is a *constant expression* that e
 
 The [`std::tuple`](http://en.cppreference.com/w/cpp/utility/tuple) and the `operator|` overload are there just to make the `IS_VALID(types...)(expression)` syntax possible. Alternatively, the user would have had to specify the number of types as part of the macro name itself. Separating the expression from the types allows [variadic macro argument counting techniques](https://github.com/SuperV1234/vrm_pp/blob/master/include/vrm/pp/arg_count.hpp) to be easily applied.
 
-That's it! [*You can find a complete example on GitHub.*](TODO)
+That's it! [*You can find a complete example on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/2_cpp17.cpp)
 
 I think this technique is very useful when combined with `if constexpr(...)` - it's a very barebones *"in-place concept"* definition and check. Example:
 
