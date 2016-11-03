@@ -4,13 +4,13 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
-            "link_name": "TODO_linkname",
-            "tags": ["c++", "c++14", "c++17", "lambda", "constexpr", "boost"],
+            "link_name": "checking_expression_validity_in_place",
+            "tags": ["c++", "c++14", "c++17", "lambda", "constexpr", "SFINAE"],
             "expand":
             {
-                "Title": "TODO_title TODO_title TODO_title",
+                "Title": "checking expression validity in-place with c++17",
                 "Text": "180_blog_2016_md/8_in_place_expr_validity.md",
-                "Date": "XX TODO XXXX"
+                "Date": "03 november 2016"
             }
         },
         {
