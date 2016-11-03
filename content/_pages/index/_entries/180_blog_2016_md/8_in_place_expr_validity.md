@@ -47,7 +47,7 @@ In this article I'll show how to implement the *pseudocode* in:
 
 * **C++17**: using [`if constexpr(...)`](http://en.cppreference.com/w/cpp/language/if#Constexpr_If), [`constexpr` lambdas](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4487.pdf), and [std::is_callable](http://en.cppreference.com/w/cpp/types/is_callable). This version will allow expression validity to be **checked in-place** *(i.e. directly in the `if constexpr` predicate)*. [Variadic preprocessor macros](http://en.cppreference.com/w/cpp/preprocessor/replace) will also be used to make the user code easier to read and maintain.
 
-*(Note: if you are familiar with C++11 and C++14 techniques for expression validity detection, you can [**directly skip to the in-place C++17 detection technique.**](TODO))*
+*(Note: if you are familiar with C++11 and C++14 techniques for expression validity detection, you can [**directly skip to the in-place C++17 detection technique.**](#cpp17_impl))*
 
 
 
@@ -194,7 +194,7 @@ auto make_noise(const T& x)
 
 [*You can find a complete example on GitHub.*](TODO)
 
-Is this a better implementation compared to the C++11 version? That's discutible. There are, however, some objective advantages:
+Is this a better implementation compared to the C++11 version? That's debatable. There are, however, some objective advantages:
 
 * Expression validity detector definition/instantiation is local to the function scope.
 
@@ -208,7 +208,7 @@ These advantages become more important when nesting multiple `static_if` blocks 
 
 
 
-### C++17 implementation
+### C++17 implementation {#cpp17_impl}
 
 The previous implementation took care of C++11's annoyances, but introduced some new ones:
 
@@ -366,17 +366,29 @@ std::apply(std::make_tuple(type_c<int*>), some_validity_checker);
 some_validity_checker(type_c<int*>)
 ```
 
+*(Note: [`std::apply`](http://en.cppreference.com/w/cpp/utility/apply) invokes a callable object by "unpacking" the contents of a tuple as its arguments. It was introduced in C++17.)*
+
 Finally, `some_validity_checker(type_c<int*>)` is a *constant expression* that evaluates to either `true` or `false`.
 
+The [`std::tuple`](http://en.cppreference.com/w/cpp/utility/tuple) and the `operator|` overload are there just to make the `IS_VALID(types...)(expression)` syntax possible. Alternatively, the user would have had to specify the number of types as part of the macro name itself. Separating the expression from the types allows [variadic macro argument counting techniques](https://github.com/SuperV1234/vrm_pp/blob/master/include/vrm/pp/arg_count.hpp) to be easily applied.
 
+That's it! [*You can find a complete example on GitHub.*](TODO)
 
+I think this technique is very useful when combined with `if constexpr(...)` - it's a very barebones *"in-place concept"* definition and check. Example:
 
+```cpp
+template <typename T0, typename T1>
+auto some_generic_function(T0 a, T1 b)
+{
+    if constexpr(IS_VALID(T0, T1)(foo(_0, _1))
+    {
+        return foo(a, b);
+    }
+    else if constexpr(IS_VALID(T0, T1)(_0 + _1))
+    {
+        return a + b;
+    }
 
-
-
-**TODO**
-**TODO**
-**TODO**
-
-- mention vrm::core::static_if and my talk
-- post on reddit as text post, immediately show C++17 example, then link
+    // ...
+}
+```
