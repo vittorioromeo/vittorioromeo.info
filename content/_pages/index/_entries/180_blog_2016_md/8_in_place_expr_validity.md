@@ -202,6 +202,10 @@ Is this a better implementation compared to the C++11 version? That's discutible
 
 These advantages become more important when nesting multiple `static_if` blocks together and dealing with more complicated validity checking: the equivalent C++11 code would require an huge amount of boilerplate and `std::enable_if` constraints compared to the C++14 implementation.
 
+*(Note: [`boost::hana:is_valid`](https://boostorg.github.io/hana/structboost_1_1hana_1_1type.html#a2d2e7e08e284f7e0bd1bd9c3ad0e0a2b) is a production-ready C++14 implementation of the above `is_valid` function.)*
+
+*(Note: you can find my `static_if` implementation in [`vrm::core::static_if`](https://github.com/SuperV1234/vrm_core/blob/master/include/vrm/core/static_if/static_if.hpp).)*
+
 
 
 ### C++17 implementation
@@ -250,10 +254,129 @@ IS_VALID(T)(_0 << _0);
 IS_VALID(T0, T1, float)(std::make_tuple(_0, _1, _2));
 ```
 
+All the `IS_VALID` invocations shown above can be used in contexts where only a *constant expression* is accepted such as `static_assert(...)` or `if constexpr(...)`.
+
+> What is this magic!?
+
+Time to reveal the dark secrets of `IS_VALID`. Let's begin by defining some utilities that will allow types to be wrapped into values.
+
+```cpp
+template <typename T>
+struct type_w
+{
+    using type = T;
+};
+
+template <typename T>
+constexpr type_w<T> type_c{};
+```
+
+Types can now be wrapped into values like this: `type_c<int>`. The type inside a `type_c` wrapped can be retrieved as follows:
+
+```cpp
+using inner_type = typename decltype(type_c<int>)::type;
+```
+
+*(Note: the idea of wrapping types into values (and viceversa) [is a core principle of `boost::hana`](https://boostorg.github.io/hana/structboost_1_1hana_1_1type.html#ae35139e732c4b75e91061513cf445628).)*
+
+After that, a new implementation of the previously seen `validity_checker` that works with `type_c` is required:
+
+```cpp
+template <typename TF>
+struct validity_checker
+{
+    template <typename... Ts>
+    constexpr auto operator()(Ts... ts)
+    {
+        return decltype(
+            std::is_callable<
+                TF(typename decltype(ts)::type...)
+            >{}
+        ){};
+    }
+};
+
+template <typename TF>
+constexpr auto is_valid(TF)
+{
+    return validity_checker<TF>{};
+}
+```
+
+*(Note: [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) is equivalent to the previously seen `is_callable` and is part of the C++17 standard.)*
+
+This `validity_checker` is conceptually equivalent to the previous one, but it expects `ts...` to be a pack of `type_c` instances which are automatically unwrapped in the `std::is_callable` instantiation.
+
+Before moving onto the inner workings of `IS_VALID`, let's see how [`constexpr` lambdas](https://isocpp.org/files/papers/N4487.pdf) *(standardized in C++17)* can be used to evaluate `is_valid` in-place inside a *constant expression*.
+
+```cpp
+// Make sure that `int*` can be dereferenced.
+static_assert(
+    is_valid([](auto _0) constexpr -> decltype(*_0){})
+    (type_c<int*>)
+);
+```
+
+*Yikes.* This works and compiles, but it's verbose and full of noise/boilerplate. That's why a macro *\*shudders\** is needed here. Let's finally check out how `IS_VALID` is implemented. *(For simplicity, only the single-type version will be analyzed. A fully-variadic `IS_VALID` is simple to implement - [see the example on GitHub](TODO), which uses my [`vrm_pp` preprocessor metaprogramming](https://github.com/SuperV1234/vrm_pp) library.)*
+
+```cpp
+template <typename T, typename TF>
+constexpr auto operator|(T x, validity_checker<TF> vc)
+{
+    return std::apply(vc, x);
+}
+
+#define IS_VALID_EXPANDER(...) \
+    is_valid([](auto _0) constexpr->decltype(__VA_ARGS__){})
+
+#define IS_VALID(type0) \
+    std::make_tuple(type_c<type0>) | IS_VALID_EXPANDER
+```
+
+In order to understand this madness, let's use an example:
+
+```cpp
+// Can `int*` be dereferenced?
+IS_VALID(int*)(*_0)
+```
+
+Let's expand `IS_VALID`:
+
+```cpp
+std::make_tuple(type_c<int*>) | IS_VALID_EXPANDER
+```
+
+Let's expand `IS_VALID_EXPANDER`:
+
+```cpp
+std::make_tuple(type_c<int*>) | is_valid([](auto _0) constexpr->decltype(*_0){})
+```
+
+The `is_valid(...)` call evaluates to a `validity_checker<...>` instance. As it is not possible to explicitly name the type of the lambda, we'll refer to this particular instance as `some_validity_checker` in the following examples.
+
+```cpp
+std::make_tuple(type_c<int*>) | some_validity_checker
+```
+
+The `operator|(T, validity_checker<...>)` overload can now be evaluated:
+
+```cpp
+std::apply(std::make_tuple(type_c<int*>), some_validity_checker);
+// ...which is equivalent to...
+some_validity_checker(type_c<int*>)
+```
+
+Finally, `some_validity_checker(type_c<int*>)` is a *constant expression* that evaluates to either `true` or `false`.
+
+
+
+
+
+
 
 **TODO**
 **TODO**
 **TODO**
 
-- mention boost::hana::is_valid
 - mention vrm::core::static_if and my talk
+- post on reddit as text post, immediately show C++17 example, then link
