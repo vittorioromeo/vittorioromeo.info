@@ -39,6 +39,8 @@ void make_noise(const T& x)
 }
 ```
 
+<p></p>
+
 In this article I'll show how to implement the *pseudocode* in:
 
 * **C++11**: using [`std::void_t`](http://en.cppreference.com/w/cpp/types/void_t) and [`std::enable_if`](http://en.cppreference.com/w/cpp/types/enable_if).
