@@ -191,6 +191,7 @@ auto make_noise(const T& x)
             })(x);
 }
 ```
+[*You can find a complete example on GitHub.*](TODO)
 
 Is this a better implementation compared to the C++11 version? That's discutible. There are, however, some objective advantages:
 
@@ -199,7 +200,6 @@ Is this a better implementation compared to the C++11 version? That's discutible
 * There is a single overload of `make_noise` - compile-time branching is local to the function scope. 
 
 These advantages become more important when nesting multiple `static_if` blocks together and dealing with more complicated validity checking: the equivalent C++11 code would require an huge amount of boilerplate and `std::enable_if` constraints compared to the C++14 implementation.
-
 
 
 
