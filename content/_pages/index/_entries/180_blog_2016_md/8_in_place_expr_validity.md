@@ -186,6 +186,12 @@ auto make_noise(const T& x)
             })
         .else_([](auto&&)
             {
+                // The pattern below generates a compiler-error.
+                
+                // It is not possible to use `static_assert(false)`
+                // here, as it triggers whether or not the branch
+                // is taken.
+
                 struct cannot_meow_or_bark;
                 cannot_meow_or_bark{};
             })(x);
