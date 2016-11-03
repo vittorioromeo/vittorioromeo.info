@@ -65,6 +65,9 @@ constexpr auto type_deferrer(Ts... xs)
 #define WAT(...) is_valid([](auto _0) constexpr->decltype(__VA_ARGS__){})
 #define IVTEST(type0) type_deferrer(type_c<type0>) | WAT
 
+#define WAT2(...) is_valid([](auto _0, auto _1) constexpr->decltype(__VA_ARGS__){})
+#define IVTEST2(type0, type1) type_deferrer(type_c<type0>, type_c<type1>) | WAT2
+
 
 
 /*
@@ -162,6 +165,7 @@ template <typename T>
 auto make_noise(const T& x)
 {
     static_assert(IVTEST(T)(_0.meow()));
+    static_assert(IVTEST2(T, int)(std::make_tuple(_0, _1)));
     /*if
         constexpr(IVTEST(T)(_0.meow()))
         {

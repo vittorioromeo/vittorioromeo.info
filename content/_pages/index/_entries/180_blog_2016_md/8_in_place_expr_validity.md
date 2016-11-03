@@ -218,11 +218,11 @@ We can solve both these annoyances thanks to some new features introduced in C++
 template <typename T>
 auto make_noise(const T& x)
 {
-    if constexpr(IS_VALID(T, _0.meow()))
+    if constexpr(IS_VALID(T)(_0.meow()))
     {
         x.meow();
     }
-    else if constexpr(IS_VALID(T, _0.bark()))
+    else if constexpr(IS_VALID(T)(_0.bark()))
     {
         x.bark();
     }
@@ -234,6 +234,21 @@ auto make_noise(const T& x)
 }
 ```
 
+Before diving into the implementation, let's analyze the user syntax. `IS_VALID` is a variadic macro that takes any number of types and *"returns"* another variadic macro that takes an expression built using some **type placeholders** *(e.g. `_0`, `_1`, ...)*. The combination of the two macros is a **constant expression** that evaluates to `true` if the expression is valid for the given types, to `false` otherwise. Here are some other example invocations:
+
+```cpp
+// Can `T` be dereferenced?
+IS_VALID(T)(*_0);
+
+// Can `T0` and `T1` be added together?
+IS_VALID(T0, T1)(_0 + _1);
+
+// Can `T` be streamed into itself?
+IS_VALID(T)(_0 << _0);
+
+// Can a tuple be made out of `T0`, `T1` and `float`?
+IS_VALID(T0, T1, float)(std::make_tuple(_0, _1, _2));
+```
 
 
 **TODO**
