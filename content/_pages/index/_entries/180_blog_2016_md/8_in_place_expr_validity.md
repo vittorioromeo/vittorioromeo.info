@@ -191,6 +191,7 @@ auto make_noise(const T& x)
             })(x);
 }
 ```
+
 [*You can find a complete example on GitHub.*](TODO)
 
 Is this a better implementation compared to the C++11 version? That's discutible. There are, however, some objective advantages:
@@ -201,6 +202,37 @@ Is this a better implementation compared to the C++11 version? That's discutible
 
 These advantages become more important when nesting multiple `static_if` blocks together and dealing with more complicated validity checking: the equivalent C++11 code would require an huge amount of boilerplate and `std::enable_if` constraints compared to the C++14 implementation.
 
+
+
+### C++17 implementation
+
+The previous implementation took care of C++11's annoyances, but introduced some new ones:
+
+* `is_valid` has to be assigned to a variable in order to be used in a [constant expression](http://en.cppreference.com/w/cpp/language/constant_expression). This happens because lambdas are not `constexpr`.
+
+* **Verbosity.** Having to use something like `static_if` makes the code much less readable. Having to create a lambda with a `decltype(...)` trailing return type for every expression creates noise.
+
+We can solve both these annoyances thanks to some new features introduced in C++17 and to some *macro black magic*. The final result will look like this:
+
+```cpp
+template <typename T>
+auto make_noise(const T& x)
+{
+    if constexpr(IS_VALID(T, _0.meow()))
+    {
+        x.meow();
+    }
+    else if constexpr(IS_VALID(T, _0.bark()))
+    {
+        x.bark();
+    }
+    else
+    {
+        struct cannot_meow_or_bark;
+        cannot_meow_or_bark{};
+    }
+}
+```
 
 
 

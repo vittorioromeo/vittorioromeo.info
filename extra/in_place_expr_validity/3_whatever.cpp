@@ -1,6 +1,10 @@
 #include <type_traits>
+#include <iostream>
+#include <tuple>
 #include <utility>
+#include <experimental/tuple>
 #include <boost/hana.hpp>
+#include <vrm/pp.hpp>
 
 struct A
 {
@@ -28,14 +32,41 @@ template <typename...>
 using int_t = int;
 
 template <typename TF>
-constexpr auto is_valid(TF)
+struct validimpl
 {
-    return [](auto... ts) constexpr
+    template <typename... Ts>
+    constexpr auto operator()(Ts... ts)
     {
         return decltype(std::is_callable<std::decay_t<TF>(
                 typename decltype(ts)::type...)>{}){};
-    };
+    }
+};
+
+template <typename T, typename TF>
+constexpr auto operator|(T x, validimpl<TF> v)
+{
+    return std::apply(v, x);
 }
+
+template <typename TF>
+constexpr auto is_valid(TF)
+{
+    return validimpl<TF>{};
+}
+
+
+template <typename... Ts>
+constexpr auto type_deferrer(Ts... xs)
+{
+    return std::make_tuple(xs...);
+}
+
+
+#define WAT(...) is_valid([](auto _0) constexpr->decltype(__VA_ARGS__){})
+#define IVTEST(type0) type_deferrer(type_c<type0>) | WAT
+
+
+
 /*
 
 
@@ -52,6 +83,10 @@ constexpr bool is_valid2(TF, T)
     }
 }   */
 
+
+
+
+
 #define VR_IS_VALID_1(type0, expression) \
     is_valid([](auto _0) constexpr->decltype expression{}, type_c<type0>)
 
@@ -61,12 +96,12 @@ constexpr bool is_valid2(TF, T)
 #define IS_VALID_1(type0, type1, ...)                                  \
     is_valid([](auto _0, auto _1) constexpr->decltype(__VA_ARGS__){})( \
         type_c<type0>, type_c<type1>)
-
+/*
 template <typename T0, typename T1>
 void sum_if_possible(T0 a, T1 b)
 {
     (void) a; (void) b;
-    
+
     static_assert(is_valid([](auto _0, auto _1) -> decltype(_0 + _1)
         {
         })(type_c<T0>, type_c<T1>));
@@ -76,14 +111,14 @@ void sum_if_possible(T0 a, T1 b)
         {
         }
 
-    
+
     if constexpr(IS_VALID_1(T0, T1, _0 + _1))
     {
     }
     else
     {
     }
-    
+
 }
 
 int main()
@@ -102,4 +137,50 @@ int main()
 
     // static_assert(is_valid2([](auto x) constexpr -> decltype(x) { },
     // type_c<decltype(std::declval<A>().m20())>) == true);
+}*/
+
+
+struct Cat
+{
+    Cat() = delete;
+    void meow() const
+    {
+        std::cout << "meow\n";
+    }
+};
+
+struct Dog
+{
+    Dog() = delete;
+    void bark() const
+    {
+        std::cout << "bark\n";
+    }
+};
+
+template <typename T>
+auto make_noise(const T& x)
+{
+    static_assert(IVTEST(T)(_0.meow()));
+    /*if
+        constexpr(IVTEST(T)(_0.meow()))
+        {
+            x.meow();
+        } 
+      */  /* else if constexpr(IS_VALID_0(T, _0.bark()))
+         {
+             x.bark();
+         }
+         else
+         {
+             struct cannot_meow_or_bark;
+             cannot_meow_or_bark{};
+         }*/
 }
+
+int main()
+{
+    make_noise(Cat{});
+    //make_noise(Dog{});
+    // make_noise(int{});
+}   
