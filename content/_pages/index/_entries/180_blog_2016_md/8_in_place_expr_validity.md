@@ -111,7 +111,96 @@ There are some annoyances in the C++11 implementation:
 
 * `std::enable_if` has to be used to constrain multiple versions of the same function. It is not possible to *"branch"* locally at compile-time.
 
-Both those issues can be solved thanks to one of the best features introduced in C++14: [**generic lambdas**](https://en.wikipedia.org/wiki/C%2B%2B14#Generic_lambdas).
+Both those issues can be solved thanks to one of my favorite features introduced in C++14: [**generic lambdas**](https://en.wikipedia.org/wiki/C%2B%2B14#Generic_lambdas).
+
+Since generic lambdas are [*"templates in disguise"*](http://stackoverflow.com/questions/17233547/how-does-generic-lambda-work-in-c14), they provide a SFINAE-friendly context. Therefore, we can create an `is_valid` function that allows us to take advantage of the previously seen `void_t` detection idiom without explicitly having to create a new `struct`:
+
+```cpp
+auto has_meow = is_valid([](auto&& x) -> decltype(x.meow()){});
+static_assert(has_meow(Cat{}), "");
+static_assert(!has_bark(Cat{}), "");
+```
+
+As you can see, `has_meow` can be locally instantiated in any scope, and can be used to check expression validity with a nicer syntax.
+
+> How does it work?
+
+It's not complicated - `is_valid` is a simple `constexpr` function that takes a callable object of type `TF` and returns a `validity_checker<TF>` instance.
+
+```cpp
+template <typename TF>
+constexpr auto is_valid(TF)
+{
+    return validity_checker<TF>{};
+}
+```
+
+The `validity_checker` class's `operator()` is a `constexpr` variadic template that checks whether or not `TF` is callable with the given arguments.
+
+```cpp
+template <typename TF>
+struct validity_checker
+{
+    template <typename... Ts>
+    constexpr auto operator()(Ts&&...) const
+    {
+        return is_callable<TF(Ts...)>{};
+    }
+};
+```
+
+Finally, `is_callable` is a *type-trait-like* class that can be easily implemented using `void_t`. It evaluates to `std::true_type` if the passed signature would result in a well-formed function invocation.
+
+```cpp
+template <typename, typename = void>
+struct is_callable : std::false_type { };
+
+template <typename TF, class... Ts>
+struct is_callable<TF(Ts...),
+    void_t<decltype(std::declval<TF>()(std::declval<Ts>()...))>>
+    : std::true_type { };
+```
+
+This solves the first C++11 annoyance, by allowing us to instantiate detectors locally. The second issue is not as easy to straighten out - branching locally at compile-time would require something like [`if constexpr(...)`](http://open-std.org/JTC1/SC22/WG21/docs/papers/2016/p0128r1.html) *(a.k.a. `static_if`)*, which is only available in C++17... 
+
+...but it is actually possible to implement a working `static_if` in C++14, albeit with a slightly cumbersome syntax. I explain how in my [**CppCon 2016 talk**: "Implementing `static` control flow in C++14"](https://www.youtube.com/watch?v=aXSsUqVSe2k).
+
+Once we have that, we can finally implement our `make_noise` function:
+
+```cpp
+template <typename T>
+auto make_noise(const T& x)
+{
+    auto has_meow = is_valid([](auto&& x) -> decltype(x.meow()){ });
+    auto has_bark = is_valid([](auto&& x) -> decltype(x.bark()){ });
+
+    static_if(has_meow(x))
+        .then([](auto&& y)
+            {
+                y.meow();
+            })
+        .else_if(has_bark(x))
+        .then([](auto&& y)
+            {
+                y.bark();
+            })
+        .else_([](auto&&)
+            {
+                struct cannot_meow_or_bark;
+                cannot_meow_or_bark{};
+            })(x);
+}
+```
+
+Is this a better implementation compared to the C++11 version? That's discutible. There are, however, some objective advantages:
+
+* Expression validity detector definition/instantiation is local to the function scope.
+
+* There is a single overload of `make_noise` - compile-time branching is local to the function scope. 
+
+These advantages become more important when nesting multiple `static_if` blocks together and dealing with more complicated validity checking: the equivalent C++11 code would require an huge amount of boilerplate and `std::enable_if` constraints compared to the C++14 implementation.
+
+
 
 
 
