@@ -20,8 +20,8 @@ struct validity_checker
     template <typename... Ts>
     constexpr auto operator()(Ts... ts)
     {
-        return decltype(std::is_callable<std::decay_t<TF>(
-                typename decltype(ts)::type...)>{}){};
+        return std::is_callable<std::decay_t<TF>(
+            typename decltype(ts)::type...)>{};
     }
 };
 

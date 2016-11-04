@@ -71,7 +71,7 @@ template <typename, typename = void>
 struct has_meow : std::false_type { };
 
 template <typename T>
-struct has_meow<T, void_t<decltype(std::declval<T>().meow())>> 
+struct has_meow<T, void_t<decltype(std::declval<T>().meow())>>
     : std::true_type { };
 ```
 
@@ -81,20 +81,20 @@ The way this idiom works is not very complex: roughly speaking, instantiating `h
 
 * If `declval<T>().meow()` is *ill-formed*, `void_t<decltype(declval<T>().meow())>>` will be *ill-formed* as well, thus removing the `std::true_type` specialization thanks to SFINAE - all that's left is the `std::false_type` specialization.
 
-[`std::declval<T>()`](http://en.cppreference.com/w/cpp/utility/declval) is being used in place of `T{}` because it is not guaranteed that `T` is default-constructible. 
+[`std::declval<T>()`](http://en.cppreference.com/w/cpp/utility/declval) is being used in place of `T{}` because it is not guaranteed that `T` is default-constructible.
 
 After defining the `has_bark` detector class *(which is trivial to implement, as well)*, all that's left to do is use `std::enable_if` to constrain `make_noise`:
 
 ```cpp
 template <typename T>
-auto make_noise(const T& x) 
+auto make_noise(const T& x)
     -> typename std::enable_if<has_meow<T>{}>::type
 {
     x.meow();
 }
 
 template <typename T>
-auto make_noise(const T& x) 
+auto make_noise(const T& x)
     -> typename std::enable_if<has_bark<T>{}>::type
 {
     x.bark();
@@ -163,7 +163,7 @@ struct is_callable<TF(Ts...),
     : std::true_type { };
 ```
 
-This solves the first C++11 annoyance, by allowing us to instantiate detectors locally. The second issue is not as easy to straighten out - branching locally at compile-time would require something like [`if constexpr(...)`](http://open-std.org/JTC1/SC22/WG21/docs/papers/2016/p0128r1.html) *(a.k.a. `static_if`)*, which is only available in C++17... 
+This solves the first C++11 annoyance, by allowing us to instantiate detectors locally. The second issue is not as easy to straighten out - branching locally at compile-time would require something like [`if constexpr(...)`](http://open-std.org/JTC1/SC22/WG21/docs/papers/2016/p0128r1.html) *(a.k.a. `static_if`)*, which is only available in C++17...
 
 ...but it is actually possible to implement a working `static_if` in C++14, albeit with a slightly cumbersome syntax. I explain how in my [**CppCon 2016 talk**: "Implementing `static` control flow in C++14"](https://www.youtube.com/watch?v=aXSsUqVSe2k).
 
@@ -189,7 +189,7 @@ auto make_noise(const T& x)
         .else_([](auto&&)
             {
                 // The pattern below generates a compiler-error.
-                
+
                 // It is not possible to use `static_assert(false)`
                 // here, as it triggers whether or not the branch
                 // is taken.
@@ -206,7 +206,7 @@ Is this a better implementation compared to the C++11 version? That's debatable.
 
 * Expression validity detector definition/instantiation is local to the function scope.
 
-* There is a single overload of `make_noise` - compile-time branching is local to the function scope. 
+* There is a single overload of `make_noise` - compile-time branching is local to the function scope.
 
 These advantages become more important when nesting multiple `static_if` blocks together and dealing with more complicated validity checking: the equivalent C++11 code would require an huge amount of boilerplate and `std::enable_if` constraints compared to the C++14 implementation.
 
@@ -296,11 +296,9 @@ struct validity_checker
     template <typename... Ts>
     constexpr auto operator()(Ts... ts)
     {
-        return decltype(
-            std::is_callable<
-                TF(typename decltype(ts)::type...)
-            >{}
-        ){};
+        return std::is_callable<
+            TF(typename decltype(ts)::type...)
+        >{};
     }
 };
 
