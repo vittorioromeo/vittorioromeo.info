@@ -75,7 +75,7 @@ struct Dog
 template <typename T>
 auto make_noise(const T& x)
 {
-    if constexpr(IS_VALID(T)(_0.meow()))11
+    if constexpr(IS_VALID(T)(_0.meow()))
     {
         x.meow();
     }
