@@ -64,6 +64,8 @@ template <typename...>
 using void_t = void;
 ```
 
+*(Note: as [/u/bluescarni](https://www.reddit.com/user/bluescarni) mentioned [on reddit](https://www.reddit.com/r/cpp/comments/5b0bvh/checking_expression_validity_inplace_with_c17/), you may need [a workaround](http://en.cppreference.com/w/cpp/types/void_t) when compiling in C++11 mode due to [CWG 1558](http://open-std.org/JTC1/SC22/WG21/docs/cwg_defects.html#1558).)*
+
 Yeah, it's *that* simple. In order to use `void_t` to detect expression validity, [*partial template specialization*](http://en.cppreference.com/w/cpp/language/partial_specialization) must be used - here's a detector class for `meow`:
 
 ```cpp
@@ -102,6 +104,8 @@ auto make_noise(const T& x)
 ```
 
 That's it for C++11! [*You can find a complete example on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/0_cpp11.cpp)
+
+*(Note: for more `void_t` goodness, check out [the detection idiom](http://en.cppreference.com/w/cpp/experimental/is_detected).)*
 
 
 
