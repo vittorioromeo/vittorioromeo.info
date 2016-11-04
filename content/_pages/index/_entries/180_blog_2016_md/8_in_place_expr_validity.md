@@ -382,7 +382,7 @@ The [`std::tuple`](http://en.cppreference.com/w/cpp/utility/tuple) and the `oper
 
 That's it! [*You can find a complete example on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/in_place_expr_validity/2_cpp17.cpp)
 
-I think this technique is very useful when combined with `if constexpr(...)` - it's a very barebones *"in-place concept"* definition and check. Example:
+I think this technique is very useful when combined with `if constexpr(...)` - it's a barebones *"in-place concept"* definition and check. Example:
 
 ```cpp
 template <typename T0, typename T1>
