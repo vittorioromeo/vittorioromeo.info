@@ -403,8 +403,8 @@ auto some_generic_function(T0 a, T1 b)
 
 ...there's a small *temporary* caveat, however: neither `g++` nor `clang++`'s latest versions can currently compile `IS_VALID` inside an `if constexpr(...)` branch which is part of a template context:
 
-* `clang++` hasn't implemented support for `constexpr` lambdas yet.
+* `clang++` [hasn't implemented support for `constexpr` lambdas yet](http://clang.llvm.org/cxx_status.html).
 
-* `g++` has, but there's a [bug I found](http://stackoverflow.com/questions/40283001) and [reported *(as #78131)*](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78131).
+* `g++` [has](https://gcc.gnu.org/projects/cxx-status.html#cxx1z), but there's a [bug I found](http://stackoverflow.com/questions/40283001) and [reported *(as #78131)*](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78131).
 
 `IS_VALID` does work properly with `g++` trunk in other contexts where a *constant expression* is required though *(e.g. non-template context `if constexpr(...)` and `static_assert`)*.
