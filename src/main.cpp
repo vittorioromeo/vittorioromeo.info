@@ -926,7 +926,7 @@ void process_entries_ellipsis_and_permalink(archetype::entry& ae)
 
     auto atag_link_styled =
         "<a style='color: black; text-decoration: "
-        "none;' href='" +
+        "none;' href='/" +
         atag_href + "'>";
 
     // Ellipse long text
