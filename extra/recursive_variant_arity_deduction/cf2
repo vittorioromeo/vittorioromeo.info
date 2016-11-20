@@ -1,6 +1,6 @@
 #!/bin/bash
 
-time g++ -std=c++1z \
+time g++7 -std=c++1z \
     -W -Wall -Wextra -Wpedantic \
     -fdiagnostics-color=always \
     -I"C:\MinGW\include" \
