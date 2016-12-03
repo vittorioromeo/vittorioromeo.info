@@ -1,9 +1,10 @@
 #!/bin/bash
 
-time g++ -std=c++1z \
+time /usr/local/bin/g++ -std=c++1z \
     -W -Wall -Wextra -Wpedantic \
     -lpthread \
     -fdiagnostics-color=always \
+    -I"/home/vittorioromeo/OHWorkspace/vrm_pp/include" \
     -I"/home/vittorioromeo/OHWorkspace/vrm_core/include" \
     $1 -o /tmp/x.x |& ./vv_camomilla.sh
 

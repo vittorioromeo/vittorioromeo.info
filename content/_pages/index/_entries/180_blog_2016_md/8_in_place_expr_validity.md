@@ -55,7 +55,7 @@ In this article I'll show how to implement the *pseudocode* in:
 
 ### C++11 implementation
 
-The technique that will be used in the C++11 implementation consists of combining [std::void_t](http://en.cppreference.com/w/cpp/types/void_t) with [`std::enable_if`](http://en.cppreference.com/w/cpp/types/enable_if) - this allows us to detect *ill-formed* expressions in SFINAE contexts. I first heard about this method by attending the excellent ["Modern Template Metaprogramming: A Compendium"](https://www.youtube.com/watch?v=a0FliKwcwXE) talk by [*Walter E. Brown*](https://cppcon2014.sched.org/speaker/walter_e_brown) at CppCon 2014 - I remember being *mind-blown* after the talk!
+The technique that will be used in the C++11 implementation consists of combining [`std::void_t`](http://en.cppreference.com/w/cpp/types/void_t) with [`std::enable_if`](http://en.cppreference.com/w/cpp/types/enable_if) - this allows us to detect *ill-formed* expressions in SFINAE contexts. I first heard about this method by attending the excellent ["Modern Template Metaprogramming: A Compendium"](https://www.youtube.com/watch?v=a0FliKwcwXE) talk by [*Walter E. Brown*](https://cppcon2014.sched.org/speaker/walter_e_brown) at CppCon 2014 - I remember being *mind-blown* after the talk!
 
 Let's begin by implementing `void_t`, which is only part of the standard since C++17:
 
