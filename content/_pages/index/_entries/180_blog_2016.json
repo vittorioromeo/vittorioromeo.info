@@ -5,6 +5,17 @@
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "checking_expression_validity_in_place",
+            "tags": ["c++", "c++14", "c++17", "lambda", "capture", "forward"],
+            "expand":
+            {
+                "Title": "capturing perfectly-forwarded objects in lambdas",
+                "Text": "180_blog_2016_md/9_fwd_capture.md",
+                "Date": "11 december 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "checking_expression_validity_in_place",
             "tags": ["c++", "c++14", "c++17", "lambda", "constexpr", "SFINAE"],
             "expand":
             {

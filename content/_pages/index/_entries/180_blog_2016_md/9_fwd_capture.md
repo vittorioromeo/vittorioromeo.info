@@ -1,8 +1,9 @@
 
 
-**Perfect forwarding** and **forwarding references** allow developers to write generic *template functions* that retain the *lvalueness*/*rvalueness* of passed arguments, in order to avoid unnecessary copies or support reference semantics without having to implement multiple overloads. *([This article](http://eli.thegreenplace.net/2014/perfect-forwarding-and-universal-references-in-c/) by **Eli Bendersky** explains them in depth. I will assume you're familiar with the concepts for the rest of the article.)*
+**Perfect forwarding** and **forwarding references** allow developers to write generic *template functions* that retain the *lvalueness*/*rvalueness* of passed arguments, in order to avoid unnecessary copies or support reference semantics without having to implement multiple overloads. 
+*([This article](http://eli.thegreenplace.net/2014/perfect-forwarding-and-universal-references-in-c/) by **Eli Bendersky** explains them in depth. I will assume you're familiar with these concepts for the rest of the article.)*
 
-In this article, I'll cover the issues *(and their solutions)* related to capturing perfectly-forwarded objects into lambdas.
+In this article, I'll cover the issues related to capturing *perfectly-forwarded* objects into lambdas and a possible solution.
 
 
 
@@ -149,3 +150,125 @@ That's impossible without adding an *extra layer of indirection*, as the languag
 
 
 ### The solution
+
+One possible way of solving the aforementioned issue and achieve the desired capturing semantics is to **create a *wrapper class***  that will always be *captured by copy* by the inner lambda, but will internally store either *an lvalue-reference* or *a value* depending on how it is constructed.
+
+The solution I'm going to present here was recently designed and implemented because I encountered this particular situation when experimenting with *stack-allocated asynchronous chain generation*. Most of the ideas behind it come from this StackOverflow question I asked back in 2014: ["Capturing perfectly-forwarded variable in lambda"](http://stackoverflow.com/questions/26831382).
+
+The wrapper will be a *template class* called `fwd_capture_wrapper`. It will be specialized depending on the *lvalue-ness*/*rvalue-ness* of the captured object:
+
+```cpp
+// Unspecialized version: stores a `T` instance by value.
+template <typename T>
+struct fwd_capture_wrapper : impl::by_value<T>
+{
+    // "Inherit" constructors.
+    using impl::by_value<T>::by_value;
+};
+
+// Specialized version: stores a `T` reference.
+template <typename T>
+struct fwd_capture_wrapper<T&> : impl::by_ref<T>
+{
+    // "Inherit" constructors.
+    using impl::by_ref<T>::by_ref;
+};
+```
+
+Let's now implement `impl::by_value<T>`{.cpp}. It will store a plain `T` instance *(initialized via a *perfect forwarding constructor)* and provide `.get()` methods to access it.
+
+```cpp
+template <typename T>
+class by_value
+{
+private:
+    T _x;
+
+public:
+    template <typename TFwd>
+    by_value(TFwd&& x) : _x{std::forward<TFwd>(x)} 
+    {
+    }
+
+    auto&       get() &      { return _x; }
+    const auto& get() const& { return _x; }
+    auto        get() &&     { return std::move(_x); }
+};
+```
+
+When designing `impl::by_ref<T>`, we could choose to store a `T&`. Unfortunately this would prevent us from easily adding copy/move operations for the wrapper itself. Thankfully [`std::reference_wrapper`](http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper) was introduced in C++11. It is [`TriviallyCopyable`](http://en.cppreference.com/w/cpp/concept/TriviallyCopyable) and "behaves like a pointer", but does not allow any *null state* and prevents accidental construction from temporary objects.
+
+```cpp
+template <typename T>
+class by_ref
+{
+private:
+    std::reference_wrapper<T> _x;
+
+public:
+    by_ref(T& x) : _x{x} 
+    {
+    }
+
+    auto&       get() &      { return _x.get(); }
+    const auto& get() const& { return _x.get(); }
+    auto        get() &&     { return std::move(_x.get()); }
+};
+```
+
+That's it! The only missing piece is a nice `fwd_capture` interface function that hides the boilerplate away from the user:
+
+```cpp
+template <typename T>
+auto fwd_capture(T&& x)
+{
+    return fwd_capture_wrapper<T>(std::forward<T>(x));
+}
+```
+
+Let's revisit our flawed implementation of `foo`:
+
+```cpp
+auto foo = [](auto&& a)
+{
+    return [a = fwd_capture(std::forward<decltype(a)>(a))]() mutable 
+    { 
+        ++a.get()._value;
+        std::cout << a.get()._value << "\n";
+    };
+};
+```
+
+`a` is now a `fwd_capture_wrapper` that will store either a value or a reference as intended, depending on what `a` is in the outer lambda.
+
+Our test cases now work correctly!
+
+```cpp
+auto l_inner = foo(A{});
+l_inner(); // Prints `1`.
+l_inner(); // Prints `2`.
+l_inner(); // Prints `3`.
+```
+
+```cpp
+A my_a;
+auto l_inner = foo(my_a);
+l_inner(); // Prints `1`.
+l_inner(); // Prints `2`.
+l_inner(); // Prints `3`.
+
+// Prints `3`, yay!
+std::cout << my_a._value << "\n";
+```
+
+[*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/CDq6ZLnImy9TABRd)
+
+
+
+### Reducing noise
+
+Typing `fwd_capture(std::forward<decltype(a)>(a))`{.cpp} is very annoying, as it's mostly *noise*/*boilerplate*. We have to perfectly-forward `a` into the wrapper though, so avoiding the call to `std::forward` is out of the question. 
+
+There's only one **evil** tool that can help here: *macros*.
+
+Let's begin with `std::forward<decltype(a)>(a)`{.cpp}
