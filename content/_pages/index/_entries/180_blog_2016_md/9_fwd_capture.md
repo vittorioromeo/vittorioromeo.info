@@ -338,7 +338,7 @@ Remember that these macros should have some reasonably unique prefixes to avoid 
 
 > There's something missing! What about *variadic arguments*?
 
-Good point. Let's assume that `foo` takes a variadic amount of arguments...
+True - let's assume that `foo` takes a variadic amount of arguments...
 
 ```cpp
 auto foo = [](auto&&... xs) { /* ... */ };
