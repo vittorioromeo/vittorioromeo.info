@@ -3,7 +3,15 @@
 **Perfect forwarding** and **forwarding references** allow developers to write generic *template functions* that retain the *lvalueness*/*rvalueness* of passed arguments, in order to avoid unnecessary copies or support reference semantics without having to implement multiple overloads. 
 *([This article](http://eli.thegreenplace.net/2014/perfect-forwarding-and-universal-references-in-c/) by **Eli Bendersky** explains them in depth. I will assume you're familiar with these concepts for the rest of the article.)*
 
-In this article, I'll cover the issues related to capturing *perfectly-forwarded* objects into lambdas and a possible solution.
+In this article, I'll show how to correctly capture *perfectly-forwarded* objects into lambdas:
+
+* We'll take a look at an example that shows how using `std::forward` in lambda captures can produce unexpected results.
+
+* A *perfect forward capture* wrapper that prevents the aforementioned unexpected results will then be implemented.
+
+* Macros *(yuck!)* will be used to reduce noise/boilerplate.
+
+* The solution will be finally generalized to *pefectly-forwarded variadic argument packs*.
 
 
 
@@ -271,4 +279,161 @@ Typing `fwd_capture(std::forward<decltype(a)>(a))`{.cpp} is very annoying, as it
 
 There's only one **evil** tool that can help here: *macros*.
 
-Let's begin with `std::forward<decltype(a)>(a)`{.cpp}
+Let's begin with `std::forward<decltype(a)>(a)`{.cpp}: `a` needs to be repeated twice. We can define a `FWD` macro that does that for us:
+
+```cpp
+#define FWD(...) ::std::forward<decltype(__VA_ARGS__)>(__VA_ARGS__)
+```
+
+*(See ["`vrm_core` issue #1"](https://github.com/SuperV1234/vrm_core/issues/1) for discussion regarding `__VA_ARGS__` in this context.)*
+
+The `FWD` macro can be used as follows:
+
+```cpp
+template <typename T> 
+void foo(T&&);
+
+template <typename T> 
+void bar(T&& x);
+{
+    foo(FWD(x));
+    // ...equivalent to...
+    foo(std::forward<decltype(x)>(x));
+}
+```
+
+Great! Now `fwd_capture(std::forward<decltype(a)>(a))`{.cpp} can be reduced to `fwd_capture(FWD(a))`{.cpp}:
+
+```cpp
+return [a = fwd_capture(FWD(a))]() mutable 
+{ 
+    /* ... */
+};
+```
+
+There's still some unnecessary repetition: `fwd_capture` always expects the user to perfectly-forward something - there's no reasonable usage of `fwd_capture` without `FWD`. Therefore... we can hide `fwd_capture` in an implementation namespace and provide a macro that forwards the argument for us.
+
+```cpp
+#define FWD_CAPTURE(...) impl::fwd_capture(FWD(__VA_ARGS__))
+``` 
+
+All the noise is finally hidden away:
+
+
+```cpp
+return [a = FWD_CAPTURE(a)]() mutable 
+{ 
+    /* ... */
+};
+```
+
+Remember that these macros should have some reasonably unique prefixes to avoid collisions, and that they're not mandatory - they, however, immensely increase code readability when perfectly-capturing a lot of arguments in the same lambda.
+
+[*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/YlJecRF4ztbYmo30)
+
+
+
+### Variadic argument packs
+
+> There's something missing! What about *variadic arguments*?
+
+Good point. Let's assume that `foo` takes a variadic amount of arguments...
+
+```cpp
+auto foo = [](auto&&... xs) { /* ... */ };
+```
+
+...and that we want to *perfectly-capture* all of them in the inner lambda. Unfortunately the following snippet doesn't work:
+
+```cpp
+auto foo = [](auto&&... xs)
+{
+    return [xs = FWD_CAPTURE(xs)...]() mutable 
+    { 
+        
+    };
+};
+```
+
+![error](resources/img/blog/fwd_capture_variadic_error.png)
+
+
+[There is no way of doing a *generalized variadic lambda capture*](http://stackoverflow.com/questions/24816557/generalized-lambda-capture-on-param-pack). The solution *(workaround?)* is using [`std::tuple`](http://en.cppreference.com/w/cpp/utility/tuple).
+
+```cpp
+template <typename... Ts>
+auto /*impl::*/fwd_capture_as_tuple(Ts&&... xs)
+{
+    return std::make_tuple(FWD_CAPTURE(xs)...);   
+}
+
+#define FWD_CAPTURE_PACK(...) impl::fwd_capture_as_tuple(FWD(__VA_ARGS__)...)
+```
+
+*([`std::make_tuple`](http://en.cppreference.com/w/cpp/utility/tuple/make_tuple) is going to copy/move the wrappers, not the object themselves.)*
+
+After capturing a variadic pack, we may want to *"perfectly-apply"* it to some function or to iterate over the captured objects. In order to do that, we can use [`std::experimental::apply`](http://en.cppreference.com/w/cpp/experimental/apply) and [*fold expressions*](http://en.cppreference.com/w/cpp/language/fold):
+
+```cpp
+// Expand all elements of `fc` into a `f(...)` invocation.
+template <typename TF, typename TFwdCapture>
+decltype(auto) apply_fwd_capture_pack(TF&& f, TFwdCapture&& fc)
+{
+    return std::experimental::apply(
+        [&f](auto&&... xs) -> decltype(auto) 
+        { 
+            return f(FWD(xs).get()...); 
+        }, FWD(fc));
+}
+
+// Execute `f` on every element of `fc`.
+template <typename TF, typename TFwdCapture>
+void for_fwd_capture_tuple(TF&& f, TFwdCapture&& fc)
+{
+    apply_fwd_capture_pack( 
+        [&f](auto&&... xs){ (f(FWD(xs)), ...); }, 
+        FWD(fc)
+    );
+}
+```  
+
+Using `FWD_CAPTURE_PACK` and `apply_fwd_capture_pack` we can now generalize our `foo` example even further:
+
+```cpp
+auto foo = [](auto&&... xs)
+{
+    // Perfectly-capture `xs...` as `xs_pack`.
+    return [xs_pack = FWD_CAPTURE_PACK(xs)]() mutable 
+    { 
+        // Perfectly-iterate over elements of `xs_pack`.
+        for_fwd_capture_tuple([](auto&& a)
+        {
+            ++a._value;
+            std::cout << a._value << "\n";
+        }, xs_pack);
+    };
+};
+``` 
+
+As an example, the following code snippet...
+
+```cpp
+A my_a;
+auto l_inner = foo(my_a, A{});
+l_inner();
+l_inner();
+
+std::cout << my_a._value << "\n";
+```
+
+...will print:
+
+```bash
+1 # 1st invocation - `my_a`
+1 # 1st invocation - `A{}`
+2 # 2nd invocation - `my_a`
+2 # 2nd invocation - `A{}`
+2 # `my_a._value`
+```
+
+[*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/FkHFc2PhMX4VkVrc)
