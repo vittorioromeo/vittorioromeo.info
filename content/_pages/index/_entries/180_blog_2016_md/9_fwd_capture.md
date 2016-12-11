@@ -36,11 +36,12 @@ auto foo = [](auto& a)
 
 A my_a;
 foo(my_a)();
+// What is `my_a._value` here?
 ```
 
 ...**what is the value of `my_a._value`?**
 
-It should be obvious that, since `a` was passed by *lvalue reference* to `foo` and captured by reference from the inner lambda, the increment will be visible outside of the function call. Therefore, `my_a._value` is euqal to `1`. 
+It should be obvious that, since `a` was passed by *lvalue reference* to `foo` and captured by reference from the inner lambda, the increment will be visible outside of the function call. Therefore, `my_a._value` is equal to `1`. 
 
 [*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/ZFGfMWyLHzR36l9Z)
 
@@ -101,7 +102,7 @@ While it seems natural to use `std::forward` and *generalized lambda captures* i
 
 Let's look at `foo` again: 
 
-```
+```cpp
 auto foo = [](auto&& a)
 {
     return [a = std::forward<decltype(a)>(a)]() mutable { /* ... */ };
@@ -355,7 +356,7 @@ auto foo = [](auto&&... xs)
 };
 ```
 
-![error](resources/img/blog/fwd_capture_variadic_error.png)
+![Variadic generalized capture error.](resources/img/blog/fwd_capture_variadic_error.png)
 
 
 [There is no way of doing a *generalized variadic lambda capture*](http://stackoverflow.com/questions/24816557/generalized-lambda-capture-on-param-pack). The solution *(workaround?)* is using [`std::tuple`](http://en.cppreference.com/w/cpp/utility/tuple).
