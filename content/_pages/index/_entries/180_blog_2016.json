@@ -4,7 +4,7 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
-            "link_name": "checking_expression_validity_in_place",
+            "link_name": "capturing_perfectly_forwarded_objects_in_lambdas",
             "tags": ["c++", "c++14", "c++17", "lambda", "capture", "forward"],
             "expand":
             {
