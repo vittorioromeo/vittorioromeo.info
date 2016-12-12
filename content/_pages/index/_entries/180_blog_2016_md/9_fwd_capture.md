@@ -441,7 +441,7 @@ std::cout << my_a._value << "\n";
 
 
 
-### A simpler solution?
+### A simpler solution? {#simpler_solution}
 
 *(This section was added on 12/12/2016.)*
 
