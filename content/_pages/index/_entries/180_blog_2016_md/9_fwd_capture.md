@@ -438,3 +438,144 @@ std::cout << my_a._value << "\n";
 ```
 
 [*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/FkHFc2PhMX4VkVrc)
+
+
+
+### A simpler solution?
+
+*(This section was added on 12/12/2016.)*
+
+As shown by [*Nikos Athanasiou* on reddit](https://www.reddit.com/r/cpp/comments/5hset9), it's possible to solve this issue in a much simpler way. All we need is `std::tuple` and some knowledge of [*template argument deduction* rules](http://en.cppreference.com/w/cpp/language/template_argument_deduction).
+
+Let's think about what `fwd_capture_wrapper` is doing: 
+
+* Given an *lvalue reference*, it stores an *lvalue reference*.
+
+* Given an *rvalue reference*, it stores a *value*.
+
+Again... this is [something I asked on StackOverflow a while ago](http://stackoverflow.com/questions/33421323).  *(I find myself coming back to my own questions very often.)*
+
+Nikos suggested that it's sufficient to use `std::tuple` as our wrapper, using some sort of *"type trait"* that keeps *lvalue references*:
+
+```cpp
+template <typename T>
+using capture_t = std::conditional_t
+<
+    std::is_lvalue_reference<T>{},
+
+    std::add_lvalue_reference_t<T>, 
+    std::remove_reference_t<T>
+>;
+
+template <typename... Ts>
+auto fwd_capture(Ts&&... xs)
+{
+    return std::tuple<capture_t<Ts>...>(FWD(xs)...); 
+}
+```
+
+This **works**, and doesn't require all the *wrapper* boilerplate. [`std::get`](http://en.cppreference.com/w/cpp/utility/tuple/get) needs to be used in order to access the captured object, but it can always be wrapped in a nicer interface:
+
+```cpp
+template <typename T>
+decltype(auto) access(T&& x) 
+{ 
+    return std::get<0>(FWD(x)); 
+}
+```
+
+[*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/nXLz6ZCpdembIYTW)
+
+Guess what - it can be simplified *even further*. Turns out that **`capture_t` is actually redundant**! This definition of `fwd_capture` is therefore equivalent to the previous one:
+
+```cpp
+template <typename... Ts>
+auto fwd_capture(Ts&&... xs)
+{
+    return std::tuple<Ts...>(FWD(xs)...); 
+}
+```
+
+> Why?
+
+Given this example function...
+
+```cpp
+template <typename T>
+void foo(T&&) 
+{ 
+    // What is `T` here? 
+    std::tuple<T>{}; 
+}
+```
+
+...let's look at [the *latest standard draft*](https://timsong-cpp.github.io/cppwp/temp.deduct.call#def:forwarding_reference):
+
+*("P" below means "parameter".)*
+
+> *(from [**$14.8.2.1.3**](https://timsong-cpp.github.io/cppwp/temp.deduct.call#3))*
+>
+> If P is a cv-qualified type, the top-level cv-qualifiers of P's type are ignored for type deduction. **If P is a reference type, the type referred to by P is used for type deduction.** Example:
+> ```cpp
+> template<class T> int f(const T&);
+> int n1 = f(5);     // calls f<int>(const int&)
+>
+> const int i = 0;
+> int n2 = f(i);     // calls f<int>(const int&)
+>
+> template <class T> int g(volatile T&);
+> int n3 = g(i);     // calls g<const int>(const volatile int&)
+> ```
+
+The quote above means that `T` is deduced as `T` when an *rvalue reference* is passed to `foo`.
+
+> *(from [**$14.8.2.1.3**](https://timsong-cpp.github.io/cppwp/temp.deduct.call#3))*
+>
+> A forwarding reference is an rvalue reference to a cv-unqualified template parameter that does not represent a template parameter of a class template (during class template argument deduction ([over.match.class.deduct])). **If P is a forwarding reference and the argument is an lvalue, the type “lvalue reference to A” is used in place of A for type deduction.** Example:
+> ```cpp
+> template <class T> int f(T&& heisenreference);
+> template <class T> int g(const T&&);
+> int i;
+>
+> int n1 = f(i);     // calls f<int&>(int&)
+>
+> int n2 = f(0);     // calls f<int>(int&&)
+>
+> int n3 = g(i);     // error: would call g<int>(const int&&), which
+>                    // would bind an rvalue reference to an lvalue
+> ```
+
+The quote above means that `T` is deduced as `T&` when an *lvalue reference* is passed to `foo`.
+
+Great! This means that...
+
+```cpp
+template <typename... Ts>
+auto fwd_capture(Ts&&... xs)
+{
+    return std::tuple<Ts...>(FWD(xs)...); 
+}
+```
+
+...is all we need!
+
+[*(Complete example on **wandbox**.)*](http://melpon.org/wandbox/permlink/dsjMViJ915lbsbe1)
+
+> What about varidic arguments?
+
+Adapting this technique to variadic argument packs then becomes *trivial* - we just create a tuple of tuples:
+
+```cpp
+#define FWD_CAPTURE(...) impl::fwd_capture(FWD(__VA_ARGS__))
+
+template <typename... Ts>
+auto fwd_capture_as_tuple(Ts&&... xs)
+{
+    return std::make_tuple(FWD_CAPTURE(xs)...);   
+}
+```
+
+[*(Complete example on **wandbox**.)*](
+http://melpon.org/wandbox/permlink/MMsACfPcsFL8QgLy)
+
+
