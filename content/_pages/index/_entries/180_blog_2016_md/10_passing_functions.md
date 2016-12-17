@@ -30,27 +30,41 @@ benchmark([&some_data]{ some_computation(); });
 
 When passing functions around to other functions things are however not as straightforward as they might sound. Should you use a *template parameter*? Should you use `std::function`? A *function pointer*? 
 
-This article aims to compare the aforementioned function-passing techniques and to provide some guidelines.
+This article aims to compare the aforementioned function-passing techniques and to provide some guidelines. Every technique will benchmarked.
 
 
 
 ### What your options are
 
-Without introducing any additional dependency, your options for passing around functions are:
+Without introducing any additional dependency, your options for passing *callable objects* around are:
 
 * [**Function pointers**](http://en.cppreference.com/w/cpp/language/pointer#Pointers_to_functions).
 
-    ```cpp
-    void f(int) { }
-    void g(void(*x)(int)) { }
-
-    // ...
-
-    g(f);
-    g([](int){ });
-    ```
-
 * [**Template parameters**](http://en.cppreference.com/w/cpp/language/template_parameters).
+
+* [**`std::function`**](http://en.cppreference.com/w/cpp/utility/functional/function).
+
+* **`function_view`** - a lightweight class that we're going to implement in this article.
+
+
+
+### Function pointers
+
+[**Function pointers**](http://en.cppreference.com/w/cpp/language/pointer#Pointers_to_functions) are not just a relic from the past in modern C++ - they can be used to pass [*free functions*](http://en.cppreference.com/w/cpp/language/functions) and *captureless [lambdas](http://en.cppreference.com/w/cpp/language/lambda)*. [Member functions](http://en.cppreference.com/w/cpp/language/member_functions) can be passed to other functions with [member function pointers](http://en.cppreference.com/w/cpp/language/pointer#Pointers_to_member_functions).
+
+
+```cpp
+void f(int) { }
+void g(void(*x)(int)) { }
+
+// ...
+
+g(f);
+g([](int){ });
+```
+
+
+
 
     ```cpp
     void f(int) { }
@@ -65,7 +79,6 @@ Without introducing any additional dependency, your options for passing around f
     g([i = 0](int) -> mutable { });
     ```
 
-* [**`std::function`**](http://en.cppreference.com/w/cpp/utility/functional/function).
 
     ```cpp
     void f(int) { }

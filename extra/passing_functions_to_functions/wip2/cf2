@@ -1,0 +1,13 @@
+#!/bin/bash
+
+OUT="/tmp/x.x"
+FLAGS="-std=c++1z -W -Wall -Wextra -Wpedantic -fdiagnostics-color=always -o $OUT"
+
+GCC="g++7"
+CLANG="clang++"
+
+COMPILERS=($GCC $CLANG)
+OPTIMIZATIONS=("-O0" "-O1" "-O2" "-O3" "-Ofast")
+MACROS=("VR_FN_PTR" "VR_TEMPLATE" "VR_FUNCITON_VIEW" "VR_STD_FUNCTION")
+
+$GCC $FLAGS -DVR_FN_PTR $1 && $OUT
