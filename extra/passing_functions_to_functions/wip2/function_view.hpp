@@ -38,7 +38,7 @@ template <typename TSignature>
 class function_view;
 
 template <typename TReturn, typename... TArgs>
-class function_view<TReturn(TArgs...)>
+class function_view<TReturn(TArgs...)> final
 {
 private:
     using signature_type = TReturn(char*, TArgs...);
@@ -50,14 +50,14 @@ private:
 public:
     template <typename T,
         typename = std::enable_if_t<is_callable<T(TArgs...), TReturn>{}>>
-    function_view(T&& x) : _ptr(reinterpret_cast<char*>(&x))
+    function_view(T&& x) noexcept : _ptr(reinterpret_cast<char*>(&x))
     {
         _fn_ptr = [](char* ptr, TArgs... xs) -> TReturn {
             return std::invoke(reinterpret_cast<T&>(*ptr), xs...);
         };
     }
 
-    auto operator()(TArgs... xs)
+    auto operator()(TArgs... xs) noexcept(noexcept(_fn_ptr(_ptr, xs...)))
     {
         return _fn_ptr(_ptr, xs...);
     }

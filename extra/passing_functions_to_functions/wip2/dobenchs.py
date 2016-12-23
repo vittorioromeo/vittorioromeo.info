@@ -18,18 +18,26 @@ def main():
     compilers = [["g++ 6.2.1", "/bin/g++"],
                  ["clang++ 3.9.0", "/bin/clang++"]]
 
-    #optimization_levels = ["-O0"]
     optimization_levels = ["-O0", "-O1", "-O2", "-O3", "-Ofast"]
 
-    macros = [["Function pointer", "VR_FN_PTR"],
+    macros = [["Baseline", "VR_BASELINE"],
+              ["Function pointer", "VR_FN_PTR"],
               ["Template parameter", "VR_TEMPLATE"],
               ["`function_view`", "VR_FUNCTION_VIEW"],
               ["`std::function`", "VR_STD_FUNCTION"]]
 
     results = {}
-    
+
     csvs = []
-   
+
+    def baseline(comp, opt):
+        return results[macros[0][0]][comp][opt]
+
+    def percentage_change(val, comp, opt):
+        if val == 0: return 0
+        
+        b = baseline(comp, opt)
+        return float(val - b) / float(val) * 100.0
 
     for macro in macros:
         csv = ""
@@ -66,7 +74,14 @@ def main():
                 eprint(run_cmd("./stripasm {}".format(out)).stdout)
                 eprint("\n\n\n")
 
-                optres.append(str(reslines))
+                if macroname != macros[0][0]: 
+                    pc = percentage_change(reslines, compilername, optlname)
+                    truncatedpc = str(pc)[:4]
+
+                    optres.append("{} *({}{}{})*".format(reslines, "+" if pc >= 0 else "", truncatedpc, "%"))
+                else:
+                    optres.append("{}".format(reslines))
+
                 results[macroname][compilername][optlname] = reslines
             
             csv += "{}{}".format("\n", compilername + ',' + ','.join(optres))
