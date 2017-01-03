@@ -111,13 +111,13 @@ g([i = 0](int) -> mutable { });
 
 Again, this is a very **general-purpose** class that **models ownership of a callable object**. It introduces a **significant run-time overhead** and can potentially dynamically allocate. Use it sparingly!
 
-I *strongly* reccommend not using `std::function` unless you need its general-purpose polymorphic semantics.  
+I *strongly* recommend not using `std::function` unless you need its general-purpose polymorphic semantics.  
 
 
 
 ### `function_view` {#function_view}
 
-This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this.)* 
+This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this. An example is [this StackOverflow answer by Yakk](http://stackoverflow.com/a/39087660/598696).)* 
 
 ```cpp
 void f(int) { }
@@ -138,7 +138,7 @@ This is very often what you want when you pass a function to another one.
 
 ### Benchmark - generated assembly
 
-I created a [small Python script](TODO) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after stripping aòò the cruft)*. This is not an extremely accurate benchmark that resembles the real world, but **should give you an idea** of how easy/hard it is for a compiler to optimize the techniques described above.
+I created a [small Python script](TODO) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after stripping aòò the cruft)*. This is not an extremely accurate benchmark that resembles the real world, but **should give you an idea of how easy/hard it is for a compiler to optimize the techniques described above**.
 
 #### Stateless callable objects
 
@@ -234,6 +234,11 @@ Pay attention to the following things:
 
 * *Don't* use **`std::function`** unless you need its features and semantics!
 
+You can play around with the code snippet [on **gcc.godbolt.org**](https://godbolt.org/g/I2vQCR), in order to closely analyze the generated assembly.
+
 
 
 # TODO: stateful benchmark
+
+STATELESS GODBOLT LINK: https://godbolt.org/g/I2vQCR
+STATEFUL GODBOLT LINK: https://godbolt.org/g/FwFNzU

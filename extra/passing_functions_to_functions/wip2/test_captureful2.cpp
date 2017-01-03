@@ -12,6 +12,7 @@ int main()
 {
     volatile int k = 1;
     state += k;
+    state += k;
     return state;
 }
 
@@ -19,21 +20,27 @@ int main()
 
 #if not defined(VR_FN_PTR)
 
+
 #if defined(VR_TEMPLATE)
 template <typename TF>
 VR_INLINE void f(TF&& x){ x(state); }
+template <typename TF>
+VR_INLINE void g(TF&& x){ x(state); }
 #elif defined(VR_FUNCTION_VIEW)
 #include "function_view.hpp"
 VR_INLINE void f(function_view<void(volatile int&)> x){ x(state); }
+VR_INLINE void g(function_view<void(volatile int&)> x){ x(state); }
 #elif defined(VR_STD_FUNCTION)
 #include <functional>
 VR_INLINE void f(std::function<void(volatile int&)> x){ x(state); }
+VR_INLINE void g(std::function<void(volatile int&)> x){ x(state); }
 #endif
 
 int main()
 {
     volatile int k = 1;
     f([&k](volatile auto& y){ y += k; });
+    g([&k](volatile auto& y){ y += k; });
     return state;
 }
 

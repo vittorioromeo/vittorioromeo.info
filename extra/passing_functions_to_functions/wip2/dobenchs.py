@@ -26,80 +26,88 @@ def main():
               ["`function_view`", "VR_FUNCTION_VIEW"],
               ["`std::function`", "VR_STD_FUNCTION"]]
 
+    adds = [["", ""],
+            [" (`inline`)", "-DVR_INLINE_ENABLED=1"]]
+
     results = {}
 
-    csvs = []
+    for add in adds:
+        csvs = []
 
-    def baseline(comp, opt):
-        return results[macros[0][0]][comp][opt]
+        addname = add[0]
+        addflag = add[1]
+        results[addname] = {}
 
-    def percentage_change(val, comp, opt):
-        if val == 0: return 0
-        
-        b = baseline(comp, opt)
-        return (float(val - b) / float(b)) * 100.0
+        def baseline(comp, opt):
+            return results[addname][macros[0][0]][comp][opt]
 
-    for macro in macros:
-        csv = ""
-        csv += ','.join([""] + list(map(lambda x: x[1:], optimization_levels)))
-
-        macroname = macro[0]
-        macrodef = macro[1]
-        results[macroname] = {}
-
-        for compiler in compilers:
-            compilername = compiler[0]
-            compilerdef = compiler[1]
-            results[macroname][compilername] = {}
-
-            optres = []
-
-            for optimization_level in optimization_levels:
-                optlevel = optimization_level
-                optlname = optlevel[1:]
-
-
-                cmd = "{} {} {} -D{}=1 {}".format(compilerdef, flags, optlevel, macrodef, sys.argv[1])
-                eprint(cmd)
-
-                res = run_cmd(cmd)
-                #if res.stderr != "":
-                    #print(res.stderr)
-                    #sys.exit(1)
-
-                asmwc = run_cmd("./stripasm {} | wc -l | cut -f1 -d' '".format(out))
-                reslines = int(asmwc.stdout)
-
-                eprint(reslines)                
-                eprint(run_cmd("./stripasm {}".format(out)).stdout)
-                eprint("\n\n\n")
-
-                if macroname != macros[0][0]: 
-                    pc = percentage_change(reslines, compilername, optlname)
-                    truncatedpc = str(pc)[:4]
-
-                    optres.append("{} *({}{}{})*".format(reslines, "+" if pc >= 0 else "", truncatedpc, "%"))
-                else:
-                    optres.append("{}".format(reslines))
-
-                results[macroname][compilername][optlname] = reslines
+        def percentage_change(val, comp, opt):
+            if val == 0: return 0
             
-            csv += "{}{}".format("\n", compilername + ',' + ','.join(optres))
+            b = baseline(comp, opt)
+            return (float(val - b) / float(b)) * 100.0
 
-        csvs.append(["{}".format(macroname), csv])
+        for macro in macros:
+            csv = ""
+            csv += ','.join([""] + list(map(lambda x: x[1:], optimization_levels)))
 
-    pp = pprint.PrettyPrinter(indent=4)
-    # pp.pprint(csvs)
+            macroname = macro[0]
+            macrodef = macro[1]
+            results[addname][macroname] = {}
 
-    for c in csvs:
-        print("**" + c[0] + "**" + "\n")
-        
-        mdout = str(run_cmd("csvtomd <(echo '{}')".format(c[1])).stdout)
-        #print('|'.join(('\n'+mdout.lstrip()).splitlines(True)))
-        pmdout = '|'.join(mdout.splitlines(True))
+            for compiler in compilers:
+                compilername = compiler[0]
+                compilerdef = compiler[1]
+                results[addname][macroname][compilername] = {}
 
-        
-        print('|' + pmdout)
-        print("\n\n\n")
+                optres = []
+
+                for optimization_level in optimization_levels:
+                    optlevel = optimization_level
+                    optlname = optlevel[1:]
+
+
+                    cmd = "{} {} {} {} -D{}=1 {}".format(compilerdef, flags, addflag, optlevel, macrodef, sys.argv[1])
+                    eprint(cmd)
+
+                    res = run_cmd(cmd)
+                    #if res.stderr != "":
+                        #print(res.stderr)
+                        #sys.exit(1)
+
+                    asmwc = run_cmd("./stripasm {} | wc -l | cut -f1 -d' '".format(out))
+                    reslines = int(asmwc.stdout)
+
+                    eprint(reslines)                
+                    eprint(run_cmd("./stripasm {}".format(out)).stdout)
+                    eprint("\n\n\n")
+
+                    if macroname != macros[0][0]: 
+                        pc = percentage_change(reslines, compilername, optlname)
+                        truncatedpc = str(pc)[:4]
+
+                        optres.append("{} *({}{}{})*".format(reslines, "+" if pc >= 0 else "", truncatedpc, "%"))
+                    else:
+                        optres.append("{}".format(reslines))
+
+                    results[addname][macroname][compilername][optlname] = reslines
+                
+                csv += "{}{}".format("\n", compilername + ',' + ','.join(optres))
+
+            csvs.append(["{}".format(macroname), csv])
+
+        pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(csvs)
+
+        for c in csvs:
+            print("**" + c[0] + addname + "**" + "\n")
+            
+            mdout = str(run_cmd("csvtomd <(echo '{}')".format(c[1])).stdout)
+            #print('|'.join(('\n'+mdout.lstrip()).splitlines(True)))
+            pmdout = '|'.join(mdout.splitlines(True))
+
+            
+            print('|' + pmdout)
+            print("\n\n\n")
 
 main()
