@@ -37,7 +37,7 @@ def main():
         if val == 0: return 0
         
         b = baseline(comp, opt)
-        return float(val - b) / float(val) * 100.0
+        return (float(val - b) / float(b)) * 100.0
 
     for macro in macros:
         csv = ""
