@@ -1,12 +1,12 @@
 
 
-Since the advent of [C++11](https://en.wikipedia.org/wiki/C%2B%2B11) writing *more [**functional**](https://en.wikipedia.org/wiki/Functional_programming)* code has become easier. Functional programming patterns and ideas are another powerful tool in the C++ developer's huge toolbox - I recently attended a great introductory talk on them by [*Phil Nash*](https://twitter.com/phil_nash) at the first London C++ Meetup. You can find an older recording [here on YouTube](https://www.youtube.com/watch?v=YgcUuYCCV14).
+Since the advent of [C++11](https://en.wikipedia.org/wiki/C%2B%2B11) writing *more [**functional**](https://en.wikipedia.org/wiki/Functional_programming)* code has become easier. Functional programming patterns and ideas are powerful additions to the C++ developer's huge toolbox. *(I recently attended a great introductory talk on them by [*Phil Nash*](https://twitter.com/phil_nash) at the first London C++ Meetup - you can find an older recording [here on YouTube](https://www.youtube.com/watch?v=YgcUuYCCV14).)*
 
 In this blog post I'll briefly cover some techniques that can be used to *pass functions to other functions* and show their impact on the generated assembly at the end. 
 
 *(If you are familiar with **lambdas** and **higher-order functions** you can [skip the following paragraphs](#what_your_options_are).)*
 
-[**First-class and higher-order functions**](https://en.wikipedia.org/wiki/Functional_programming#First-class_and_higher-order_functions) are one of the staples of functional programming. Wikipedia concisely explains them as follows:
+[**First-class and higher-order functions**](https://en.wikipedia.org/wiki/Functional_programming#First-class_and_higher-order_functions) are one of the staples of functional programming. Wikipedia concisely describes them as follows:
 
 > Higher-order functions are **functions that can either take other functions as arguments or return them** as results. [...]
 >
@@ -96,7 +96,7 @@ The drawbacks of this technique are:
 
 ### `std::function`
 
-I see [`std::function`](http://en.cppreference.com/w/cpp/utility/functional/function) being suggested for the purpose of passing callbacks/functions **way too often**. `std::function` is an **heavyweight general-purpose polymorphic function wrapper** that is meant to **store and "own"** a callable object. It also has an [*empty state*](http://en.cppreference.com/w/cpp/utility/functional/function/operator_bool) that causes [an exception to be thrown upon invocation](http://en.cppreference.com/w/cpp/utility/functional/bad_function_call). 
+I see [`std::function`](http://en.cppreference.com/w/cpp/utility/functional/function) being suggested for the purpose of passing callbacks/functions **way too often**. `std::function` is a **heavyweight general-purpose polymorphic function wrapper** that is meant to **store and "own"** a callable object. It also has an [*empty state*](http://en.cppreference.com/w/cpp/utility/functional/function/operator_bool) that causes [an exception to be thrown upon invocation](http://en.cppreference.com/w/cpp/utility/functional/bad_function_call). 
 
 ```cpp
 void f(int) { }
@@ -117,7 +117,7 @@ I *strongly* recommend not using `std::function` unless you need its general-pur
 
 ### `function_view` {#function_view}
 
-This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this. An example is [this StackOverflow answer by Yakk](http://stackoverflow.com/a/39087660/598696).)* 
+This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily *(and zero overhead when inlined)*. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this. An example is [this StackOverflow answer by Yakk](http://stackoverflow.com/a/39087660/598696).)* 
 
 ```cpp
 void f(int) { }
@@ -130,15 +130,17 @@ g([](int){ });
 g([i = 0](int) -> mutable { });
 ```
 
-As you can see from the example above, it looks reasonably similar to `std::function` - however, its semantics are way different: **`function_view` does not own a callable object. It merely refers to an existing one.** 
+As you can see from the example above, it looks reasonably similar to `std::function` - however, its semantics are way different: **`function_view` does not own a callable object. It merely refers to an existing one.** That means that any instance of `function_view` **assumes** the *pointee* callable object to be alive.
 
 This is very often what you want when you pass a function to another one.
+
+*(The implementation of `function_view` will be shown and explained [at the end of the article](TODO).)*
 
 
 
 ### Benchmark - generated assembly
 
-I created a [small Python script](TODO) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after stripping aòò the cruft)*. This is not an extremely accurate benchmark that resembles the real world, but **should give you an idea of how easy/hard it is for a compiler to optimize the techniques described above**.
+I created a [small *horrible* Python script](TODO) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after [stripping all the cruft](TODO))*. This is **not** an accurate benchmark that resembles the real world but **should give you an idea of how easy/hard it is for a compiler to optimize the techniques described above**.
 
 #### Stateless callable objects
 
@@ -234,11 +236,135 @@ Pay attention to the following things:
 
 * *Don't* use **`std::function`** unless you need its features and semantics!
 
+Adding the `inline` keyword in front of the functions changes things dramatically: **only `std::function` has additional overhead** - **+466%** more assembly lines are produced compared to the *baseline*. The rest of the techniques become *"zero-cost"*. 
+
 You can play around with the code snippet [on **gcc.godbolt.org**](https://godbolt.org/g/I2vQCR), in order to closely analyze the generated assembly.
 
 
 
-# TODO: stateful benchmark
 
-STATELESS GODBOLT LINK: https://godbolt.org/g/I2vQCR
-STATEFUL GODBOLT LINK: https://godbolt.org/g/FwFNzU
+
+
+#### Stateful callable objects
+
+The second benchmark snippet deals with simple *stateful* callable objects. The **baseline** is as follows:
+
+```cpp
+volatile int state = 0;
+
+int main()
+{
+    volatile int k = 1;
+    state += k;
+    return state;
+}
+```
+
+Here's a table of the lines of generated assembly.
+
+**Baseline**
+
+|               |  O0  |  O1  |  O2  |  O3  |  Ofast
+|---------------|------|------|------|------|-------
+|g++ 6.2.1      |  10  |  7   |  7   |  7   |  7
+|clang++ 3.9.0  |  11  |  5   |  5   |  5   |  5
+
+
+The benchmark script tests this piece of code...
+
+```cpp
+int main()
+{
+    volatile int k = 1;
+    f([&k](volatile auto& y){ y += k; });
+    return state;
+}
+```
+
+...by alternating between the following definitions of `f`:
+
+```cpp
+template <typename TF>
+void f(TF&& x) { x(state); }
+
+void f(function_view<void(volatile int&)> x) { x(state); }
+
+void f(std::function<void(volatile int&)> x) { x(state); }
+```
+
+The results are similar to the previous benchmark:
+
+**Template parameter**
+
+|               |  O0             |  O1             |  O2           |  O3           |  Ofast
+|---------------|-----------------|-----------------|---------------|---------------|-------------
+|g++ 6.2.1      |  36 *(+260.%)*  |  7 *(+0.0%)*    |  7 *(+0.0%)*  |  7 *(+0.0%)*  |  7 *(+0.0%)*
+|clang++ 3.9.0  |  34 *(+209.%)*  |  12 *(+140.%)*  |  5 *(+0.0%)*  |  5 *(+0.0%)*  |  5 *(+0.0%)*
+
+
+
+**`function_view`**
+
+|               |  O0              |  O1             |  O2             |  O3             |  Ofast
+|---------------|------------------|-----------------|-----------------|-----------------|---------------
+|g++ 6.2.1      |  173 *(+1630%)*  |  20 *(+185.%)*  |  10 *(+42.8%)*  |  10 *(+42.8%)*  |  10 *(+42.8%)*
+|clang++ 3.9.0  |  144 *(+1209%)*  |  64 *(+1180%)*  |  7 *(+40.0%)*   |  7 *(+40.0%)*   |  7 *(+40.0%)*
+
+
+
+**`std::function`**
+
+|               |  O0              |  O1              |  O2             |  O3             |  Ofast
+|---------------|------------------|------------------|-----------------|-----------------|---------------
+|g++ 6.2.1      |  372 *(+3620%)*  |  45 *(+542.%)*   |  37 *(+428.%)*  |  37 *(+428.%)*  |  37 *(+428.%)*
+|clang++ 3.9.0  |  281 *(+2454%)*  |  141 *(+2720%)*  |  33 *(+560.%)*  |  33 *(+560.%)*  |  33 *(+560.%)*
+
+All the previously made observations apply here. Using `inline` also makes the assembly generated by `function_view` identical to the baseline/template one.
+
+You can play around with the code snippet [on **gcc.godbolt.org**](https://godbolt.org/g/FwFNzU), in order to closely analyze the generated assembly.
+
+In order to make sure that the overhead introduced by `std::function` wasn't mostly "fixed" and actually "scaled" by adding more functions, I manually created some snippets that invoke multiple callable objects *(up to 5)* and plotted the results. This is the baseline code for 5 functions..
+
+```cpp
+int main()
+{
+    volatile int k = 1;
+    state += k;
+    state += k;
+    state += k;
+    state += k;
+    state += k;
+    return state;
+}
+```
+
+...this is the code being measured...
+
+```cpp
+int main()
+{
+    volatile int k = 1;
+    f([&k](volatile auto& y){ y += k; });
+    g([&k](volatile auto& y){ y += k; });
+    j([&k](volatile auto& y){ y += k; });
+    h([&k](volatile auto& y){ y += k; });
+    i([&k](volatile auto& y){ y += k; });
+    return state;
+}
+```
+
+...and this is the resulting plot:
+
+![*"Scaling" generated assembly overhead*](resources/img/blog/pf2f_plot0.png)
+
+Unfortunately, the overhead from `std::function` seems to scale linearly with the number of function invocations - my recommendation of avoiding it unless you need all of its "power" therefore persists. Let's end the article by looking at the implementation of `function_view`.
+
+
+
+### Implementation of `function_view`
+
+```cpp
+struct function_view { magic(); };
+```
+
+cya
