@@ -44,7 +44,7 @@ private:
     using signature_type = TReturn(char*, TArgs...);
     using fn_ptr_type = fn_ptr<signature_type>;
 
-    char* _ptr;
+    void* _ptr;
     fn_ptr_type _fn_ptr;
 
 public:
@@ -53,11 +53,11 @@ public:
     function_view(T&& x) noexcept : _ptr(reinterpret_cast<char*>(&x))
     {
         _fn_ptr = [](char* ptr, TArgs... xs) -> TReturn {
-            return std::invoke(reinterpret_cast<T&>(*ptr), xs...);
+            return std::invoke(static_cast<T&>(*ptr), xs...);
         };
     }
 
-    auto operator()(TArgs... xs) noexcept(noexcept(_fn_ptr(_ptr, xs...)))
+    decltype(auto) operator()(TArgs... xs) const noexcept(noexcept(_fn_ptr(_ptr, xs...)))
     {
         return _fn_ptr(_ptr, xs...);
     }
