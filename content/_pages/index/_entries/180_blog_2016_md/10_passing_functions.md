@@ -323,7 +323,7 @@ All the previously made observations apply here. Using `inline` also makes the a
 
 You can play around with the code snippet [on **gcc.godbolt.org**](https://godbolt.org/g/FwFNzU), in order to closely analyze the generated assembly.
 
-In order to make sure that the overhead introduced by `std::function` wasn't mostly "fixed" and actually "scaled" by adding more functions, I manually created some snippets that invoke multiple callable objects *(up to 5)* and plotted the results. As an example, this is the baseline code for **5** functions..
+In order to make sure that the overhead introduced by `std::function` wasn't mostly "fixed" and actually "scaled" by adding more functions, I manually created some snippets that invoke multiple callable objects *(up to 5)* and plotted the results. As an example, this is the baseline code for **5** functions...
 
 ```cpp
 int main()
@@ -368,3 +368,7 @@ struct function_view { magic(); };
 ```
 
 cya
+
+TODO: finish implementation section
+TODO: sprinkle links to github repo eveywhere
+TODO: publish!
