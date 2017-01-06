@@ -34,6 +34,13 @@ struct signature_helper<TReturn(TArgs...)>
 template <typename TSignature>
 using fn_ptr = typename signature_helper<TSignature>::fn_ptr_type;
 
+template <typename T>
+struct dependent_false : std::false_type
+{
+};
+
+
+
 template <typename TSignature>
 class function_view;
 
@@ -41,24 +48,32 @@ template <typename TReturn, typename... TArgs>
 class function_view<TReturn(TArgs...)> final
 {
 private:
-    using signature_type = TReturn(char*, TArgs...);
-    using fn_ptr_type = fn_ptr<signature_type>;
+    using signature_type = TReturn(void*, TArgs...);
 
     void* _ptr;
-    fn_ptr_type _fn_ptr;
+    TReturn (*_erased_fn)(void*, TArgs...);
 
 public:
-    template <typename T,
-        typename = std::enable_if_t<is_callable<T(TArgs...), TReturn>{}>>
-    function_view(T&& x) noexcept : _ptr(reinterpret_cast<char*>(&x))
+    template <typename T>
+    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
     {
-        _fn_ptr = [](char* ptr, TArgs... xs) -> TReturn {
-            return std::invoke(static_cast<T&>(*ptr), xs...);
-        };
+        if constexpr(!is_callable<T(TArgs...)>{})
+        {
+            static_assert(dependent_false<T>{},
+                "The provided callable doesn't have the correct "
+                "signature.");
+        }
+        else
+        {
+            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+                return (*static_cast<T*>(ptr))(xs...);
+            };
+        }
     }
 
-    decltype(auto) operator()(TArgs... xs) const noexcept(noexcept(_fn_ptr(_ptr, xs...)))
+    decltype(auto) operator()(TArgs... xs) const
+        noexcept(noexcept(_erased_fn(_ptr, xs...)))
     {
-        return _fn_ptr(_ptr, xs...);
+        return _erased_fn(_ptr, xs...);
     }
 };

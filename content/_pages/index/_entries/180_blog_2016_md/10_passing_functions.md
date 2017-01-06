@@ -65,7 +65,7 @@ g(f);
 g([](int){ });
 ```
 
-Compilers can aggressively optimize function pointers, resulting in a **small run-time overhead**. Unfortunately, not being able to pass stateful lambdas and generic callable objects is a huge limitation which prevents many functional patterns.
+Compilers can aggressively optimize function pointers *(at least in the same TU)*, resulting in a **small run-time overhead**. Unfortunately, not being able to pass stateful lambdas and generic callable objects is a huge limitation which prevents many functional patterns.
 
 
 
@@ -117,7 +117,7 @@ I *strongly* recommend not using `std::function` unless you need its general-pur
 
 ### `function_view` {#function_view}
 
-This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily *(and zero overhead when inlined)*. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this. An example is [this StackOverflow answer by Yakk](http://stackoverflow.com/a/39087660/598696).)* 
+This is where things start to get interesting. It is possible to easily implement a **lightweight non-owning generic callable object view** with an overhead comparable to raw function pointers quite easily *(and zero overhead when inlined)*. I am going to benchmark and show a C++17 implementation. *(Note that the I've seen already the idea of a "function view" multiple times online - I don't claim to have invented this. An example is [this StackOverflow answer](http://stackoverflow.com/a/39087660/598696) by Yakk. Another is ["The Impossibly Fast C++ Delegates"](https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates) by Sergey Ryazanov.)* 
 
 ```cpp
 void f(int) { }
@@ -134,13 +134,11 @@ As you can see from the example above, it looks reasonably similar to `std::func
 
 This is very often what you want when you pass a function to another one.
 
-*(The implementation of `function_view` will be shown and explained [at the end of the article](TODO).)*
-
-
+*(The implementation of `function_view` will be shown and explained [at the end of the article](#fn_view_impl).)*
 
 ### Benchmark - generated assembly
 
-I created a [small *horrible* Python script](TODO) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after [stripping all the cruft](TODO))*. This is **not** an accurate benchmark that resembles the real world but **should give you an idea of how easy/hard it is for a compiler to optimize the techniques described above**.
+I created a [small *horrible* Python script](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/passing_functions_to_functions/dobenchs.py) that compiles a small code snippet in multiple ways and counts the lines of generated x86-64 assembly *(after [stripping all the cruft](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/passing_functions_to_functions/stripasm))*. This is **not** an accurate benchmark that resembles the real world but **should give you an idea of how easy/hard it is for a compiler to optimize the techniques described above**.
 
 #### Stateless callable objects
 
@@ -357,18 +355,177 @@ int main()
 
 ![*"Scaling" generated assembly overhead*](resources/img/blog/pf2f_plot0.png)
 
-Unfortunately, the overhead from `std::function` seems to scale linearly with the number of function invocations - my recommendation of avoiding it unless you need all of its "power" therefore persists. Let's end the article by looking at the implementation of `function_view`.
+Unfortunately, the overhead from `std::function` seems to scale linearly with the number of function invocations - my recommendation of avoiding it unless you need all of its "power" therefore persists. 
+
+Hopefully these benchmarks on the generated assembly should clarify how easy/hard it is for a compiler to optimize the analyzed techniques. If you're interested in **invocation run-time overhead** benchmarks, Dietmar Kühl created a [very interesting interactive graph](http://www.dietmar-kuehl.de/cputube/functions.html) *(which doesn't unfortunately include `function_view`)*.
+
+[*You can find all the code and scripts for the benchmarks on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/passing_functions_to_functions)
+
+Let's end the article by looking at the implementation of `function_view`.
 
 
 
-### Implementation of `function_view`
+
+
+### Implementation of `function_view` {#fn_view_impl}
+
+I will now provide and explain an implementation of a simplified `function_view` which supports generic callable objects *(but doesn't have any syntactic sugar for member functions)*. We'll also only implement the constructor - deducing the implementation of various operators from it should however be straightforward.
+
+Let's recap what we need:
+
+* A `function_view` class template that takes a *signature* as its only template parameter.
+
+* Its constructor will take a generic callable object, whose `operator()` invocation will be [*type erased*](https://en.wikipedia.org/wiki/Type_erasure).
+
+* An `operator()` implementation that calls the *type erased* pointee and retuns its result.   
 
 ```cpp
-struct function_view { magic(); };
+template <typename TSignature>
+class function_view;
+
+template <typename TReturn, typename... TArgs>
+class function_view<TReturn(TArgs...)> final
+{
+private:
+    using signature_type = TReturn(void*, TArgs...);
+
+    void* _ptr;
+    TReturn (*_erased_fn)(void*, TArgs...);
+
+public:
+    template <typename T>
+    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
+    {
+        if constexpr(!std::is_callable<T(TArgs...)>{})
+        {
+            static_assert(dependent_false<T>{},
+                "The provided callable doesn't have the correct "
+                "signature.");
+        }
+        else
+        {
+            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+                return (*static_cast<T*>(ptr))(xs...);
+            };
+        }
+    }
+
+    decltype(auto) operator()(TArgs... xs) const
+        noexcept(noexcept(_erased_fn(_ptr, xs...)))
+    {
+        return _erased_fn(_ptr, xs...);
+    }
+};
 ```
 
-cya
+Let's analyze the implementation step-by-step.
 
-TODO: finish implementation section
-TODO: sprinkle links to github repo eveywhere
-TODO: publish!
+
+
+#### Matching the signature
+
+When we instantiate `function_view<void(int)>`, the `void(int)` syntax evaluates to a single [*function type*](http://stackoverflow.com/questions/17446220/c-function-types). We however want to separately "match" the return type and the argument types, therefore [*partial template specialization*](http://en.cppreference.com/w/cpp/language/partial_specialization) is used:
+
+```cpp
+template <typename TSignature>
+class function_view;
+
+template <typename TReturn, typename... TArgs>
+class function_view<TReturn(TArgs...)> final 
+{ 
+    /* ... */ 
+};
+```
+
+Note that `TReturn` and `TArgs...` match the signature's return and argument types exactly as they are *(without stripping `const` or references)*.
+
+
+
+#### Type erasure
+
+In order to store any callable object with the signature `TReturn(TArgs...)` we need to perform *type erasure* in the only moment where we have its type information: `function_view`'s constructor. We'll need the following fields:
+
+* A `void*` that points to the memory location containing the referenced callable object.
+
+* A `TReturn(*)(void*, TArgs...)` function pointer that, given the aforementioned `void*` pointer, calls the referenced callable object. 
+
+```cpp
+template <typename TReturn, typename... TArgs>
+class function_view<TReturn(TArgs...)> final
+{
+private:
+    using signature_type = TReturn(void*, TArgs...);
+
+    void* _ptr;
+    TReturn (*_erased_fn)(void*, TArgs...);
+
+    // ...
+``` 
+
+Let's now define a constructor template which takes a generic callable object by [*forwarding-reference*](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4164.pdf) *(as we also want to be able to "view" temporary callables, such as lambda expressions)*. 
+
+* [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) and [`if constexpr(...)`](http://en.cppreference.com/w/cpp/language/if#Constexpr_If) will be used to produce a nice compile-time error in case of an invalid user-provided constructor argument.
+
+* A *captureless* lambda *(which is implicitly convertible to a function pointer)* will be used to initialize `_erased_fn`. Its body will maintain the type information of the passed callable object.
+
+```cpp
+// ...
+
+public:
+    template <typename T>
+    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
+    {
+        if constexpr(!is_callable<T(TArgs...)>{})
+        {
+            static_assert(dependent_false<T>{},
+                "The provided callable doesn't have the correct "
+                "signature.");
+        }
+        else
+        {
+            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+                return (*static_cast<T*>(ptr))(xs...);
+            };
+        }
+    }
+
+// ...
+```
+
+Pay attention:
+
+* `dependent_false<T>` is used to make sure that the `static_assert` is only triggered when the first branch is taken. Basically, it "delays" the evaluation of the static assertion until the branch is actually instantiated. Its implementation is trivial:
+
+    ```cpp
+    template <typename>
+    struct dependent_false : std::false_type
+    {
+    };
+    ```
+
+* A [*trailing return type*](http://en.cppreference.com/w/cpp/language/function) is used for the lambda that initialized `_erased_fn`, as lambda implicitly deduce their return type by value. It is not guaranteed that `TReturn` is a value though! 
+
+   * An alternative is using a `-> decltype(auto)` return type, which keeps [*cv-qualifiers*](http://en.cppreference.com/w/cpp/language/cv) and references.
+
+* `_ptr` is initialized to the address of `x`, using [`std::addressof`](http://en.cppreference.com/w/cpp/memory/addressof) to prevent unexpected errors in case of overloaded `operator&`.
+
+
+
+#### Call operator
+
+The last missing piece is the `operator()`, which is quite trivial:
+
+```cpp
+// ...
+
+    decltype(auto) operator()(TArgs... xs) const
+        noexcept(noexcept(_erased_fn(_ptr, xs...)))
+    {
+        return _erased_fn(_ptr, xs...);
+    }
+};
+```
+
+It's sufficient to invoke `_erased_fn` with the `_ptr` pointing to the *(assumed alive)* callable object and with the expanded `xs...` argument pack. 
+
+That's it! [*You can find the complete implementation on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/passing_functions_to_functions/function_view.hpp)
