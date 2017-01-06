@@ -507,7 +507,7 @@ Pay attention:
 
 * A [*trailing return type*](http://en.cppreference.com/w/cpp/language/function) is used for the lambda that initialized `_erased_fn`, as lambda implicitly deduce their return type by value. It is not guaranteed that `TReturn` is a value though! 
 
-   * An alternative is using a `-> decltype(auto)` return type, which keeps [*cv-qualifiers*](http://en.cppreference.com/w/cpp/language/cv) and references.
+    * An alternative is using a `-> decltype(auto)` return type, which keeps [*cv-qualifiers*](http://en.cppreference.com/w/cpp/language/cv) and references.
 
 * `_ptr` is initialized to the address of `x`, using [`std::addressof`](http://en.cppreference.com/w/cpp/memory/addressof) to prevent unexpected errors in case of overloaded `operator&`.
 
