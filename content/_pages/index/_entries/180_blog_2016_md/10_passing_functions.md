@@ -369,7 +369,7 @@ Let's end the article by looking at the implementation of `function_view`.
 
 ### Implementation of `function_view` {#fn_view_impl}
 
-I will now provide and explain an implementation of a simplified `function_view` which supports generic callable objects *(but doesn't have any syntactic sugar for member functions)*. We'll also only implement the constructor - deducing the implementation of various operators from it should however be straightforward.
+I will now provide and explain an implementation of a simplified `function_view` which supports generic callable objects *(but doesn't have any syntactic sugar for member functions)*. We'll also only implement the constructor and `operator()` - deducing the implementation of the remaining operators from them is straightforward.
 
 Let's recap what we need:
 
@@ -377,7 +377,9 @@ Let's recap what we need:
 
 * Its constructor will take a generic callable object, whose `operator()` invocation will be [*type erased*](https://en.wikipedia.org/wiki/Type_erasure).
 
-* An `operator()` implementation that calls the *type erased* pointee and retuns its result.   
+* An `operator()` implementation that calls the *type erased* pointee and retuns its result.
+
+Here is `function_view` in all its glory:
 
 ```cpp
 template <typename TSignature>
