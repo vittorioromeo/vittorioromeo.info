@@ -54,26 +54,19 @@ private:
     TReturn (*_erased_fn)(void*, TArgs...);
 
 public:
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_callable<T&(TArgs...)>{} &&
+                              !std::is_same<std::decay_t<T>, function_view>{}>>
     function_view(T&& x) noexcept : _ptr{std::addressof(x)}
     {
-        if constexpr(!is_callable<T(TArgs...)>{})
-        {
-            static_assert(dependent_false<T>{},
-                "The provided callable doesn't have the correct "
-                "signature.");
-        }
-        else
-        {
-            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-                return (*static_cast<T*>(ptr))(xs...);
-            };
-        }
+        _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+        };
     }
 
     decltype(auto) operator()(TArgs... xs) const
-        noexcept(noexcept(_erased_fn(_ptr, xs...)))
+        noexcept(noexcept(_erased_fn(_ptr, std::forward<TArgs>(xs)...)))
     {
-        return _erased_fn(_ptr, xs...);
+        return _erased_fn(_ptr, std::forward<TArgs>(xs)...);
     }
 };

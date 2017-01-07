@@ -395,27 +395,20 @@ private:
     TReturn (*_erased_fn)(void*, TArgs...);
 
 public:
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_callable<T&(TArgs...)>{} &&
+                              !std::is_same<std::decay_t<T>, function_view>{}>>
     function_view(T&& x) noexcept : _ptr{std::addressof(x)}
     {
-        if constexpr(!std::is_callable<T(TArgs...)>{})
-        {
-            static_assert(dependent_false<T>{},
-                "The provided callable doesn't have the correct "
-                "signature.");
-        }
-        else
-        {
-            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-                return (*static_cast<T*>(ptr))(xs...);
-            };
-        }
+        _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+        };
     }
 
     decltype(auto) operator()(TArgs... xs) const
-        noexcept(noexcept(_erased_fn(_ptr, xs...)))
+        noexcept(noexcept(_erased_fn(_ptr, std::forward<TArgs>(xs)...)))
     {
-        return _erased_fn(_ptr, xs...);
+        return _erased_fn(_ptr, std::forward<TArgs>(xs)...);
     }
 };
 ```
@@ -466,29 +459,28 @@ private:
 
 Let's now define a constructor template which takes a generic callable object by [*forwarding-reference*](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4164.pdf) *(as we also want to be able to "view" temporary callables, such as lambda expressions)*. 
 
-* [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) and [`if constexpr(...)`](http://en.cppreference.com/w/cpp/language/if#Constexpr_If) will be used to produce a nice compile-time error in case of an invalid user-provided constructor argument.
+* [`std::enable_if`](http://en.cppreference.com/w/cpp/types/enable_if) will be used to constrain the constructor. 
+
+    * [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) will make sure that the callable object passed to the constructor matches the desired signature. *(`T&` is being used instead of `T` because the pointee will always be called as an lvalue.)*
+
+    * [`std::is_same`](http://en.cppreference.com/w/cpp/types/is_same) and [`std::decay`](http://en.cppreference.com/w/cpp/types/decay) will prevent hijacking of the *copy constructor*.
 
 * A *captureless* lambda *(which is implicitly convertible to a function pointer)* will be used to initialize `_erased_fn`. Its body will maintain the type information of the passed callable object.
+
+*(Many thanks to [/u/tcanens](https://www.reddit.com/r/cpp/comments/5mgyf2/passing_functions_to_functions/dc4gkr5/?context=3) on reddit for pointing out some issues with the previous version of this article.)*
 
 ```cpp
 // ...
 
 public:
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<
+                              std::is_callable<T&(TArgs...)>{} &&
+                              !std::is_same<std::decay_t<T>, function_view>{}>>
     function_view(T&& x) noexcept : _ptr{std::addressof(x)}
     {
-        if constexpr(!is_callable<T(TArgs...)>{})
-        {
-            static_assert(dependent_false<T>{},
-                "The provided callable doesn't have the correct "
-                "signature.");
-        }
-        else
-        {
-            _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-                return (*static_cast<T*>(ptr))(xs...);
-            };
-        }
+        _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
+            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+        };
     }
 
 // ...
@@ -496,14 +488,7 @@ public:
 
 Pay attention:
 
-* `dependent_false<T>` is used to make sure that the `static_assert` is only triggered when the first branch is taken. Basically, it "delays" the evaluation of the static assertion until the branch is actually instantiated. Its implementation is trivial:
-
-    ```cpp
-    template <typename>
-    struct dependent_false : std::false_type
-    {
-    };
-    ```
+* [`std::forward`](http://en.cppreference.com/w/cpp/utility/forward) is being used in an unusual context here, as `TArgs...` is not a deduced argument pack, **but it is required** to maintain the correct value categories *(here's a motivating [example on wandbox](http://melpon.org/wandbox/permlink/m44h9Y6Thml0V8Z0))*.
 
 * A [*trailing return type*](http://en.cppreference.com/w/cpp/language/function) is used for the lambda that initialized `_erased_fn`, as lambda implicitly deduce their return type by value. It is not guaranteed that `TReturn` is a value though! 
 
@@ -521,13 +506,13 @@ The last missing piece is the `operator()`, which is quite trivial:
 // ...
 
     decltype(auto) operator()(TArgs... xs) const
-        noexcept(noexcept(_erased_fn(_ptr, xs...)))
+        noexcept(noexcept(_erased_fn(_ptr, std::forward<TArgs>(xs)...)))
     {
-        return _erased_fn(_ptr, xs...);
+        return _erased_fn(_ptr, std::forward<TArgs>(xs)...);
     }
 };
 ```
 
-It's sufficient to invoke `_erased_fn` with the `_ptr` pointing to the *(assumed alive)* callable object and with the expanded `xs...` argument pack. 
+It's sufficient to invoke `_erased_fn` with the `_ptr` pointing to the *(assumed alive)* callable object and with the expanded `std::forward<TArgs>(xs)...` argument pack. 
 
 That's it! [*You can find the complete implementation on GitHub.*](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/passing_functions_to_functions/function_view.hpp)
