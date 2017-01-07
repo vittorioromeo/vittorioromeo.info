@@ -463,7 +463,7 @@ Let's now define a constructor template which takes a generic callable object by
 
     * [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) will make sure that the callable object passed to the constructor matches the desired signature. *(`T&` is being used instead of `T` because the pointee will always be called as an lvalue.)*
 
-    * [`std::is_same`](http://en.cppreference.com/w/cpp/types/is_same) and [`std::decay`](http://en.cppreference.com/w/cpp/types/decay) will prevent hijacking of the *copy constructor*.
+    * [`std::is_same`](http://en.cppreference.com/w/cpp/types/is_same) and [`std::decay`](http://en.cppreference.com/w/cpp/types/decay) will be used to prevent hijacking of the *copy constructor*.
 
 * A *captureless* lambda *(which is implicitly convertible to a function pointer)* will be used to initialize `_erased_fn`. Its body will maintain the type information of the passed callable object.
 
