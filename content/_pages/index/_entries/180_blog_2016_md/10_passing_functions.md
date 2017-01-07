@@ -490,7 +490,7 @@ Pay attention:
 
 * [`std::forward`](http://en.cppreference.com/w/cpp/utility/forward) is being used in an unusual context here, as `TArgs...` is not a deduced argument pack, **but it is required** to maintain the correct value categories *(here's a motivating [example on wandbox](http://melpon.org/wandbox/permlink/m44h9Y6Thml0V8Z0))*.
 
-* A [*trailing return type*](http://en.cppreference.com/w/cpp/language/function) is used for the lambda that initialized `_erased_fn`, as lambda implicitly deduce their return type by value. It is not guaranteed that `TReturn` is a value though! 
+* A [*trailing return type*](http://en.cppreference.com/w/cpp/language/function) is used for the lambda that initialized `_erased_fn`, as lambdas implicitly deduce their return type by value. It is not guaranteed that `TReturn` is a value though! 
 
     * An alternative is using a `-> decltype(auto)` return type, which keeps [*cv-qualifiers*](http://en.cppreference.com/w/cpp/language/cv) and references.
 
