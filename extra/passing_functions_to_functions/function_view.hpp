@@ -57,10 +57,11 @@ public:
     template <typename T, typename = std::enable_if_t<
                               std::is_callable<T&(TArgs...)>{} &&
                               !std::is_same<std::decay_t<T>, function_view>{}>>
-    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
+    function_view(T&& x) noexcept : _ptr{(void*)std::addressof(x)}
     {
         _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+            return (*reinterpret_cast<std::add_pointer_t<T>>(ptr))(
+                std::forward<TArgs>(xs)...);
         };
     }
 

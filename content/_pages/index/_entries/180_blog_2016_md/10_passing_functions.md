@@ -398,10 +398,11 @@ public:
     template <typename T, typename = std::enable_if_t<
                               std::is_callable<T&(TArgs...)>{} &&
                               !std::is_same<std::decay_t<T>, function_view>{}>>
-    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
+    function_view(T&& x) noexcept : _ptr{(void*)std::addressof(x)}
     {
         _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+            return (*reinterpret_cast<std::add_pointer_t<T>>(ptr))(
+                std::forward<TArgs>(xs)...);
         };
     }
 
@@ -476,10 +477,11 @@ public:
     template <typename T, typename = std::enable_if_t<
                               std::is_callable<T&(TArgs...)>{} &&
                               !std::is_same<std::decay_t<T>, function_view>{}>>
-    function_view(T&& x) noexcept : _ptr{std::addressof(x)}
+    function_view(T&& x) noexcept : _ptr{(void*)std::addressof(x)}
     {
         _erased_fn = [](void* ptr, TArgs... xs) -> TReturn {
-            return (*static_cast<T*>(ptr))(std::forward<TArgs>(xs)...);
+            return (*reinterpret_cast<std::add_pointer_t<T>>(ptr))(
+                std::forward<TArgs>(xs)...);
         };
     }
 
@@ -494,7 +496,11 @@ Pay attention:
 
     * An alternative is using a `-> decltype(auto)` return type, which keeps [*cv-qualifiers*](http://en.cppreference.com/w/cpp/language/cv) and references.
 
-* `_ptr` is initialized to the address of `x`, using [`std::addressof`](http://en.cppreference.com/w/cpp/memory/addressof) to prevent unexpected errors in case of overloaded `operator&`.
+* `_ptr` is initialized to the address of `x`, using [`std::addressof`](http://en.cppreference.com/w/cpp/memory/addressof) to prevent unexpected errors in case of overloaded `operator&`. 
+
+* An explicit `(void*)` cast is being used to drop `const` qualifiers and accept function pointers. `reinterpret_cast` and `std::add_pointer_t` are being used to "rebuild" the original type-erased pointer. Using `static_cast` would not support function pointers. Using `T*` would be ill-formed when `T` is an lvalue reference. *([Thanks Yakk and T.C.!](https://www.reddit.com/r/cpp/comments/5mgyf2/passing_functions_to_functions/dc5ewek/))*
+
+
 
 
 
