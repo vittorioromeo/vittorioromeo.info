@@ -83,7 +83,7 @@ void g(TF&& x) { }
 
 g(f);
 g([](int){ });
-g([i = 0](int) -> mutable { });
+g([i = 0](int) mutable { });
 ```
 
 The drawbacks of this technique are:
@@ -106,7 +106,7 @@ void g(std::function<void(int)> x) { }
 
 g(f);
 g([](int){ });
-g([i = 0](int) -> mutable { });
+g([i = 0](int) mutable { });
 ```
 
 Again, this is a very **general-purpose** class that **models ownership of a callable object**. It introduces a **significant run-time overhead** and can potentially dynamically allocate. Use it sparingly!
@@ -127,7 +127,7 @@ void g(function_view<void(int)> x) { }
 
 g(f);
 g([](int){ });
-g([i = 0](int) -> mutable { });
+g([i = 0](int) mutable { });
 ```
 
 As you can see from the example above, it looks reasonably similar to `std::function` - however, its semantics are way different: **`function_view` does not own a callable object. It merely refers to an existing one.** That means that any instance of `function_view` **assumes** the *pointee* callable object to be alive.
