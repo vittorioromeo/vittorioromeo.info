@@ -1,7 +1,8 @@
 #!/bin/bash
 
 OUT="/tmp/x.x"
-FLAGS="-std=c++1z -W -Wall -Wextra -Wpedantic -fdiagnostics-color=always -o $OUT"
+INCLUDES="-I/home/vittorioromeo/OHWorkspace/vrm_pp/include"
+FLAGS="-std=c++1z -W -Wall -Wextra -Wpedantic -fdiagnostics-color=always $INCLUDES -o $OUT"
 
 GCC="g++"
 CLANG="clang++"
