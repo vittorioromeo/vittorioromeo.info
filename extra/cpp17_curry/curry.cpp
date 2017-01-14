@@ -58,7 +58,12 @@ constexpr decltype(auto) curry(F&& f)
                     // `f` will be called by applying the concatenation of
                     // `partial_pack` and `xs...`, retaining the original value
                     // categories thanks to the "forward-capture" wrappers.
-                    ](auto&&... ys) constexpr -> decltype(auto) 
+                    return apply_fwd_capture(
+                    [
+                        // `f` can be captured by reference as it's just a 
+                        // wrapper which lives in the parent lambda.
+                        &f
+                    ](auto&&... ys) constexpr -> decltype(f.get()(FWD(ys)...)) 
                     {//         ^^
                         // The `ys...` pack will contain all the concatenated 
                         // values.     
@@ -93,8 +98,8 @@ int main()
     };
 
     /* TODO: curry<5>(vsum) ?
-        const auto vsum = [](auto... xs) { return (0 + ... + xs); };
-        assert(curry(vsum) == 0);
+    const auto vsum = [](auto... xs) { return (0 + ... + xs); };
+    assert(curry(vsum) == 0);
     */
 
     constexpr auto cexpr_csum0 = curry(sum)(0, 1, 2, 3, 4, 5, 6, 7);
@@ -115,21 +120,4 @@ int main()
     static_assert(cexpr_csum6 == sum(0, 1, 2, 3, 4, 5, 6, 7));
     static_assert(cexpr_csum7 == sum(0, 1, 2, 3, 4, 5, 6, 7));
 
-    volatile auto vcexpr_csum0 = curry(sum)(0, 1, 2, 3, 4, 5, 6, 7);
-    volatile auto vcexpr_csum1 = curry(sum)(0)(1, 2, 3, 4, 5, 6, 7);
-    volatile auto vcexpr_csum2 = curry(sum)(0, 1)(2, 3, 4, 5, 6, 7);
-    volatile auto vcexpr_csum3 = curry(sum)(0, 1, 2)(3, 4, 5, 6, 7);
-    volatile auto vcexpr_csum4 = curry(sum)(0, 1, 2, 3)(4, 5, 6, 7);
-    volatile auto vcexpr_csum5 = curry(sum)(0, 1, 2, 3, 4)(5, 6, 7);
-    volatile auto vcexpr_csum6 = curry(sum)(0, 1, 2, 3, 4, 5)(6, 7);
-    volatile auto vcexpr_csum7 = curry(sum)(0, 1, 2, 3, 4, 5, 6)(7);
-
-    assert(vcexpr_csum0 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum1 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum2 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum3 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum4 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum5 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum6 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-    assert(vcexpr_csum7 == sum(0, 1, 2, 3, 4, 5, 6, 7));
 }
