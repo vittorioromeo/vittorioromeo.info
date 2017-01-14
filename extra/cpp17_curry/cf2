@@ -1,0 +1,9 @@
+#!/bin/bash
+
+OUT="/tmp/x.x"
+FLAGS="-std=c++1z -W -Wall -Wextra -Wpedantic -fdiagnostics-color=always -o $OUT"
+
+GCC="g++"
+CLANG="clang++"
+
+$GCC $1 $FLAGS && $OUT
