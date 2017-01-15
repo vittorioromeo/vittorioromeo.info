@@ -69,7 +69,7 @@ Basically, `add1_three(5)` is equivalent to `add2_one(2)(5)`, which is equivalen
 
 
 
-# Partial application
+### Partial application
 
 > > In computer science, **partial application** (or **partial function application**) refers to the process of fixing a number of arguments to a function, producing another function of smaller arity.
 >
@@ -86,7 +86,7 @@ partial_add3(1, 2)(3); // Returns `6`.
 partial_add3(1)(2)(3); // Returns `6`. (Currying!)
 ```
 
-As you can see, we can decide how many arguments to bind *(including zero)*. We could easily implement this in C++17 using *recursion*, [*generic lambdas*](http://en.cppreference.com/w/cpp/language/lambda), [*`if constexpr(...)`*](http://en.cppreference.com/w/cpp/language/if#Constexpr_If), and [*variadic templates*](http://en.cppreference.com/w/cpp/language/parameter_pack).
+As you can see, we can decide how many arguments to bind *(including zero)*. We could easily implement this in C++17 using *recursion*, [*generic lambdas*](http://en.cppreference.com/w/cpp/language/lambda), [*`if constexpr(...)`*](http://en.cppreference.com/w/cpp/language/if#Constexpr_If), and [*variadic templates*](http://en.cppreference.com/w/cpp/language/parameter_pack). *(We'll also use a [fold expression](http://en.cppreference.com/w/cpp/language/fold) to compute the sum.)*
 
 ```cpp
 template <typename... Ts>
@@ -116,7 +116,7 @@ Writing code that enables *currying* and *partial application* for every functio
 
 ### C++17 `curry`
 
-idea by julian
+idea by julian: https://twitter.com/awtem/status/804781466852950017
 
 
 #### Example usage
