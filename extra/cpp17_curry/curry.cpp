@@ -1,25 +1,20 @@
 #include "./fwd_capture.hpp"
-#include "./is_valid.hpp"
 #include <cassert>
 #include <experimental/tuple>
 #include <functional>
 #include <type_traits>
+#include <vrm/core/type_traits.hpp>
 
 #define IF_CONSTEXPR \
     if               \
     constexpr
 
 using vr::impl::apply_fwd_capture;
-
-namespace impl
-{
-    template <typename F>
-    constexpr auto is_callable_with_no_args = IS_VALID(_0())(F);
-}
+using vrm::core::forward_like;
 
 // clang-format off
-template <typename F>
-constexpr decltype(auto) curry(F&& f) 
+template <typename TF>
+constexpr decltype(auto) curry(TF&& f) 
 {
     // If `f()` can be called, then immediately call and return. 
     // (Base case.)
@@ -28,10 +23,10 @@ constexpr decltype(auto) curry(F&& f)
     // number of arguments. 
     // (Recursive case.)
 
-    IF_CONSTEXPR (impl::is_callable_with_no_args<F>) 
+    IF_CONSTEXPR (std::is_callable<TF()>{}) 
     {   
         // Base case.
-        return f();
+        return FWD(f)();
     }
     else
     {
@@ -39,8 +34,11 @@ constexpr decltype(auto) curry(F&& f)
         
         // Return a lambda that binds any number of arguments to the current 
         // callable object `f` - this is "partial application".
-        return [f = FWD_CAPTURE(f)](auto&&... partials) constexpr 
-        {
+        return [f = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
+        {//                                             ^^^^^^^
+            // The `mutable` is very important as we'll be moving `f` to the 
+            // inner lambda.
+
             // As we may want to partial-apply multiple times (currying in the 
             // case of a single argument), we need to recurse here.
             return curry
@@ -53,7 +51,8 @@ constexpr decltype(auto) curry(F&& f)
                 ]
                 (auto&&... xs) constexpr 
                     // For some reason `g++` doesn't like `decltype(auto)` here.
-                    -> decltype(f.get()(FWD(partials)..., FWD(xs)...))
+                    -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
+                                                          FWD(xs)...))
                 {
                     // `f` will be called by applying the concatenation of
                     // `partial_pack` and `xs...`, retaining the original value
@@ -63,13 +62,14 @@ constexpr decltype(auto) curry(F&& f)
                         // `f` can be captured by reference as it's just a 
                         // wrapper which lives in the parent lambda.
                         &f
-                    ](auto&&... ys) constexpr -> decltype(f.get()(FWD(ys)...)) 
-                    {//         ^^
+                    ](auto&&... ys) constexpr 
+                        -> decltype(forward_like<TF>(f.get())(FWD(ys)...)) 
+                    {//                                       ^^^^^^^^^^
                         // The `ys...` pack will contain all the concatenated 
                         // values.     
-                        //             vvvvvvvvvv
-                        return f.get()(FWD(ys)...);
-                        //     ^^^^^^^
+                        //                               vvvvvvvvvv
+                        return forward_like<TF>(f.get())(FWD(ys)...);
+                        //                      ^^^^^^^
                         // `f.get()` is either the original callable object or
                         // an intermediate step of the `curry` recursion.
                     }, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
@@ -89,8 +89,20 @@ struct nocopy
     nocopy(nocopy&&) = default;
 };
 
+struct nocopy_callable
+{
+    nocopy_callable() = default;
+    nocopy_callable(const nocopy_callable&) = delete;
+    nocopy_callable(nocopy_callable&&) = default;
+
+    auto operator()(int, int, int) &&
+    {
+    }
+};
+
 int main()
 {
+#if 1
     const auto sum = [](auto a, auto b, auto c, auto d, auto e, auto f, auto g,
         auto h) constexpr
     {
@@ -120,4 +132,23 @@ int main()
     static_assert(cexpr_csum6 == sum(0, 1, 2, 3, 4, 5, 6, 7));
     static_assert(cexpr_csum7 == sum(0, 1, 2, 3, 4, 5, 6, 7));
 
+    volatile auto vcexpr_csum0 = curry(sum)(0, 1, 2, 3, 4, 5, 6, 7);
+    volatile auto vcexpr_csum1 = curry(sum)(0)(1, 2, 3, 4, 5, 6, 7);
+    volatile auto vcexpr_csum2 = curry(sum)(0, 1)(2, 3, 4, 5, 6, 7);
+    volatile auto vcexpr_csum3 = curry(sum)(0, 1, 2)(3, 4, 5, 6, 7);
+    volatile auto vcexpr_csum4 = curry(sum)(0, 1, 2, 3)(4, 5, 6, 7);
+    volatile auto vcexpr_csum5 = curry(sum)(0, 1, 2, 3, 4)(5, 6, 7);
+    volatile auto vcexpr_csum6 = curry(sum)(0, 1, 2, 3, 4, 5)(6, 7);
+    volatile auto vcexpr_csum7 = curry(sum)(0, 1, 2, 3, 4, 5, 6)(7);
+
+    assert(vcexpr_csum0 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum1 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum2 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum3 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum4 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum5 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum6 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+    assert(vcexpr_csum7 == sum(0, 1, 2, 3, 4, 5, 6, 7));
+#endif
+    curry(nocopy_callable{})(0);
 }

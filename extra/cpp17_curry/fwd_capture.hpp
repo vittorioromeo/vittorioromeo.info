@@ -40,7 +40,9 @@ namespace vr::impl
                 return static_cast<const base_type&>(*this);
             }
 
-            template <typename TFwd>
+            template <typename TFwd,
+                typename = std::enable_if_t<
+                    !std::is_same<std::decay_t<TFwd>, fwd_capture_tuple>{}>>
             constexpr fwd_capture_tuple(TFwd&& x) noexcept(
                 std::is_nothrow_constructible<base_type, decltype(x)>{})
                 : base_type(FWD(x))
@@ -73,7 +75,9 @@ namespace vr::impl
         using base_type = detail::fwd_capture_tuple<T>;
 
     public:
-        template <typename TFwd>
+        template <typename TFwd,
+            typename = std::enable_if_t<
+                !std::is_same<std::decay_t<TFwd>, fwd_capture_wrapper>{}>>
         constexpr fwd_capture_wrapper(TFwd&& x) noexcept(
             std::is_nothrow_constructible<base_type, decltype(x)>{})
             : base_type(FWD(x))
