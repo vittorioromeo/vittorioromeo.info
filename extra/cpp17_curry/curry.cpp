@@ -47,7 +47,7 @@ constexpr decltype(auto) curry(TF&& f)
                     f = std::move(f)
                 ]
                 (auto&&... xs) constexpr 
-                    // For some reason `g++` doesn't like `decltype(auto)` here.
+                    // Weirdly `g++` doesn't like `decltype(auto)` here.
                     -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
                                                           FWD(xs)...))
                 {

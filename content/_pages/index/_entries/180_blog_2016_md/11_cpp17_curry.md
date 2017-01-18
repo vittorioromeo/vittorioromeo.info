@@ -263,71 +263,35 @@ Additionally, the `f` parameter is taken by [*forwarding-reference*](http://www.
 
 #### Definition
 
-I'll show the complete definition of `curry` first *(with comments)*, and then analyze all the parts one-by-one more closely.
+I'll show the complete definition of `curry` first, and then analyze all the parts one-by-one more closely.
 
 ```cpp
 template <typename TF>
 constexpr decltype(auto) curry(TF&& f) 
 {
-    // If `f()` can be called, then immediately call and return. 
-    // (Base case.)
-
-    // Otherwise, return a function that allows partial application of any 
-    // number of arguments. 
-    // (Recursive case.)
-
     if constexpr (std::is_callable<TF()>{}) 
     {   
-        // Base case.
         return FWD(f)();
     }
     else
     {
-        // Recursive case.
-        
-        // Return a lambda that binds any number of arguments to the current 
-        // callable object `f` - this is "partial application".
         return [f = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
-        {//                                             ^^^^^^^
-            // The `mutable` is very important as we'll be moving `f` to the 
-            // inner lambda.
-
-            // As we may want to partial-apply multiple times (currying in the 
-            // case of a single argument), we need to recurse here.
+        {
             return curry
             (
                 [
                     partial_pack = FWD_CAPTURE_PACK_AS_TUPLE(partials), 
-                    
-                    // `f` can be moved as it's a "forward-capture" wrapper.
                     f = std::move(f)
                 ]
-                (auto&&... xs) constexpr 
-                    // For some reason `g++` doesn't like `decltype(auto)` here.
+                (auto&&... xs) constexpr                
                     -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
                                                           FWD(xs)...))
                 {
-                    // `f` will be called by applying the concatenation of
-                    // `partial_pack` and `xs...`, retaining the original value
-                    // categories thanks to the "forward-capture" wrappers.
-                    return apply_fwd_capture(
-                    [
-                        // `f` can be captured by reference as it's just a 
-                        // wrapper which lives in the parent lambda.
-                        &f
-                    ](auto&&... ys) constexpr 
+                    return apply_fwd_capture([&f](auto&&... ys) constexpr 
                         -> decltype(forward_like<TF>(f.get())(FWD(ys)...)) 
-                    {//                                       ^^^^^^^^^^
-                        // The `ys...` pack will contain all the concatenated 
-                        // values.     
-                        //                               vvvvvvvvvv
+                    {
                         return forward_like<TF>(f.get())(FWD(ys)...);
-                        //                      ^^^^^^^
-                        // `f.get()` is either the original callable object or
-                        // an intermediate step of the `curry` recursion.
                     }, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
-                    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                    // Automatically concatenated by `apply_fwd_capture`.
                 }
             );
         };
