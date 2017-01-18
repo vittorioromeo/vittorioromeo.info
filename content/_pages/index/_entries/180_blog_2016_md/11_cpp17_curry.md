@@ -116,19 +116,223 @@ Writing code that enables *currying* and *partial application* for every functio
 
 ### C++17 `curry`
 
-idea by julian: https://twitter.com/awtem/status/804781466852950017
+As mentioned in the beginning of the article, these are the goals for our `curry` function:
+
+* Given a generic callable object `f`, invoking `curry(f)` returns a *curried*/*partially-applicable* version of `f`.
+
+* If `f` is `constexpr`-friendly, the returned one will be as well.
+
+* `curry` should not introduce any overhead compared to hand-written *currying*/*partial application*.
+
+
+
+#### Credit where it's due
+
+Please note that the design and implementation of `curry` that I am going to cover is a *heavily-modified version* of [this snippet that was tweeted by **Julian Becker**](https://twitter.com/awtem/status/804781466852950017) - in fact, it was that tweet that inspired me to write this article. **Thanks!**
+
 
 
 #### Example usage
 
+Before we analyze the *declaration* and *definition* of `curry`, let's take a look at some usage examples.
+
+* **Nullary functions:**
+
+    ```cpp
+    auto greet = []{ std::puts("hi!\n"); };
+
+    greet(); // Prints "hi!".
+    curry(greet); // Prints "hi!".
+    
+    // Compile-time error:
+    /* curry(greet)(); */
+    ```
+
+    As you can see, in the case of a *nullary callable object* `f`, invoking `curry(f)` calls the original object immediately. 
+
+* **Unary functions**:
+
+    ```cpp
+    auto plus_one = [](auto x){ return x + 1; };
+
+    plus_one(0); // Returns `1`.
+    curry(plus_one)(0); // Returns `1`.
+
+    // Returns a wrapper around `plus_one` that enables
+    // currying/partial application.
+    // `plus_one` is "perfectly-captured" in the wrapper.
+    auto curried_plus_one = curry(plus_one);
+    
+    curried_plus_one(1); // Returns `1`.
+    ```
+
+    > What does *perfectly-captured* mean? 
+
+    It means that if the captured object is an *lvalue*, it will be captured *by reference*. If the captured object is an *rvalue, it will be captured *by move*. I've written a comprehensive article on this topic: [**"capturing perfectly-forwarded objects in lambdas"**](http://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html).
+
+* **Binary functions**:
+
+    ```cpp
+    auto add2 = [](auto a, auto b){ return a + b; };
+
+    // All of the invocations below return `3`.
+    add2(1, 2);
+    curry(add2)(1, 2); // Partial application.
+    curry(add2)(1)(2); // Currying.
+
+    // Example of "binding" an argument:
+    auto add_one = curry(add2)(1);
+    add_one(2); // Returns `3`.
+    add_one(3); // Returns `4`.
+    ```
+
+    You should be starting to see the pattern now...
+
+* **$N$-ary functions**:
+
+    ```cpp
+    auto add3 = [](auto a, auto b, auto c)
+    { 
+        return a + b + c; 
+    };
+
+    // All of the invocations below return `6`.
+    add3(1, 2, 3);
+    curry(add3)(1, 2, 3);
+    curry(add3)(1, 2)(3);
+    curry(add3)(1)(2, 3);
+    curry(add3)(1)(2)(3);
+    ```
+
+    The example above shows that *currying* and *partial application* can be freely combined. Let's see another example of that with a [`constexpr` lambda](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4487.pdf) of arity $5$.
+
+    ```cpp
+    auto add5 = [](auto a, auto b, auto c, 
+                   auto d, auto e) constexpr
+    { 
+        return a + b + c + d + e; 
+    };
+    
+    constexpr auto csum5 = curry(sum5);
+
+    constexpr auto a = csum5(0, 1, 2, 3, 4, 5);
+    constexpr auto b = csum5(0)(1, 2, 3, 4, 5);
+    constexpr auto c = csum5(0, 1)(2, 3, 4, 5);
+    constexpr auto d = csum5(0, 1, 2)(3, 4, 5);
+    constexpr auto e = csum5(0, 1, 2, 3)(4, 5);
+    constexpr auto f = csum5(0, 1, 2, 3, 4)(5);
+    ```
+
+    Note that the usages of `curry(sum5)` above are in no way exhaustive - more combinations such as `curry(sum5)(0, 1)(2, 3)(4, 5)` can be written, and every *intermediate step* can be given a name.
+
+Now that you have an idea on how `curry` can be used, let's dive into its *declaration* and *definition*.
+
+#### Declaration
+
+Given the constraints listed earlier, we can easily write down the *declaration* of `curry`.
+
 ```cpp
-sdgjs
+template <typename TF>
+constexpr decltype(auto) curry(TF&& f);
 ```
 
-#### Implementation
+> Why `decltype(auto)` instead of `auto`? 
+
+Because the *final step* of `curry` needs to return exactly what the original callable object does. Example:
 
 ```cpp
-sdgjs
+auto f = [](auto, auto) -> auto& 
+{
+    return some_global_variable; 
+};
+
+// OK - can return an additional "curry wrapper" by value.
+auto step0 = curry(f); 
+
+// Same as above.
+auto step1 = step0('a');
+auto step2 = step1('b');
+
+// Now `step2` has to return a reference!
+auto& that_same_global = step2();
+```
+
+Additionally, the `f` parameter is taken by [*forwarding-reference*](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4164.pdf). I will assume you're familiar with [*move semantics*](http://stackoverflow.com/questions/3106110/what-are-move-semantics), [`std::forward`](http://en.cppreference.com/w/cpp/utility/forward), and [**"forward captures"**](http://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html) for the rest of the article.
+
+
+
+#### Definition
+
+I'll show the complete definition of `curry` first *(with comments)*, and then analyze all the parts one-by-one more closely.
+
+```cpp
+template <typename TF>
+constexpr decltype(auto) curry(TF&& f) 
+{
+    // If `f()` can be called, then immediately call and return. 
+    // (Base case.)
+
+    // Otherwise, return a function that allows partial application of any 
+    // number of arguments. 
+    // (Recursive case.)
+
+    if constexpr (std::is_callable<TF()>{}) 
+    {   
+        // Base case.
+        return FWD(f)();
+    }
+    else
+    {
+        // Recursive case.
+        
+        // Return a lambda that binds any number of arguments to the current 
+        // callable object `f` - this is "partial application".
+        return [f = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
+        {//                                             ^^^^^^^
+            // The `mutable` is very important as we'll be moving `f` to the 
+            // inner lambda.
+
+            // As we may want to partial-apply multiple times (currying in the 
+            // case of a single argument), we need to recurse here.
+            return curry
+            (
+                [
+                    partial_pack = FWD_CAPTURE_PACK_AS_TUPLE(partials), 
+                    
+                    // `f` can be moved as it's a "forward-capture" wrapper.
+                    f = std::move(f)
+                ]
+                (auto&&... xs) constexpr 
+                    // For some reason `g++` doesn't like `decltype(auto)` here.
+                    -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
+                                                          FWD(xs)...))
+                {
+                    // `f` will be called by applying the concatenation of
+                    // `partial_pack` and `xs...`, retaining the original value
+                    // categories thanks to the "forward-capture" wrappers.
+                    return apply_fwd_capture(
+                    [
+                        // `f` can be captured by reference as it's just a 
+                        // wrapper which lives in the parent lambda.
+                        &f
+                    ](auto&&... ys) constexpr 
+                        -> decltype(forward_like<TF>(f.get())(FWD(ys)...)) 
+                    {//                                       ^^^^^^^^^^
+                        // The `ys...` pack will contain all the concatenated 
+                        // values.     
+                        //                               vvvvvvvvvv
+                        return forward_like<TF>(f.get())(FWD(ys)...);
+                        //                      ^^^^^^^
+                        // `f.get()` is either the original callable object or
+                        // an intermediate step of the `curry` recursion.
+                    }, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
+                    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    // Automatically concatenated by `apply_fwd_capture`.
+                }
+            );
+        };
+    }
+}
 ```
 
 #### Generated assembly benchmarks
@@ -141,5 +345,5 @@ sdgjs
 
 
 ```cpp
-sdgjs
+fgsdfd
 ```

@@ -137,10 +137,9 @@ namespace vr::impl
         return std::make_tuple(FWD_COPY_CAPTURE(xs)...);
     }
 
-    // TODO: to orizzonte
     template <typename TF, typename... TFwdCaptures>
     constexpr decltype(auto) apply_fwd_capture(TF&& f, TFwdCaptures&&... fcs)
-    // TODO: noexcept
+        // TODO: noexcept
     {
         return vr::impl::apply([&f](auto&&... xs) mutable -> decltype(
                                    auto) { return f(FWD(xs).get()...); },

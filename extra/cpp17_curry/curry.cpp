@@ -1,13 +1,10 @@
 #include "./fwd_capture.hpp"
 #include <cassert>
+#include <cstdio>
 #include <experimental/tuple>
 #include <functional>
 #include <type_traits>
 #include <vrm/core/type_traits.hpp>
-
-#define IF_CONSTEXPR \
-    if               \
-    constexpr
 
 using vr::impl::apply_fwd_capture;
 using vrm::core::forward_like;
@@ -23,7 +20,7 @@ constexpr decltype(auto) curry(TF&& f)
     // number of arguments. 
     // (Recursive case.)
 
-    IF_CONSTEXPR (std::is_callable<TF()>{}) 
+    if constexpr (std::is_callable<TF()>{}) 
     {   
         // Base case.
         return FWD(f)();
@@ -102,7 +99,6 @@ struct nocopy_callable
 
 int main()
 {
-#if 1
     const auto sum = [](auto a, auto b, auto c, auto d, auto e, auto f, auto g,
         auto h) constexpr
     {
@@ -149,6 +145,15 @@ int main()
     assert(vcexpr_csum5 == sum(0, 1, 2, 3, 4, 5, 6, 7));
     assert(vcexpr_csum6 == sum(0, 1, 2, 3, 4, 5, 6, 7));
     assert(vcexpr_csum7 == sum(0, 1, 2, 3, 4, 5, 6, 7));
-#endif
+
     curry(nocopy_callable{})(0);
+
+    assert(curry([](int a, int b, int c) { return a + b + c; })(1)(2)(3) ==
+           1 + 2 + 3);
+
+    auto greet = [] { std::puts("hi!\n"); };
+
+    greet(); // Prints "hi!".
+
+    curry(greet);
 }
