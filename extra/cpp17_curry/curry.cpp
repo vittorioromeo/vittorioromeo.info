@@ -31,8 +31,8 @@ constexpr decltype(auto) curry(TF&& f)
         
         // Return a lambda that binds any number of arguments to the current 
         // callable object `f` - this is "partial application".
-        return [f = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
-        {//                                             ^^^^^^^
+        return [xf = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
+        {//                                              ^^^^^^^
             // The `mutable` is very important as we'll be moving `f` to the 
             // inner lambda.
 
@@ -43,31 +43,31 @@ constexpr decltype(auto) curry(TF&& f)
                 [
                     partial_pack = FWD_CAPTURE_PACK_AS_TUPLE(partials), 
                     
-                    // `f` can be moved as it's a "forward-capture" wrapper.
-                    f = std::move(f)
+                    // `xf` can be moved as it's a "forward-capture" wrapper.
+                    yf = std::move(xf)
                 ]
                 (auto&&... xs) constexpr 
                     // Weirdly `g++` doesn't like `decltype(auto)` here.
-                    -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
-                                                          FWD(xs)...))
+                    -> decltype(forward_like<TF>(xf.get())(FWD(partials)..., 
+                                                           FWD(xs)...))
                 {
-                    // `f` will be called by applying the concatenation of
+                    // `yf` will be called by applying the concatenation of
                     // `partial_pack` and `xs...`, retaining the original value
                     // categories thanks to the "forward-capture" wrappers.
                     return apply_fwd_capture(
                     [
-                        // `f` can be captured by reference as it's just a 
+                        // `yf` can be captured by reference as it's just a 
                         // wrapper which lives in the parent lambda.
-                        &f
+                        &yf
                     ](auto&&... ys) constexpr 
-                        -> decltype(forward_like<TF>(f.get())(FWD(ys)...)) 
-                    {//                                       ^^^^^^^^^^
+                        -> decltype(forward_like<TF>(yf.get())(FWD(ys)...)) 
+                    {//                                        ^^^^^^^^^^
                         // The `ys...` pack will contain all the concatenated 
                         // values.     
-                        //                               vvvvvvvvvv
-                        return forward_like<TF>(f.get())(FWD(ys)...);
-                        //                      ^^^^^^^
-                        // `f.get()` is either the original callable object or
+                        //                                vvvvvvvvvv
+                        return forward_like<TF>(yf.get())(FWD(ys)...);
+                        //                      ^^^^^^^^
+                        // `yf.get()` is either the original callable object or
                         // an intermediate step of the `curry` recursion.
                     }, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
                     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

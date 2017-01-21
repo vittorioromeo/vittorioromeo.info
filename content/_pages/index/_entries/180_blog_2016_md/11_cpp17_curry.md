@@ -50,7 +50,7 @@ curried_add3(1)(2)(3); // Returns `6`.
 
 [**wandbox example**](http://melpon.org/wandbox/permlink/HGACYHh1sV3knQGZ)
 
-As you can see, the arity of every lambda is $1$. This pattern is useful because it allows to intuitively *bind* arguments incrementally until the last one. If you're finding yourself constantly using the same arguments except one in a series of function calls, currying avoids repetition and increases readability.
+As you can see, the arity of every lambda is $1$. This pattern is useful because it allows developers to intuitively *bind* arguments incrementally until the last one. If you're finding yourself constantly using the same arguments except one in a series of function calls, currying avoids repetition and increases readability.
 
 ```cpp
 auto add2_one = curried_add3(1);
@@ -75,7 +75,7 @@ Basically, `add1_three(5)` is equivalent to `add2_one(2)(5)`, which is equivalen
 >
 > [*(from Wikipedia)*](https://en.wikipedia.org/wiki/Partial_application)
 
-Even though they are two separate concepts, *partial application* is very similar to *currying*. Even though I couldn't find a formal confirmation anywhere, I believe that thinking about *partial application* as a "generalized form of *currying*" can be helpful: instead of binding one argument and getting $arity - 1$ unary functions back, we can bind $n$ arguments at once and get another *partially-applicable* function with $arity - n$ arity.
+Despite them being two separate concepts, *partial application* is very similar to *currying*. Even though I couldn't find a formal confirmation anywhere, I believe that thinking about *partial application* as a "generalized form of *currying*" can be helpful: instead of binding one argument and getting $arity - 1$ unary functions back, we can bind $n$ arguments at once and get another *partially-applicable* function with $arity - n$ arity.
 
 Imagine we had add a `partial_add3` function which allowed *partial application* to sum three numbers:
 
@@ -110,7 +110,7 @@ auto partial_add3(Ts... xs)
 
 [**wandbox example**](http://melpon.org/wandbox/permlink/AFmdO0Cpkt5zRcJC)
 
-Writing code that enables *currying* and *partial application* for every function is cumbersome. Let's write a generic `curry` function that, given a callable object `f`, returns a *curried*/*partial-applicable* version of `f`!
+Writing code that enables *currying* and *partial application* for every function is cumbersome. Let's write a generic `curry` function that, given a callable object `f`, returns a *curried*/*partially-applicable* version of `f`!
 
 
 
@@ -275,22 +275,22 @@ constexpr decltype(auto) curry(TF&& f)
     }
     else
     {
-        return [f = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
+        return [xf = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
         {
             return curry
             (
                 [
                     partial_pack = FWD_CAPTURE_PACK_AS_TUPLE(partials), 
-                    f = std::move(f)
+                    yf = std::move(xf)
                 ]
                 (auto&&... xs) constexpr                
-                    -> decltype(forward_like<TF>(f.get())(FWD(partials)..., 
-                                                          FWD(xs)...))
+                    -> decltype(forward_like<TF>(xf.get())(FWD(partials)..., 
+                                                           FWD(xs)...))
                 {
-                    return apply_fwd_capture([&f](auto&&... ys) constexpr 
-                        -> decltype(forward_like<TF>(f.get())(FWD(ys)...)) 
+                    return apply_fwd_capture([&yf](auto&&... ys) constexpr 
+                        -> decltype(forward_like<TF>(yf.get())(FWD(ys)...)) 
                     {
-                        return forward_like<TF>(f.get())(FWD(ys)...);
+                        return forward_like<TF>(yf.get())(FWD(ys)...);
                     }, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
                 }
             );
@@ -298,6 +298,117 @@ constexpr decltype(auto) curry(TF&& f)
     }
 }
 ```
+
+The first thing to notice is the **recursive** structure of `curry`.
+
+```cpp
+template <typename TF>
+constexpr decltype(auto) curry(TF&& f) 
+{
+    if constexpr (std::is_callable<TF()>{}) 
+    {
+        return FWD(f)();
+    }
+    else
+    {
+        // ...
+    }
+}
+```
+
+The *base case* branch is taken when `std::is_callable<TF()>{}` evaluates to `true`. [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) is a new C++17 *type trait* that checks whether or not a particular object types can be called with a specific set of argument types.
+
+* If `std::is_callable<TF()>{}` evaluates to `false`, then it means that `TF` needs some arguments in order to be called - those arguments can be *curried*/*partially-applied*.
+
+* If it evaluates to `true`, it means that there are no more arguments to *curry*/*partially-apply* in `f`. Therefore, `f` can be invoked to get the final result:
+
+    ```cpp
+    return FWD(f)();
+    ```
+
+    `FWD` is a macro that expands to `std::forward<decltype(f)>(f)`. It's being used as `TF` could have a [*ref-qualified*](https://akrzemi1.wordpress.com/2014/06/02/ref-qualifiers/) `operator()` that behaves in different ways depending on `f`'s value category.
+
+We will now focus on the *recursive case* of `curry`. The first step is allowing *partial application* of arguments - since we don't know how many arguments will be bound in advance, a *generic variadic lambda* will be returned:
+
+```cpp
+return [xf = FWD_CAPTURE(f)](auto&&... partials) mutable constexpr 
+{
+    return curry(/* ... */);
+}
+```
+
+The returned lambda will:
+
+* Capture `f` by *forward capture* into `xf`.
+
+* Accept any amount of *forwarding references* in the `partials...` pack. These arguments will be *bound* for subsequent recursive calls.
+
+* Be marked as `mutable`: this is **important** as `xf` will be moved in the inner lambda's capture list.
+
+* Be marked as `constexpr`: this allows `curry` to be used as a [*constant expression*](http://en.cppreference.com/w/cpp/language/constant_expression) where possible.
+
+* Recursively call `curry` in its body, returning a new *curried*/*partially-applicable* function.
+
+Let's now focus on the `return curry(/*...*/)` statement. We want to return a *curried* version of a new intermediate callable object where:
+
+* The `partials...` pack values are *bound* for its invocation - these values will be captured by *forward capture* as `partial_pack`.
+
+* The *forward-captured* `xf` from the "parent" lambda is captured *by move* into `yf`. `xf` doesn't need to be forwarded as `FWD_CAPTURE(f)` returns a movable wrapper that either stores an *lvalue reference* or a *value*.
+
+```cpp
+return curry
+(
+    [
+        partial_pack = FWD_CAPTURE_PACK_AS_TUPLE(partials), 
+        yf = std::move(xf)
+    ]
+    (auto&&... xs) constexpr                
+        -> decltype(forward_like<TF>(xf.get())(FWD(partials)..., 
+                                               FWD(xs)...))
+    {
+        // ...
+    }
+);
+```
+
+The lambda passed to `curry` will accept any number of *forwarding references* in the `xs...` pack that will be used alongside the captured `partials...` to call `f`. The expected function call can be easily understood by the lambda's *trailing return type*:
+
+```cpp
+//          Unwrap `f` from the `xf` `FWD_CAPTURE` wrapper and propagate
+//          the original callable object's value category.
+//          vvvvvvvvvvvvvvvvvvvvvvvvv
+-> decltype(forward_like<TF>(xf.get())(FWD(partials)..., FWD(xs)...))
+//                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//          Unpack both the `partials` and `xs` argument packs in a
+//          single function call to `f`.
+```
+
+[`forward_like` is an utility function in my `vrm_core` library](https://github.com/SuperV1234/vrm_core/blob/437a0afb35385250cd75c22babaeeecbfa4dcacc/include/vrm/core/type_traits/forward_like.hpp) that *forwards* the passed argument with the same *value category* of the potentially-unrelated specified type.
+
+The expression inside the above return type essentially means: *"invoke the original callable object by unpacking `partials...` and `xs...` one after another"*.
+
+*(For some reason both `g++` and `clang++` throw a compilation error when `-> decltype(auto)` is used instead of the explicit one above. I am inclined to think this is a compiler bug.)*
+
+Lastly, let's analyze the body of the lambda.
+
+```cpp
+return apply_fwd_capture([&yf](auto&&... ys) constexpr 
+    -> decltype(forward_like<TF>(yf.get())(FWD(ys)...)) 
+{
+    return forward_like<TF>(yf.get())(FWD(ys)...);
+}, partial_pack, FWD_CAPTURE_PACK_AS_TUPLE(xs));
+```
+
+Remember: we're trying to call `f` by unpacking both `partials...` and `xs...` **at the same time**. The `partials...` pack is stored in a special wrapper returned by `FWD_CAPTURE_PACK_AS_TUPLE`. The `xs...` pack contains the arguments passed to the lambda.
+
+The `apply_fwd_capture` takes any number of wrapped *forward-capture pack wrappers* and uses them to invoke an user-provided callable object. The wrappers are unpacked at the same time, preserving the original value category. Since `xs...` is not wrapped, we're gonna explicitly do so by using the `FWD_CAPTURE_PACK_AS_TUPLE` macro.
+
+In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by expanding `partials...` and `xs...` correctly - those values will be then forwarded to the wrapped callable object `yf`.
+
+**That's it!** Eventually the recursion will end as one of the steps will produce an intermediate callable objects that satisfies `std::is_callable<TF()>{}`, giving back a "concrete" result to the caller.
+
+
+
 
 #### Generated assembly benchmarks
 
