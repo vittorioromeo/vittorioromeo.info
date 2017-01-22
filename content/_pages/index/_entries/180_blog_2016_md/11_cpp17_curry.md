@@ -130,6 +130,7 @@ As mentioned in the beginning of the article, these are the goals for our `curry
 
 Please note that the design and implementation of `curry` that I am going to cover is a *heavily-modified version* of [this snippet that was tweeted by **Julian Becker**](https://twitter.com/awtem/status/804781466852950017) - in fact, it was that tweet that inspired me to write this article. **Thanks!**
 
+*(Julian also wrote [an excellent answer](http://stackoverflow.com/questions/152005/how-can-currying-be-done-in-c/26768388#26768388) on the StackOverflow question "How can currying be done in C++?" - make sure to check it out.)*
 
 
 #### Example usage
