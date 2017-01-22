@@ -75,7 +75,7 @@ Basically, `add1_three(5)` is equivalent to `add2_one(2)(5)`, which is equivalen
 >
 > [*(from Wikipedia)*](https://en.wikipedia.org/wiki/Partial_application)
 
-Despite them being two separate concepts, *partial application* is very similar to *currying*. Even though I couldn't find a formal confirmation anywhere, I believe that thinking about *partial application* as a "generalized form of *currying*" can be helpful: instead of binding one argument and getting $arity - 1$ unary functions back, we can bind $n$ arguments at once and get another *partially-applicable* function with $arity - n$ arity.
+Despite them being two separate concepts, *partial application* is very similar to *currying*. Even though I couldn't find a formal confirmation anywhere, I believe that thinking about *partial application* as a "generalized form of *currying*" can be helpful: instead of binding one argument and getting $(arity - 1)$ unary functions back, we can bind $n$ arguments at once and get another *partially-applicable* function with $(arity - n)$ arity.
 
 Imagine we had add a `partial_add3` function which allowed *partial application* to sum three numbers:
 
@@ -124,7 +124,7 @@ As mentioned in the beginning of the article, these are the goals for our `curry
 
 * `curry` should not introduce any overhead compared to hand-written *currying*/*partial application*.
 
-
+<br>
 
 #### Credit where it's due
 
@@ -132,6 +132,7 @@ Please note that the design and implementation of `curry` that I am going to cov
 
 *(Julian also wrote [an excellent answer](http://stackoverflow.com/questions/152005/how-can-currying-be-done-in-c/26768388#26768388) on the StackOverflow question "How can currying be done in C++?" - make sure to check it out.)*
 
+<br>
 
 #### Example usage
 
@@ -228,6 +229,8 @@ Before we analyze the *declaration* and *definition* of `curry`, let's take a lo
 
 Now that you have an idea on how `curry` can be used, let's dive into its *declaration* and *definition*.
 
+<br>
+
 #### Declaration
 
 Given the constraints listed earlier, we can easily write down the *declaration* of `curry`.
@@ -260,7 +263,7 @@ auto& that_same_global = step2();
 
 Additionally, the `f` parameter is taken by [*forwarding-reference*](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4164.pdf). I will assume you're familiar with [*move semantics*](http://stackoverflow.com/questions/3106110/what-are-move-semantics), [`std::forward`](http://en.cppreference.com/w/cpp/utility/forward), and [**"forward captures"**](http://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html) for the rest of the article.
 
-
+<br>
 
 #### Definition
 
@@ -327,7 +330,7 @@ The *base case* branch is taken when `std::is_callable<TF()>{}` evaluates to `tr
     return FWD(f)();
     ```
 
-    `FWD` is a macro that expands to `std::forward<decltype(f)>(f)`. It's being used as `TF` could have a [*ref-qualified*](https://akrzemi1.wordpress.com/2014/06/02/ref-qualifiers/) `operator()` that behaves in different ways depending on `f`'s value category.
+    `FWD` is a macro that expands to `std::forward<decltype(f)>(f)`. It's being used as `TF` may have a [*ref-qualified*](https://akrzemi1.wordpress.com/2014/06/02/ref-qualifiers/) `operator()` that behaves differently depending on `f`'s value category.
 
 We will now focus on the *recursive case* of `curry`. The first step is allowing *partial application* of arguments - since we don't know how many arguments will be bound in advance, a *generic variadic lambda* will be returned:
 
@@ -342,7 +345,7 @@ The returned lambda will:
 
 * Capture `f` by *forward capture* into `xf`.
 
-* Accept any amount of *forwarding references* in the `partials...` pack. These arguments will be *bound* for subsequent recursive calls.
+* Accept any amount of *forwarding references* in the `partials...` pack. These arguments will be *bound* for subsequent calls.
 
 * Be marked as `mutable`: this is **important** as `xf` will be moved in the inner lambda's capture list.
 
@@ -413,9 +416,11 @@ In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by e
 
 ### Generated assembly benchmarks
 
-As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the lines of generated assembly for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive and representative of a real-world situation.
+As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the lines of generated assembly for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive or representative of a real-world situation.
 
+The compiler used for these measurements is **g++ 7.0.0 20170113**, compiled from the SVN repository.
 
+<br>
 
 #### `constexpr` variables
 
@@ -475,21 +480,21 @@ int main()
 
 **Baseline**
 
-|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
-|--------------------|------|------|------|------|-------
-|g++ 7.0.0 20170113  |  14  |  2   |  2   |  2   |  2
+|  O0  |  O1  |  O2  |  O3  |  Ofast
+|------|------|------|------|-------
+|  14  |  2   |  2   |  2   |  2
 
 **Curry**
 
-|                    |  O0            |  O1           |  O2           |  O3           |  Ofast
-|--------------------|----------------|---------------|---------------|---------------|-------------
-|g++ 7.0.0 20170113  |  14 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*
+|  O0            |  O1           |  O2           |  O3           |  Ofast
+|----------------|---------------|---------------|---------------|-------------
+|  14 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*
 
 As shown by the tables above, using `curry` introduces no additional overhead when used in the initialization of `constexpr` variables.
 
 [You can find the complete snippet on GitHub.](TODO)
 
-
+<br>
 
 #### `volatile` variables
 
@@ -501,21 +506,21 @@ Let's now measure the eventual overhead of `curry` when initializing `volatile` 
 
 **Baseline**
 
-|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
-|--------------------|------|------|------|------|-------
-|g++ 7.0.0 20170113  |  68  |  56  |  42  |  42  |  42
+|  O0  |  O1  |  O2  |  O3  |  Ofast
+|------|------|------|------|-------
+|  68  |  56  |  42  |  42  |  42
 
 **Curry**
 
-|                    |  O0            |  O1            |  O2            |  O3            |  Ofast
-|--------------------|----------------|----------------|----------------|----------------|--------------
-|g++ 7.0.0 20170113  |  68 *(+0.0%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
+|  O0            |  O1            |  O2            |  O3            |  Ofast
+|----------------|----------------|----------------|----------------|--------------
+|  68 *(+0.0%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
 
 Even with `volatile`, there isn't any additional overhead introduced by `curry`!
 
 [You can find the complete snippet on GitHub.](TODO)
 
-
+<br>
 
 #### Intermediate `curry` steps
 
@@ -543,17 +548,17 @@ volatile auto s7 = i7(7);
 
 **Baseline**
 
-|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
-|--------------------|------|------|------|------|-------
-|g++ 7.0.0 20170113  |  68  |  56  |  42  |  42  |  42
+|  O0  |  O1  |  O2  |  O3  |  Ofast
+|------|------|------|------|-------
+|  68  |  56  |  42  |  42  |  42
 
 **Curry**
 
-|                    |  O0                |  O1            |  O2            |  O3            |  Ofast
-|--------------------|--------------------|----------------|----------------|----------------|--------------
-|g++ 7.0.0 20170113  |  19141 *(+2804%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
+|  O0                |  O1            |  O2            |  O3            |  Ofast
+|--------------------|----------------|----------------|----------------|--------------
+|  19141 *(+2804%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
 
-From optimization level `-O1` onwards everything is great: **zero overhead**! When using `-O0`, though, there is a quite noticeable overhead of $+2804%$ extra generated assembly compared to the baseline.
+From optimization level `-O1` onwards everything is great: **zero overhead**! When using `-O0`, though, there is a quite noticeable overhead of $+2804\%$ extra generated assembly compared to the baseline.
 
 
 
