@@ -401,7 +401,7 @@ return apply_fwd_capture([&yf](auto&&... ys) constexpr
 
 Remember: we're trying to call `f` by unpacking both `partials...` and `xs...` **at the same time**. The `partials...` pack is stored in a special wrapper returned by `FWD_CAPTURE_PACK_AS_TUPLE`. The `xs...` pack contains the arguments passed to the lambda.
 
-The `apply_fwd_capture` takes any number of wrapped *forward-capture pack wrappers* and uses them to invoke an user-provided callable object. The wrappers are unpacked at the same time, preserving the original value category. Since `xs...` is not wrapped, we're gonna explicitly do so by using the `FWD_CAPTURE_PACK_AS_TUPLE` macro.
+The `apply_fwd_capture` takes any number of wrapped *forward-capture pack wrappers* and uses them to invoke an user-provided callable object. The wrappers are unpacked at the same time, preserving the original value category. Since `xs...` is not wrapped, we're going to explicitly do so by using the `FWD_CAPTURE_PACK_AS_TUPLE` macro.
 
 In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by expanding `partials...` and `xs...` correctly - those values will be then forwarded to the wrapped callable object `yf`.
 
@@ -410,15 +410,160 @@ In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by e
 
 
 
-#### Generated assembly benchmarks
+### Generated assembly benchmarks
+
+As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the lines of generated assembly for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive and representative of a real-world situation.
+
+
+
+#### `constexpr` variables
+
+When `curry` is used in a `constexpr` context it is trivial to prove that it gets completely optimized out by the compiler. Regardless, here's the snippet that's going to be measured:
 
 ```cpp
-sdgjs
+int main()
+{
+    const auto sum = [](auto a, auto b, auto c, auto d, auto e, auto f, auto g,
+        auto h) constexpr
+    {
+        return a + b + c + d + e + f + g + h;
+    };
+
+    constexpr auto expected = sum(0, 1, 2, 3, 4, 5, 6, 7);
+
+#if defined(VR_BASELINE)
+    constexpr auto s0 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s1 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s2 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s3 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s4 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s5 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s6 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s7 = sum(0, 1, 2, 3, 4, 5, 6, 7);
+#elif defined(VR_CURRY)
+    constexpr auto s0 = curry(sum)(0, 1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s1 = curry(sum)(0)(1, 2, 3, 4, 5, 6, 7);
+    constexpr auto s2 = curry(sum)(0, 1)(2, 3, 4, 5, 6, 7);
+    constexpr auto s3 = curry(sum)(0, 1, 2)(3, 4, 5, 6, 7);
+    constexpr auto s4 = curry(sum)(0, 1, 2, 3)(4, 5, 6, 7);
+    constexpr auto s5 = curry(sum)(0, 1, 2, 3, 4)(5, 6, 7);
+    constexpr auto s6 = curry(sum)(0, 1, 2, 3, 4, 5)(6, 7);
+    constexpr auto s7 = curry(sum)(0, 1, 2, 3, 4, 5, 6)(7);
+#endif
+
+    static_assert(s0 == expected);
+    static_assert(s1 == expected);
+    static_assert(s2 == expected);
+    static_assert(s3 == expected);
+    static_assert(s4 == expected);
+    static_assert(s5 == expected);
+    static_assert(s6 == expected);
+    static_assert(s7 == expected);
+
+    return s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7;
+}
 ```
 
-#### Compiler bugs
+* `sum` is a `constexpr` generic lambda with an arity of $8$.
 
+* When measuring the baseline, the `s0`...`s7` `constexpr` variables are initialized by simply calling `sum`.
+
+* When using `curry`, `s0`...`s7` are initialized by using various invocations of `curry(sum)`.
+
+* In the end, the expected sum result is statically asserted and returned from `main`. 
+
+**Baseline**
+
+|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
+|--------------------|------|------|------|------|-------
+|g++ 7.0.0 20170113  |  14  |  2   |  2   |  2   |  2
+
+**Curry**
+
+|                    |  O0            |  O1           |  O2           |  O3           |  Ofast
+|--------------------|----------------|---------------|---------------|---------------|-------------
+|g++ 7.0.0 20170113  |  14 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*  |  2 *(+0.0%)*
+
+As shown by the tables above, using `curry` introduces no additional overhead when used in the initialization of `constexpr` variables.
+
+[You can find the complete snippet on GitHub.](TODO)
+
+
+
+#### `volatile` variables
+
+Let's now measure the eventual overhead of `curry` when initializing `volatile` variables. The snippet is almost identical to the previous one, except for a few differences:
+
+* The `s0`...`s7` variables are now marked as `volatile` instead of `constexpr`.
+
+* The `static_assert(x)` checks have been replaced with `if(!x){ return -1; }`.
+
+**Baseline**
+
+|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
+|--------------------|------|------|------|------|-------
+|g++ 7.0.0 20170113  |  68  |  56  |  42  |  42  |  42
+
+**Curry**
+
+|                    |  O0            |  O1            |  O2            |  O3            |  Ofast
+|--------------------|----------------|----------------|----------------|----------------|--------------
+|g++ 7.0.0 20170113  |  68 *(+0.0%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
+
+Even with `volatile`, there isn't any additional overhead introduced by `curry`!
+
+[You can find the complete snippet on GitHub.](TODO)
+
+
+
+#### Intermediate `curry` steps
+
+The above benchmarks never stored any intermediate `curry` return value - the entire expression was part of the `s0`...`s7` initializer expression. Let's see what happens when those intermediate steps are stored as follows:
 
 ```cpp
-fgsdfd
+auto i0 = curry(sum);
+auto i1 = curry(sum)(0);
+auto i2 = curry(sum)(0, 1);
+auto i3 = curry(sum)(0, 1, 2);
+auto i4 = curry(sum)(0, 1, 2, 3);
+auto i5 = curry(sum)(0, 1, 2, 3, 4);
+auto i6 = curry(sum)(0, 1, 2, 3, 4, 5);
+auto i7 = curry(sum)(0, 1, 2, 3, 4, 5, 6);
+
+volatile auto s0 = i0(0, 1, 2, 3, 4, 5, 6, 7);
+volatile auto s1 = i1(1, 2, 3, 4, 5, 6, 7);
+volatile auto s2 = i2(2, 3, 4, 5, 6, 7);
+volatile auto s3 = i3(3, 4, 5, 6, 7);
+volatile auto s4 = i4(4, 5, 6, 7);
+volatile auto s5 = i5(5, 6, 7);
+volatile auto s6 = i6(6, 7);
+volatile auto s7 = i7(7);
 ```
+
+**Baseline**
+
+|                    |  O0  |  O1  |  O2  |  O3  |  Ofast
+|--------------------|------|------|------|------|-------
+|g++ 7.0.0 20170113  |  68  |  56  |  42  |  42  |  42
+
+**Curry**
+
+|                    |  O0                |  O1            |  O2            |  O3            |  Ofast
+|--------------------|--------------------|----------------|----------------|----------------|--------------
+|g++ 7.0.0 20170113  |  19141 *(+2804%)*  |  56 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*  |  42 *(+0.0%)*
+
+From optimization level `-O1` onwards everything is great: **zero overhead**! When using `-O0`, though, there is a quite noticeable overhead of $+2804%$ extra generated assembly compared to the baseline.
+
+
+
+### Compiler bugs
+
+> `curry` looks great! Zero run-time overhead, *partial application* and *currying* all in one... what's the catch?
+
+Well, the hardest part is... getting `curry` to compile. As seen from [these tweets](https://twitter.com/supahvee1234/status/811246691731042304) between me and Julian Becker, it seems that both `g++` and `clang++` fail with *internal compiler errors* for different reasons. 
+
+* As demonstrated by this [snippet on *gcc.godbolt.org*](https://godbolt.org/g/9rP7ZO), an *internal compiler error* is produced by g++. Commenting out the *trailing return type* on line 158 fixes the ICE. I reported a minimal version of this issue as [bug #78006](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78006).
+
+* clang++'s frontend crashes in versions 3.9 and 4.0 with [the following snippet on *wandbox*](http://melpon.org/wandbox/permlink/ahl5bK74C86ddZga). I've reported this as [bug #31435](https://llvm.org/bugs/show_bug.cgi?id=31435).
+
+I managed to compile `curry` and the snippets used for this article by cloning the latest version of gcc from SVN and compiling it on my machine - I assume that some of the crashes were fixed in on *trunk* and *gcc.godbolt.org* is still a little bit behind.
