@@ -432,7 +432,7 @@ In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by e
 
 ### Generated assembly benchmarks
 
-As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the number of generated assembly lines for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive or representative of a real-world situation. *(The benchmarks were generated [with this Python script](TODO), which also prints out the assembly.)*
+As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the number of generated assembly lines for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive or representative of a real-world situation. *(The benchmarks were generated [with this Python script](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/cpp17_curry/bench/dobenchs.py), which also prints out the assembly.)*
 
 The compiler used for these measurements is **g++ 7.0.0 20170113**, compiled from the SVN repository.
 
@@ -508,7 +508,7 @@ int main()
 
 As shown by the tables above, using `curry` introduces no additional overhead when used in the initialization of `constexpr` variables.
 
-[You can find the complete snippet on GitHub.](TODO)
+[You can find the complete snippet on GitHub.](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/cpp17_curry/bench/b0_constexpr.cpp)
 
 <br>
 
@@ -534,7 +534,7 @@ Let's now measure the eventual overhead of `curry` when initializing `volatile` 
 
 Even with `volatile`, there isn't any additional overhead introduced by `curry`!
 
-[You can find the complete snippet on GitHub.](TODO)
+[You can find the complete snippet on GitHub.](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/cpp17_curry/bench/b1_volatile.cpp)
 
 <br>
 
@@ -576,7 +576,9 @@ volatile auto s7 = i7(7);
 
 From optimization level `-O1` onwards everything is great: **zero overhead**! When using `-O0`, though, there is a quite noticeable overhead of $+2804\%$ extra generated assembly compared to the baseline.
 
-*(Some additional benchmarks with `volatile` lambda parameters and values are [available on the GitHub repository]().)*
+[You can find the complete snippet on GitHub.](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/cpp17_curry/bench/b2_intermediate.cpp)
+
+*(Some additional benchmarks with `volatile` lambda parameters and values are [available on the GitHub repository](https://github.com/SuperV1234/vittorioromeo.info/tree/master/extra/cpp17_curry/bench).)*
 
 
 ### Compiler bugs
