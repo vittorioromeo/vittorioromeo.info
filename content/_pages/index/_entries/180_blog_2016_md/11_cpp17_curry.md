@@ -595,4 +595,4 @@ I managed to compile `curry` and the snippets used for this article by cloning t
 
 ### Acknowledgments
 
-Thanks to *Julian Becker* and *Jackie Kay* for proofreading the article and providing very valuable feedback.
+Many thanks to [*Julian Becker*](https://twitter.com/awtem) and [*Jackie Kay*](https://twitter.com/jackayline) for proofreading the article and providing very valuable feedback.

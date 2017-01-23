@@ -5,12 +5,12 @@
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "cpp17_curry",
-            "tags": ["c++", "c++14", "c++17", "lambda", "function", "performance"],
+            "tags": ["c++", "c++17", "lambda", "functional", "curry", "partial"],
             "expand":
             {
-                "Title": "zero-overhead C++17 curry & partial application",
+                "Title": "zero-overhead C++17 currying & partial application",
                 "Text": "180_blog_2016_md/11_cpp17_curry.md",
-                "Date": "XX january 2016"
+                "Date": "23 january 2017"
             }
         },
         {
