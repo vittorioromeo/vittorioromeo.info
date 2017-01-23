@@ -65,6 +65,20 @@ add1_three(5); // Returns `8`.
 
 Basically, `add1_three(5)` is equivalent to `add2_one(2)(5)`, which is equivalent to `curried_add3(1)(2)(5)`.
 
+A slightly more realistic example could involve [`std::find`](http://en.cppreference.com/w/cpp/algorithm/find):
+
+```cpp
+std::vector<std::string> names{/* ... */}
+
+auto find_in_names = 
+    curried_find(std::begin(names))(std::end(names));
+
+auto jack = find_in_names("Jack");
+auto rose = find_in_names("Rose");
+```
+
+In the above code snippet some repetition between `std::find` invocations is cleanly avoided thanks to *currying*.
+
 *([This short article](http://cukic.co/2013/08/07/curry-all-over-the-c11/) by Ivan Čukić has some additional interesting examples of currying in C++.)*
 
 
@@ -92,6 +106,8 @@ As you can see, we can decide how many arguments to bind *(including zero)*. We 
 template <typename... Ts>
 auto partial_add3(Ts... xs)
 {
+    static_assert(sizeof...(xs) <= 3);
+
     if constexpr (sizeof...(xs) == 3)
     {
         // Base case: evaluate and return the sum.
@@ -387,7 +403,7 @@ The lambda passed to `curry` will accept any number of *forwarding references* i
 //          single function call to `f`.
 ```
 
-[`forward_like` is an utility function in my `vrm_core` library](https://github.com/SuperV1234/vrm_core/blob/437a0afb35385250cd75c22babaeeecbfa4dcacc/include/vrm/core/type_traits/forward_like.hpp) that *forwards* the passed argument with the same *value category* of the potentially-unrelated specified type.
+[`forward_like` is an utility function in my `vrm_core` library](https://github.com/SuperV1234/vrm_core/blob/437a0afb35385250cd75c22babaeeecbfa4dcacc/include/vrm/core/type_traits/forward_like.hpp) that *forwards* the passed argument with the same *value category* of the potentially-unrelated specified type. It basically copies the "*lvalue/rvalue*-ness" of the user-provided template parameter and *applies* it to its argument. 
 
 The expression inside the above return type essentially means: *"invoke the original callable object by unpacking `partials...` and `xs...` one after another"*.
 
@@ -416,7 +432,7 @@ In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by e
 
 ### Generated assembly benchmarks
 
-As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the lines of generated assembly for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive or representative of a real-world situation.
+As I did in my previous [**"passing functions to functions"**](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article, I will compare the number of generated assembly lines for different code snippets where `curry` is used. The point of these "benchmarks" is giving the readers an idea on how easy it is for the compiler to optimize `curry` out - they are in no way exhaustive or representative of a real-world situation. *(The benchmarks were generated [with this Python script](TODO), which also prints out the assembly.)*
 
 The compiler used for these measurements is **g++ 7.0.0 20170113**, compiled from the SVN repository.
 
@@ -560,6 +576,7 @@ volatile auto s7 = i7(7);
 
 From optimization level `-O1` onwards everything is great: **zero overhead**! When using `-O0`, though, there is a quite noticeable overhead of $+2804\%$ extra generated assembly compared to the baseline.
 
+*(Some additional benchmarks with `volatile` lambda parameters and values are [available on the GitHub repository]().)*
 
 
 ### Compiler bugs
@@ -573,3 +590,9 @@ Well, the hardest part is... getting `curry` to compile. As seen from [these twe
 * clang++'s frontend crashes in versions 3.9 and 4.0 with [the following snippet on *wandbox*](http://melpon.org/wandbox/permlink/ahl5bK74C86ddZga). I've reported this as [bug #31435](https://llvm.org/bugs/show_bug.cgi?id=31435).
 
 I managed to compile `curry` and the snippets used for this article by cloning the latest version of gcc from SVN and compiling it on my machine - I assume that some of the crashes were fixed in on *trunk* and *gcc.godbolt.org* is still a little bit behind.
+
+
+
+### Acknowledgments
+
+Thanks to *Julian Becker* and *Jackie Kay* for proofreading the article and providing very valuable feedback.
