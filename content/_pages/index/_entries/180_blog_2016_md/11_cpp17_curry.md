@@ -585,9 +585,9 @@ From optimization level `-O1` onwards everything is great: **zero overhead**! Wh
 
 Well, the hardest part is... getting `curry` to compile. As seen from [these tweets](https://twitter.com/supahvee1234/status/811246691731042304) between me and Julian Becker, it seems that both `g++` and `clang++` fail with *internal compiler errors* for different reasons. 
 
-* As demonstrated by this [snippet on *gcc.godbolt.org*](https://godbolt.org/g/9rP7ZO), an *internal compiler error* is produced by g++. Commenting out the *trailing return type* on line 158 fixes the ICE. I reported a minimal version of this issue as [bug #78006](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78006).
+* This [snippet on *gcc.godbolt.org*](https://godbolt.org/g/9rP7ZO) produces a g++ *internal compiler error*. Commenting out the *trailing return type* on line 158 fixes the ICE. I reported a minimal version of this issue as [bug #78006](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78006).
 
-* clang++'s frontend crashes in versions 3.9 and 4.0 with [the following snippet on *wandbox*](http://melpon.org/wandbox/permlink/ahl5bK74C86ddZga). I've reported this as [bug #31435](https://llvm.org/bugs/show_bug.cgi?id=31435).
+* clang++'s frontend crashes in versions 3.9 and 4.0 with [this *wandbox* snippet](http://melpon.org/wandbox/permlink/ahl5bK74C86ddZga). I've reported this as [bug #31435](https://llvm.org/bugs/show_bug.cgi?id=31435).
 
 I managed to compile `curry` and the snippets used for this article by cloning the latest version of gcc from SVN and compiling it on my machine - I assume that some of the crashes were fixed in on *trunk* and *gcc.godbolt.org* is still a little bit behind.
 
