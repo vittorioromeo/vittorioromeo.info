@@ -466,6 +466,38 @@ void for_all_asides(const ssvufs::Path& page_path, TF&& f)
 }
 
 
+auto escape_xml(const std::string& x)
+{
+    std::string s;
+    s.reserve(x.size() * 1.4f);
+
+    for(std::size_t i = 0; i != x.size(); ++i)
+    {
+        switch(x[i])
+        {
+            case '&':
+                s.append("&amp;");
+                break;
+            case '\"':
+                s.append("&quot;");
+                break;
+            case '\'':
+                s.append("&ai;");
+                break;
+            case '<':
+                s.append("&lt;");
+                break;
+            case '>':
+                s.append("&gt;");
+                break;
+            default:
+                s.append(&x[i], 1);
+                break;
+        }
+    }
+
+    return s;
+}
 
 struct context
 {
@@ -511,7 +543,7 @@ struct subpage_expansion
             }
 
             Dictionary d_item;
-            d_item["Title"] = aee["Title"].asStr();
+            d_item["Title"] = escape_xml(aee["Title"].asStr());
             d_item["Link"] = utils::result_to_website(ae._output_path);
             d_item["Date"] = aee["Date"].asStr();
 
