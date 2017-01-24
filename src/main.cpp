@@ -482,7 +482,7 @@ auto escape_xml(const std::string& x)
                 s.append("&quot;");
                 break;
             case '\'':
-                s.append("&ai;");
+                s.append("&apos;");
                 break;
             case '<':
                 s.append("&lt;");
