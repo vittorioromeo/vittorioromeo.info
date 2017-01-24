@@ -1,6 +1,7 @@
 #include "./fwd_capture.hpp"
 #include <cassert>
 #include <cstdio>
+#include <iostream>
 #include <experimental/tuple>
 #include <functional>
 #include <type_traits>
@@ -20,7 +21,7 @@ constexpr decltype(auto) curry(TF&& f)
     // number of arguments. 
     // (Recursive case.)
 
-    if constexpr (std::is_callable<TF()>{}) 
+    if constexpr (std::is_callable<TF&&()>{}) 
     {   
         // Base case.
         return FWD(f)();
@@ -97,6 +98,32 @@ struct nocopy_callable
     }
 };
 
+auto fsum(int a, int b, int c)
+{
+    return a + b + c;
+}
+
+struct s_sum
+{
+    auto sum(int a, int b, int c)
+    {
+        return a + b + c;
+    }
+};
+
+struct test
+{
+    test() = default;
+    test(const test&)
+    {
+        std::cout << "copy\n";
+    }
+    test(test&&)
+    {
+        std::cout << "move\n";
+    }
+};
+
 int main()
 {
     const auto sum = [](auto a, auto b, auto c, auto d, auto e, auto f, auto g,
@@ -156,4 +183,27 @@ int main()
     greet(); // Prints "hi!".
 
     curry(greet);
+
+
+    assert(curry(fsum)(0)(1)(2) == 3);
+
+    {
+        s_sum ss;
+
+        assert(std::invoke(&s_sum::sum, ss, 0, 1, 2));
+
+        // TODO:
+        // assert(curry(&s_sum::sum)(ss)(0)(1)(2) == 3);
+    }
+
+    {
+        auto ftest = [](test x0, test x1) {
+
+        };
+
+        auto cft0 = curry(ftest)(test{});
+        cft0(test{});
+        cft0(test{});
+        cft0(test{});
+    }
 }

@@ -126,7 +126,7 @@ auto partial_add3(Ts... xs)
 
 [**wandbox example**](http://melpon.org/wandbox/permlink/AFmdO0Cpkt5zRcJC)
 
-Writing code that enables *currying* and *partial application* for every function is cumbersome. Let's write a generic `curry` function that, given a callable object `f`, returns a *curried*/*partially-applicable* version of `f`!
+Writing code that enables *currying* and *partial application* for every function is cumbersome. Let's write a generic `curry` function that, given a function object `f`, returns a *curried*/*partially-applicable* version of `f`!
 
 
 
@@ -134,7 +134,7 @@ Writing code that enables *currying* and *partial application* for every functio
 
 As mentioned in the beginning of the article, these are the goals for our `curry` function:
 
-* Given a generic callable object `f`, invoking `curry(f)` returns a *curried*/*partially-applicable* version of `f`.
+* Given a generic function object `f`, invoking `curry(f)` returns a *curried*/*partially-applicable* version of `f`.
 
 * If `f` is `constexpr`-friendly, the returned one will be as well.
 
@@ -166,7 +166,7 @@ Before we analyze the *declaration* and *definition* of `curry`, let's take a lo
     /* curry(greet)(); */
     ```
 
-    As you can see, in the case of a *nullary callable object* `f`, invoking `curry(f)` calls the original object immediately. 
+    As you can see, in the case of a *nullary function object* `f`, invoking `curry(f)` calls the original object immediately. 
 
 * **Unary functions**:
 
@@ -258,7 +258,7 @@ constexpr decltype(auto) curry(TF&& f);
 
 > Why `decltype(auto)` instead of `auto`? 
 
-Because the *final step* of `curry` needs to return exactly what the original callable object does. Example:
+Because the *final step* of `curry` needs to return exactly what the original function object does. Example:
 
 ```cpp
 auto f = [](auto, auto) -> auto& 
@@ -271,10 +271,9 @@ auto step0 = curry(f);
 
 // Same as above.
 auto step1 = step0('a');
-auto step2 = step1('b');
 
-// Now `step2` has to return a reference!
-auto& that_same_global = step2();
+// Now `step1` has to return a reference!
+auto& that_same_global = step1('b');
 ```
 
 Additionally, the `f` parameter is taken by [*forwarding-reference*](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4164.pdf). I will assume you're familiar with [*move semantics*](http://stackoverflow.com/questions/3106110/what-are-move-semantics), [`std::forward`](http://en.cppreference.com/w/cpp/utility/forward), and [**"forward captures"**](http://vittorioromeo.info/index/blog/capturing_perfectly_forwarded_objects_in_lambdas.html) for the rest of the article.
@@ -289,7 +288,7 @@ I'll show the complete definition of `curry` first, and then analyze all the par
 template <typename TF>
 constexpr decltype(auto) curry(TF&& f) 
 {
-    if constexpr (std::is_callable<TF()>{}) 
+    if constexpr (std::is_callable<TF&&()>{}) 
     {   
         return FWD(f)();
     }
@@ -325,7 +324,7 @@ The first thing to notice is the **recursive** structure of `curry`.
 template <typename TF>
 constexpr decltype(auto) curry(TF&& f) 
 {
-    if constexpr (std::is_callable<TF()>{}) 
+    if constexpr (std::is_callable<TF&&()>{}) 
     {
         return FWD(f)();
     }
@@ -336,9 +335,9 @@ constexpr decltype(auto) curry(TF&& f)
 }
 ```
 
-The *base case* branch is taken when `std::is_callable<TF()>{}` evaluates to `true`. [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_callable) is a new C++17 *type trait* that checks whether or not a particular object types can be called with a specific set of argument types.
+The *base case* branch is taken when `std::is_callable<TF&&()>{}` evaluates to `true`. [`std::is_callable`](http://en.cppreference.com/w/cpp/types/is_f) is a new C++17 *type trait* that checks whether or not a particular object types can be called with a specific set of argument types.
 
-* If `std::is_callable<TF()>{}` evaluates to `false`, then it means that `TF` needs some arguments in order to be called - those arguments can be *curried*/*partially-applied*.
+* If `std::is_callable<TF&&()>{}` evaluates to `false`, then it means that `TF` needs some arguments in order to be called - those arguments can be *curried*/*partially-applied*.
 
 * If it evaluates to `true`, it means that there are no more arguments to *curry*/*partially-apply* in `f`. Therefore, `f` can be invoked to get the final result:
 
@@ -367,9 +366,11 @@ The returned lambda will:
 
 * Be marked as `constexpr`: this allows `curry` to be used as a [*constant expression*](http://en.cppreference.com/w/cpp/language/constant_expression) where possible.
 
+    * Note that, since C++17, [**lambdas are implicity `constexpr`**](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4487.pdf) unless they fail to satisfy any [`constexpr` function requirement](http://en.cppreference.com/w/cpp/language/constexpr).
+
 * Recursively call `curry` in its body, returning a new *curried*/*partially-applicable* function.
 
-Let's now focus on the `return curry(/*...*/)` statement. We want to return a *curried* version of a new intermediate callable object where:
+Let's now focus on the `return curry(/*...*/)` statement. We want to return a *curried* version of a new intermediate function object where:
 
 * The `partials...` pack values are *bound* for its invocation - these values will be captured by *forward capture* as `partial_pack`.
 
@@ -395,7 +396,7 @@ The lambda passed to `curry` will accept any number of *forwarding references* i
 
 ```cpp
 //          Unwrap `f` from the `xf` `FWD_CAPTURE` wrapper and propagate
-//          the original callable object's value category.
+//          the original function object's value category.
 //          vvvvvvvvvvvvvvvvvvvvvvvvv
 -> decltype(forward_like<TF>(xf.get())(FWD(partials)..., FWD(xs)...))
 //                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -405,9 +406,7 @@ The lambda passed to `curry` will accept any number of *forwarding references* i
 
 [`forward_like` is an utility function in my `vrm_core` library](https://github.com/SuperV1234/vrm_core/blob/437a0afb35385250cd75c22babaeeecbfa4dcacc/include/vrm/core/type_traits/forward_like.hpp) that *forwards* the passed argument with the same *value category* of the potentially-unrelated specified type. It basically copies the "*lvalue/rvalue*-ness" of the user-provided template parameter and *applies* it to its argument. 
 
-The expression inside the above return type essentially means: *"invoke the original callable object by unpacking `partials...` and `xs...` one after another"*.
-
-*(For some reason both `g++` and `clang++` throw a compilation error when `-> decltype(auto)` is used instead of the explicit one above. I am inclined to think this is a compiler bug.)*
+The expression inside the above return type essentially means: *"invoke the original function object by unpacking `partials...` and `xs...` one after another"*.
 
 Lastly, let's analyze the body of the lambda.
 
@@ -421,11 +420,11 @@ return apply_fwd_capture([&yf](auto&&... ys) constexpr
 
 Remember: we're trying to call `f` by unpacking both `partials...` and `xs...` **at the same time**. The `partials...` pack is stored in a special wrapper returned by `FWD_CAPTURE_PACK_AS_TUPLE`. The `xs...` pack contains the arguments passed to the lambda.
 
-The `apply_fwd_capture` takes any number of wrapped *forward-capture pack wrappers* and uses them to invoke an user-provided callable object. The wrappers are unpacked at the same time, preserving the original value category. Since `xs...` is not wrapped, we're going to explicitly do so by using the `FWD_CAPTURE_PACK_AS_TUPLE` macro.
+The `apply_fwd_capture` takes any number of wrapped *forward-capture pack wrappers* and uses them to invoke an user-provided function object. The wrappers are unpacked at the same time, preserving the original value category. Since `xs...` is not wrapped, we're going to explicitly do so by using the `FWD_CAPTURE_PACK_AS_TUPLE` macro.
 
 In short, `apply_fwd_capture` will invoke the *`constexpr` variadic lambda* by expanding `partials...` and `xs...` correctly - those values will be then forwarded to the wrapped callable object `yf`.
 
-**That's it!** Eventually the recursion will end as one of the steps will produce an intermediate callable objects that satisfies `std::is_callable<TF()>{}`, giving back a "concrete" result to the caller.
+**That's it!** Eventually the recursion will end as one of the steps will produce an intermediate function objects that satisfies `std::is_callable<TF&&()>{}`, giving back a "concrete" result to the caller.
 
 
 

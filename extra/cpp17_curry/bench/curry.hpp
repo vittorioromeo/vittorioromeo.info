@@ -202,7 +202,7 @@ constexpr decltype(auto) curry(TF&& f)
     // (Recursive case.)
 
     if
-        constexpr(std::is_callable<TF()>{})
+        constexpr(std::is_callable<TF&&()>{})
         {
             // Base case.
             return FWD(f)();
