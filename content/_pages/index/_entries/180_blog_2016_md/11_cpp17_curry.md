@@ -181,7 +181,7 @@ Before we analyze the *declaration* and *definition* of `curry`, let's take a lo
     // `plus_one` is "perfectly-captured" in the wrapper.
     auto curried_plus_one = curry(plus_one);
     
-    curried_plus_one(1); // Returns `1`.
+    curried_plus_one(1); // Returns `2`.
     ```
 
     > What does *perfectly-captured* mean? 
