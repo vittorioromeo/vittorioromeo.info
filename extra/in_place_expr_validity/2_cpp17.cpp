@@ -5,15 +5,6 @@
 #include <utility>
 #include <experimental/tuple>
 
-template <typename T>
-struct type_w
-{
-    using type = T;
-};
-
-template <typename T>
-constexpr type_w<T> type_c{};
-
 template <typename ...Ts>
 struct validity_checker {
     template <typename TF>
