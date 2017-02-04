@@ -17,20 +17,9 @@ constexpr type_w<T> type_c{};
 template <typename ...Ts>
 struct validity_checker {
     template <typename TF>
-    struct helper
+    static constexpr auto is_valid(TF)
     {
-        template <typename ...T2s>
-        constexpr auto operator()(T2s... ts)
-        {
-            return std::is_callable<std::decay_t<TF>(
-                typename decltype(ts)::type...)>{};
-        }
-    };
-
-    template <typename TF>
-    constexpr auto is_valid(TF)
-    {
-        return helper<TF>{}(type_c<Ts>...);
+        return std::is_callable<std::decay_t<TF>(Ts...)>{};
     }
 };
 
@@ -38,13 +27,13 @@ struct validity_checker {
 // order preprocessor macro).
 
 #define IS_VALID_EXPANDER_2(...) \
-    is_valid([](auto _0, auto _1) constexpr->decltype(__VA_ARGS__){})
+    ([](auto _0, auto _1) constexpr->decltype(__VA_ARGS__){})
 
 #define IS_VALID_EXPANDER_1(...) \
-    is_valid([](auto _0) constexpr->decltype(__VA_ARGS__){})
+    ([](auto _0) constexpr->decltype(__VA_ARGS__){})
 
 #define IS_VALID(...) \
-    validity_checker<__VA_ARGS__>().VRM_PP_CAT(IS_VALID_EXPANDER_, VRM_PP_ARGCOUNT(__VA_ARGS__))
+    validity_checker<__VA_ARGS__>::is_valid VRM_PP_CAT(IS_VALID_EXPANDER_, VRM_PP_ARGCOUNT(__VA_ARGS__))
 
 struct Cat
 {
