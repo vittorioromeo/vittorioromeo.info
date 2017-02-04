@@ -410,3 +410,21 @@ auto some_generic_function(T0 a, T1 b)
 * `g++` [has](https://gcc.gnu.org/projects/cxx-status.html#cxx1z), but there's a [bug I found](http://stackoverflow.com/questions/40283001) and [reported *(as #78131)*](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78131).
 
 `IS_VALID` does work properly with `g++` trunk in other contexts where a *constant expression* is required though *(e.g. non-template context `if constexpr(...)` and `static_assert`)*.
+
+
+
+### Addendum {#addendum}
+
+*This section was written on 04/02/2017.*
+
+#### Major simplification
+
+When I woke up today I was extremely happy to see that [**Fabio**](https://disqus.com/by/fabio_a/) managed to simplify `IS_VALID`'s implementation significantly. He posted his work in the comments and [sent a PR](https://github.com/SuperV1234/vittorioromeo.info/pull/5) that I accepted. Thanks - very appreciated!
+
+I decided to cover his improvements here. Readers interested in implementing `IS_VALID` 
+
+
+
+#### "Reverse" syntax
+
+I've experimented with reversing the syntax of `IS_VALID`, in order to have the
