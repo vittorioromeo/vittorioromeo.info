@@ -419,12 +419,55 @@ auto some_generic_function(T0 a, T1 b)
 
 #### Major simplification
 
-When I woke up today I was extremely happy to see that [**Fabio**](https://disqus.com/by/fabio_a/) managed to simplify `IS_VALID`'s implementation significantly. He posted his work in the comments and [sent a PR](https://github.com/SuperV1234/vittorioromeo.info/pull/5) that I accepted. Thanks - very appreciated!
+When I woke up today I was extremely happy to see that [**Fabio**](https://disqus.com/by/fabio_a/) managed to simplify `IS_VALID`'s implementation significantly. He posted his work in the comments and [sent a PR](https://github.com/SuperV1234/vittorioromeo.info/pull/5) that I accepted. **Thanks - very appreciated!**
 
-I decided to cover his improvements here. Readers interested in implementing `IS_VALID` 
+I decided to cover his improvements here. Readers interested in implementing `IS_VALID` should definitely use his simplified version.
+
+* Avoid using `type_w` - it was not necessary after all! `validity_checker` can be defined as:
+
+    ```cpp
+    template <typename ...Ts>
+    struct validity_checker 
+    {
+        template <typename TF>
+        static constexpr auto is_valid(TF)
+        {
+            return std::is_callable<std::decay_t<TF>(Ts...)>{};
+        }
+    };
+    ```
+
+    As an example, for one argument, `IS_VALID` can be expanded to:
+
+    ```cpp
+    #define IS_VALID_EXPANDER_END(...) (__VA_ARGS__){})
+
+    #define IS_VALID_1(...) \
+        validity_checker<__VA_ARGS__>::is_valid([](auto _0) constexpr \ 
+        -> decltype IS_VALID_EXPANDER_END
+    ```
 
 
 
-#### "Reverse" syntax
+* Generating variadic expansions of `IS_VALID` on the fly using my [`vrm_pp`](https://github.com/SuperV1234/vrm_pp) preprocessor metaprogramming library.
 
-I've experimented with reversing the syntax of `IS_VALID`, in order to have the
+    ```cpp
+    #define IS_VALID_EXPANDER_BEGIN(count) \
+        is_valid([](VRM_PP_REPEAT_INC(count, IS_VALID_EXPANDER_MIDDLE,_)) \ 
+        constexpr -> decltype IS_VALID_EXPANDER_END
+
+    #define IS_VALID_EXPANDER_MIDDLE(idx, _) \
+        VRM_PP_COMMA_IF(idx) auto _##idx 
+
+    #define IS_VALID_EXPANDER_END(...) (__VA_ARGS__){})
+
+    #define IS_VALID(...) \
+        validity_checker<__VA_ARGS__>:: \
+        IS_VALID_EXPANDER_BEGIN(VRM_PP_ARGCOUNT(__VA_ARGS__))
+    ```
+    
+    * `VRM_PP_REPEAT_INC(count, IS_VALID_EXPANDER_MIDDLE,_)` is used to generate the `auto _0, auto_1, /*...*/` arguments.
+    
+    * `IS_VALID_EXPANDER_BEGIN(VRM_PP_ARGCOUNT(__VA_ARGS__))` is used to count the number of types passed to `IS_VALID`, and to begin generating the expansion.
+    
+
