@@ -3,7 +3,7 @@
 // AFL License page: http://opensource.org/licenses/AFL-3.0
 // http://vittorioromeo.info | vittorio.romeo@outlook.com
 
-#define VR_USE_BOOST_VARIANT
+// #define VR_USE_BOOST_VARIANT
 
 #include "any_type.hpp"
 #include "variant_aliases.hpp"
@@ -25,7 +25,7 @@ namespace std
 namespace deduced_arity
 {
     template <std::size_t TS>
-    struct deducible_t : boost::hana::size_t<TS>
+    struct deducible_t : std::integral_constant<std::size_t, TS>
     {
     };
 
@@ -37,6 +37,32 @@ namespace deduced_arity
     constexpr deducible_t<1> unary{};
     constexpr deducible_t<2> binary{};
 }
+
+template <typename TF, typename... Ts>
+using is_unary_callable_with_any =
+    std::disjunction<std::is_callable<TF(Ts)>...>;
+
+template <typename TF, typename T>
+struct is_binary_callable_with_any_lbound
+{
+    template <typename... Ts>
+    using apply = std::disjunction<std::is_callable<TF(T, Ts)>...>;
+};
+
+template <typename TF, typename T>
+struct is_binary_callable_with_any_rbound
+{
+    template <typename... Ts>
+    using apply = std::disjunction<std::is_callable<TF(Ts, T)>...>;
+};
+
+template <typename TF, typename... Ts>
+using is_binary_callable_with_any =
+    std::disjunction<
+        typename is_binary_callable_with_any_lbound<TF, Ts>::template apply<Ts...>...,
+        typename is_binary_callable_with_any_rbound<TF, Ts>::template apply<Ts...>...
+    >;
+
 
 /*
 template <typename... TFs>
@@ -64,8 +90,8 @@ namespace impl
         T _data;
 
         template <typename... Ts,
-            typename = std::enable_if_t<!std::disjunction_v<
-                std::is_same<std::decay_t<Ts>, TDerived>...>>>
+                  typename = std::enable_if_t<!std::disjunction_v<
+                      std::is_same<std::decay_t<Ts>, TDerived>...>>>
         wrapper_impl(Ts&&... xs) : _data{FWD(xs)...}
         {
         }
@@ -119,8 +145,6 @@ using is_not_overloaded_impl = decltype(&std::decay_t<T>::operator());
 template <typename T>
 using is_not_overloaded =
     std::experimental::is_detected<is_not_overloaded_impl, T>;
-
-
 
 template <typename T, typename... Ts>
 using can_invoke_with_impl = decltype(std::declval<T>()(std::declval<Ts>()...));
@@ -194,19 +218,38 @@ namespace vr
     };
     constexpr recursive_tag_t recursive;
 
-    template <typename TF>
-    struct recursive_visitor_branch : TF
+    struct non_recursive_tag_t
     {
+    };
+    constexpr non_recursive_tag_t non_recursive;
+
+    template <typename TTag, typename TF>
+    struct tagged_branch : TF
+    {
+        using tag = TTag;
+
         template <typename TFFwd>
-        recursive_visitor_branch(TFFwd&& f) : TF(FWD(f))
+        tagged_branch(TFFwd&& f) : TF(FWD(f))
         {
         }
     };
+
+    template <typename TF>
+    using recursive_visitor_branch = tagged_branch<recursive_tag_t, TF>;
+
+    template <typename TF>
+    using non_recursive_visitor_branch = tagged_branch<non_recursive_tag_t, TF>;
 
     template <typename T>
     auto operator|(recursive_tag_t, T&& x)
     {
         return recursive_visitor_branch<std::decay_t<T>>{x};
+    }
+
+    template <typename T>
+    auto operator|(non_recursive_tag_t, T&& x)
+    {
+        return non_recursive_visitor_branch<std::decay_t<T>>{x};
     }
 }
 
@@ -220,68 +263,100 @@ struct is_specialization_of<TTemplate<Ts...>, TTemplate> : boost::hana::true_
 {
 };
 
+
+template <class T>
+using has_tag = typename T::tag;
+
 template <typename T>
 using is_tagged_as_recursive =
-    is_specialization_of<T, vr::recursive_visitor_branch>;
+    std::experimental::is_detected_exact<vr::recursive_tag_t, has_tag, T>;
 
+template <typename T>
+using is_tagged_as_non_recursive =
+    std::experimental::is_detected_exact<vr::non_recursive_tag_t, has_tag, T>;
+
+template <typename>
+struct dependent_false : std::false_type
+{
+};
 
 namespace impl
 {
+    template <typename... THelpers>
     struct arity_deducer_t
     {
         template <typename TF>
         constexpr auto operator()(TF&&) const
         {
             using f_type = std::decay_t<TF>;
+            using is_unary_c = is_unary_callable_with_any<f_type, any_type, THelpers...>;
+            using is_binary_c = is_binary_callable_with_any<f_type, any_type, THelpers...>;
 
-            if
-                constexpr(is_tagged_as_recursive<f_type>{})
+            // clang-format off
+            if constexpr(is_tagged_as_recursive<f_type>{})
+            {
+                if constexpr(is_unary_c{})
+                {
+                    static_assert(dependent_false<f_type>{},
+                        "Marked recursive but unary callable.");
+                }
+                else
                 {
                     return deduced_arity::binary;
                 }
-            else if
-                constexpr(is_binary_callable<f_type>{})
+            }
+            else if constexpr(is_tagged_as_non_recursive<f_type>{})
+            {
+                if constexpr(is_binary_c{})
                 {
-                    return deduced_arity::binary;
+                    static_assert(dependent_false<f_type>{},
+                        "Marked non-recursive but binary callable.");
                 }
-            else if
-                constexpr(is_unary_callable<f_type>{})
+                else
                 {
                     return deduced_arity::unary;
                 }
-            else if
-                constexpr(is_not_overloaded<f_type>{})
-                {
-                    constexpr auto arity = function_traits<f_type>::arity;
+            }
+            else if constexpr(is_binary_c{})
+            {
+                return deduced_arity::binary;
+            }
+            else if constexpr(is_unary_c{})
+            {
+                return deduced_arity::unary;
+            }
+            else if constexpr(is_not_overloaded<f_type>{})
+            {
+                constexpr auto arity = function_traits<f_type>::arity;
 
-                    if
-                        constexpr(arity == 1)
-                        {
-                            return deduced_arity::unary;
-                        }
-                    else if
-                        constexpr(arity == 2)
-                        {
-                            return deduced_arity::binary;
-                        }
-                    else
-                    {
-                        struct unsupported_arity;
-                        return unsupported_arity{};
-                    }
+                if constexpr(arity == 1)
+                {
+                    return deduced_arity::unary;
                 }
+                else if constexpr(arity == 2)
+                {
+                    return deduced_arity::binary;
+                }
+                else
+                {
+                    static_assert(dependent_false<f_type>{},
+                        "Unsuppored arity.");
+                }
+            }
             else
             {
                 return deduced_arity::undeducible;
             }
+            // clang-format on
         }
     };
 }
 
-constexpr impl::arity_deducer_t arity_deducer{};
+template <typename... THelpers>
+constexpr impl::arity_deducer_t<THelpers...> arity_deducer{};
 
 // Added single 'f' due to gcc61 segfault
-template <typename TRet, typename TF, typename... TFs>
+template <typename TRet, typename... THelpers, typename TF, typename... TFs>
 auto make_recursive_visitor(TF&& f, TFs&&... fs)
 {
     namespace bh = boost::hana;
@@ -289,21 +364,22 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
     auto fns_tuple = bh::make_tuple(FWD(f), FWD(fs)...);
 
-    auto fns_arities = bh::transform(fns_tuple, arity_deducer);
+    auto fns_arities = bh::transform(fns_tuple, arity_deducer<THelpers...>);
 
-    bh::for_each(fns_arities, [](auto x) {
-        if
-            constexpr(std::is_same<decltype(x), deduced_arity::undeducible_t>{})
-            {
-                std::cout << "undeducible\n";
-            }
+
+    // clang-format off
+    bh::for_each(fns_arities, [](auto x)
+    {
+        if constexpr(std::is_same<decltype(x), deduced_arity::undeducible_t>{})
+        {
+            std::cout << "undeducible\n";
+        }
         else
         {
             std::cout << x << "\n";
-            ;
         }
     });
-
+    // clang-format on
 
     auto non_recs = bh::remove_if(fns_tuple, arity_detector);
 
@@ -323,7 +399,7 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
     return bh::fix([fo = std::move(final_overload)](auto self, auto&& x)->TRet {
         return fo([&self](auto&& v) { return vr::visit_recursively(self, v); },
-            FWD(x));
+                  FWD(x));
     });
 }
 
@@ -331,8 +407,12 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
 int main()
 {
+    auto k = vr::recursive | [] {};
+    static_assert(
+        is_tagged_as_recursive<vr::recursive_visitor_branch<decltype(k)>>{});
+
     // clang-format off
-    auto vnp = make_recursive_visitor<void>
+    auto vnp = make_recursive_visitor<void, long> // returns void, `long` helps deduction
     (
         [](auto x) -> std::enable_if_t<std::is_arithmetic<std::decay_t<decltype(x)>>{}> { std::cout << x << "N\n"; },
         [](int x)    { std::cout << x << "i\n"; },
