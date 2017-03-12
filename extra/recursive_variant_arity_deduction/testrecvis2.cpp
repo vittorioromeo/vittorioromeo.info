@@ -58,10 +58,10 @@ struct is_binary_callable_with_any_rbound
 
 template <typename TF, typename... Ts>
 using is_binary_callable_with_any =
-    std::disjunction<
-        typename is_binary_callable_with_any_lbound<TF, Ts>::template apply<Ts...>...,
-        typename is_binary_callable_with_any_rbound<TF, Ts>::template apply<Ts...>...
-    >;
+    std::disjunction<typename is_binary_callable_with_any_lbound<TF,
+                         Ts>::template apply<Ts...>...,
+        typename is_binary_callable_with_any_rbound<TF,
+            Ts>::template apply<Ts...>...>;
 
 
 /*
@@ -90,27 +90,118 @@ namespace impl
         T _data;
 
         template <typename... Ts,
-                  typename = std::enable_if_t<!std::disjunction_v<
-                      std::is_same<std::decay_t<Ts>, TDerived>...>>>
+            typename = std::enable_if_t<!std::disjunction_v<
+                std::is_same<std::decay_t<Ts>, TDerived>...>>>
         wrapper_impl(Ts&&... xs) : _data{FWD(xs)...}
         {
         }
     };
 }
 
-namespace impl
+// TODO:
+struct placeholder
 {
-    struct vnum_wrapper;
+};
+using _me = placeholder;
 
-    using varr = std::vector<vnum_wrapper>;
-    using vmap = std::map<int, vnum_wrapper>;
-    using vnum = vr::variant<int, float, double, varr, long, vmap>;
+template <typename TReplacement, typename T>
+struct replace_all
+{
+    using type =
+        std::conditional_t<std::is_same_v<T, placeholder>, TReplacement, T>;
+};
 
-    struct vnum_wrapper : wrapper_impl<vnum, vnum_wrapper>
+template <typename TReplacement, template <typename...> class TTemplate,
+    typename... Ts>
+struct replace_all<TReplacement, TTemplate<Ts...>>
+{
+    using type = TTemplate<typename replace_all<TReplacement, Ts>::type...>;
+};
+
+
+
+template <typename T, typename... Ts>
+struct substitue_helper;
+
+template <typename T, typename TX, typename... Ts>
+struct substitue_helper<T, TX, Ts...>
+{
+    using type = std::decay_t<decltype(std::tuple_cat( // .
+        std::declval<typename substitue_helper<T, TX>::type>(),
+        std::declval<typename substitue_helper<T, Ts>::type>()...))>;
+};
+
+template <typename T, typename TX>
+struct substitue_helper<T, TX>
+{
+    using type = std::tuple<TX>;
+};
+
+
+
+template <typename T, template <typename...> class TTemplate, typename... Ts>
+struct substitue_helper<T, TTemplate<Ts...>>
+{
+    using type = std::tuple<TTemplate<typename replace_all<T, Ts>::type...>>;
+};
+
+template <typename T, typename... Ts>
+using substitue = typename substitue_helper<T, Ts...>::type;
+
+template <typename, template <typename...> class>
+struct replace_tuple;
+
+template <typename... Ts, template <typename...> class TTemplate>
+struct replace_tuple<std::tuple<Ts...>, TTemplate>
+{
+    using type = TTemplate<Ts...>;
+};
+
+template <typename... Ts>
+struct recursive_variant_helper
+{
+    struct me_wrapper;
+
+    template <typename... Txs>
+    using substitutor = substitue<me_wrapper, Txs...>;
+
+    template <typename T>
+    using sub =
+        std::decay_t<decltype(std::get<0>(std::declval<substitutor<T>>()))>;
+
+    using final_alternatives = substitutor<Ts...>;
+
+    using variant_type =
+        typename replace_tuple<final_alternatives, vr::variant>::type;
+
+    struct me_wrapper : impl::wrapper_impl<variant_type, me_wrapper>
     {
         // seems to work on libc++
-        using wrapper_impl::wrapper_impl;
+        using impl::wrapper_impl<variant_type, me_wrapper>::wrapper_impl;
     };
+
+    using type = variant_type;
+};
+
+template <typename TRV, typename T>
+using resolve = typename TRV::template sub<T>;
+
+/* template <typename... Ts>
+using recursive_variant_builder =
+    typename recursive_variant_helper<Ts...>::type;*/
+
+
+
+namespace impl
+{
+    using varr_x = std::vector<_me>;
+    using vmap_x = std::map<int, _me>;
+    using rv_h =
+        recursive_variant_helper<int, float, double, varr_x, long, vmap_x>;
+
+    using vnum = rv_h::type;
+    using varr = resolve<rv_h, varr_x>;
+    using vmap = resolve<rv_h, vmap_x>;
 }
 
 using vnum = impl::vnum;
@@ -289,8 +380,10 @@ namespace impl
         constexpr auto operator()(TF&&) const
         {
             using f_type = std::decay_t<TF>;
-            using is_unary_c = is_unary_callable_with_any<f_type, any_type, THelpers...>;
-            using is_binary_c = is_binary_callable_with_any<f_type, any_type, THelpers...>;
+            using is_unary_c =
+                is_unary_callable_with_any<f_type, any_type, THelpers...>;
+            using is_binary_c =
+                is_binary_callable_with_any<f_type, any_type, THelpers...>;
 
             // clang-format off
             if constexpr(is_tagged_as_recursive<f_type>{})
@@ -399,7 +492,7 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
     return bh::fix([fo = std::move(final_overload)](auto self, auto&& x)->TRet {
         return fo([&self](auto&& v) { return vr::visit_recursively(self, v); },
-                  FWD(x));
+            FWD(x));
     });
 }
 
