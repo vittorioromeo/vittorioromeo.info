@@ -90,3 +90,15 @@ constexpr any_type operator>=(any_type, any_type) noexcept { return {}; }
 constexpr any_type operator&&(any_type, any_type) noexcept { return {}; }
 constexpr any_type operator||(any_type, any_type) noexcept { return {}; }
 // clang-format on
+
+#include <cstdint>
+#include <cstddef>
+
+namespace std
+{
+    template <std::size_t>
+    constexpr any_type get(any_type)
+    {
+        return {};
+    }
+}

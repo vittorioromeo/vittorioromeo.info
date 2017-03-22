@@ -11,6 +11,7 @@
 #include <experimental/type_traits>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -119,60 +120,16 @@ struct replace_all<TReplacement, TTemplate<Ts...>>
 };
 
 
-
-template <typename T, typename... Ts>
-struct substitue_helper;
-
-template <typename T, typename TX, typename... Ts>
-struct substitue_helper<T, TX, Ts...>
-{
-    using type = std::decay_t<decltype(std::tuple_cat( // .
-        std::declval<typename substitue_helper<T, TX>::type>(),
-        std::declval<typename substitue_helper<T, Ts>::type>()...))>;
-};
-
-template <typename T, typename TX>
-struct substitue_helper<T, TX>
-{
-    using type = std::tuple<TX>;
-};
-
-
-
-template <typename T, template <typename...> class TTemplate, typename... Ts>
-struct substitue_helper<T, TTemplate<Ts...>>
-{
-    using type = std::tuple<TTemplate<typename replace_all<T, Ts>::type...>>;
-};
-
-template <typename T, typename... Ts>
-using substitue = typename substitue_helper<T, Ts...>::type;
-
-template <typename, template <typename...> class>
-struct replace_tuple;
-
-template <typename... Ts, template <typename...> class TTemplate>
-struct replace_tuple<std::tuple<Ts...>, TTemplate>
-{
-    using type = TTemplate<Ts...>;
-};
-
 template <typename... Ts>
 struct recursive_variant_helper
 {
     struct me_wrapper;
 
-    template <typename... Txs>
-    using substitutor = substitue<me_wrapper, Txs...>;
 
     template <typename T>
-    using sub =
-        std::decay_t<decltype(std::get<0>(std::declval<substitutor<T>>()))>;
+    using sub = typename replace_all<me_wrapper, T>::type;
 
-    using final_alternatives = substitutor<Ts...>;
-
-    using variant_type =
-        typename replace_tuple<final_alternatives, vr::variant>::type;
+    using variant_type = typename replace_all<me_wrapper, vr::variant<Ts...>>::type;
 
     struct me_wrapper : impl::wrapper_impl<variant_type, me_wrapper>
     {
@@ -207,6 +164,30 @@ namespace impl
 using vnum = impl::vnum;
 using impl::varr;
 using impl::vmap;
+
+
+
+using number = int;
+
+struct plus
+{
+};
+struct minus
+{
+};
+using op = vr::variant<plus, minus>;
+
+namespace impl
+{
+    using r_expr_x = std::tuple<number, op, _me>;
+    using rv_expr_h =
+        recursive_variant_helper<number, std::unique_ptr<r_expr_x>>;
+}
+
+using r_expr = resolve<impl::rv_expr_h, impl::r_expr_x>;
+using expr = impl::rv_expr_h::type;
+
+
 
 template <typename TTpl>
 auto overload_tuple(TTpl&& x)
@@ -496,6 +477,11 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
     });
 }
 
+template <typename T, typename... TFs>
+decltype(auto) match(T&& v, TFs&&... fs)
+{
+    return vr::visit(boost::hana::overload(FWD(fs)...), FWD(v));
+}
 
 
 int main()
@@ -565,4 +551,26 @@ int main()
 
     v0 = varr{vnum{1}, vmap{{1, vnum{2.0}}}, vnum{3.f}};
     vr::visit(vnp, v0);
+
+    std::cout << "\n\n\n\n";
+
+    auto evaluate = make_recursive_visitor<int>( // .
+        [](int x) { return x; },                 // .
+        [](auto recurse, const std::unique_ptr<r_expr>& x) {
+            const auto& lhs = std::get<0>(*x);
+            const auto& op = std::get<1>(*x);
+            const auto& rhs = std::get<2>(*x);
+            return match(op, [&](plus) { return lhs + recurse(rhs); },
+                [&](minus) { return lhs - recurse(rhs); });
+        } // .
+        );
+
+    using std::make_unique;
+    expr e0{5};
+    expr e1{make_unique<r_expr>(9, plus{}, 3)};
+    expr e2{make_unique<r_expr>(1, minus{}, make_unique<r_expr>(3, plus{}, 7))};
+
+    std::cout << vr::visit(evaluate, e0) << "\n";
+    std::cout << vr::visit(evaluate, e1) << "\n";
+    std::cout << vr::visit(evaluate, e2) << "\n";
 }
