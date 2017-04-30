@@ -87,7 +87,7 @@ I'll share thoughts and lessons learned from some of my favorite talks below.
 
     In short, every round everyone was given a *set of tokens* and the goal was to produce the *smallest valid C++* program containing all of them. An example is [available on the schedule page](https://conference.accu.org/site/stories/2017/sessions.html#XCCountdownPubQuiz).
 
-    Everything happened in a customized [cyber-dojo](http://cyber-dojo.org/) instance running `g++ 6`. Me and [@jackayline](https://twitter.com/jackayline) got very close to winning but got disqualified in the last round - we tried to use the given `.` token as part of a [*floating point literal*](http://en.cppreference.com/w/cpp/language/floating_literal), only to later realize that the entire literal is considered a single token! Still, it was an extremely entertaining session and I really hope to see similar ideas in the future.
+    Everything happened in a customized [cyber-dojo](http://cyber-dojo.org/) instance running `g++ 6`. Me and [\@jackayline](https://twitter.com/jackayline) got very close to winning but got disqualified in the last round - we tried to use the given `.` token as part of a [*floating point literal*](http://en.cppreference.com/w/cpp/language/floating_literal), only to later realize that the entire literal is considered a single token! Still, it was an extremely entertaining session and I really hope to see similar ideas in the future.
 
 * [**Writing games in very modern C++**](https://conference.accu.org/site/stories/2017/sessions.html#XWritinggamesinverymodernC) by [*Guy Davidson*](https://conference.accu.org/site/stories/2017/presenters.html#XGuy_Davidson).
 
