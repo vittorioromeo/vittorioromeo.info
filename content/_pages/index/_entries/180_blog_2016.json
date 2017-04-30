@@ -4,6 +4,17 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "accu2017_trip_report",
+            "tags": ["accu", "c++", "conference", "talk", "experience", "report"],
+            "expand":
+            {
+                "Title": "trip report: ACCU 2017",
+                "Text": "180_blog_2016_md/12_accu2017_trip_report.md",
+                "Date": "30 april 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "cpp17_curry",
             "tags": ["c++", "c++17", "lambda", "functional", "curry", "partial"],
             "expand":
