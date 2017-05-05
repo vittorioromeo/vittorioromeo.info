@@ -20,7 +20,7 @@ match(v0)([](int x)   { cout << x << "i\n"; },
           [](double x){ cout << x << "d\n"; });
 ```
 
-I'm happy about the way the presentation went and I have received good feedback so far. The video is not yet available, but the slides are available on GitHub at [SuperV1234/accu2017](https://github.com/SuperV1234/accu2017).
+I'm happy about the way the presentation went and I have received good feedback so far. The video is [**available here**](https://www.youtube.com/watch?v=mqei4JJRQ7s) and the slides are available on GitHub at [SuperV1234/accu2017](https://github.com/SuperV1234/accu2017).
 
 
 I'll share thoughts and lessons learned from some of my favorite talks below.
@@ -79,7 +79,7 @@ I'll share thoughts and lessons learned from some of my favorite talks below.
     //           v             op1
     ```
 
-    I highly recommend watching this talk *(it's [already **available** on YouTube](https://www.youtube.com/watch?v=kz86h7AeDaA))* if you're interested in the subject. [Jeff Preshing's blog](http://preshing.com) is also an **amazing** resource, containing many illustrated articles *(e.g. ["acquire and release semantics"](http://preshing.com/20120913/acquire-and-release-semantics/))* on the memory model and multithreaded/lock-free programming in general.
+    I highly recommend watching this talk *(it's [already **available** on YouTube](https://www.youtube.com/watch?v=A_vAG6LIHwQ))* if you're interested in the subject. [Jeff Preshing's blog](http://preshing.com) is also an **amazing** resource, containing many illustrated articles *(e.g. ["acquire and release semantics"](http://preshing.com/20120913/acquire-and-release-semantics/))* on the memory model and multithreaded/lock-free programming in general.
 
 * [**C++ Countdown Pub Quiz**](https://conference.accu.org/site/stories/2017/sessions.html#XCCountdownPubQuiz) by [*Jon Jagger*](https://conference.accu.org/site/stories/2017/presenters.html#XJon_Jagger), and [*Robert Chatley*](https://conference.accu.org/site/stories/2017/presenters.html#XRobert_Chatley).
 
