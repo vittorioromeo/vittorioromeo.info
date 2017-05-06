@@ -108,7 +108,7 @@
 	                    <script src="https://apis.google.com/js/platform.js" async defer></script>
                         <div class="g-plusone" data-href="http://vittorioromeo.info"></div>
 
-                        <a rel="alternate" style="float: left; padding-right: 5px" type="application/rss+xml" href="https://vittorioromeo.info/index.rss">
+                        <a rel="alternate" style="float: left; padding-right: 5px; padding-left: 5px" type="application/rss+xml" href="https://vittorioromeo.info/index.rss">
                             <img border="0" alt="RSS Feed" src="{{ResourcesPath}}/img/rss.png" width="24" height="24">
                         </a>
 
