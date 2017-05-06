@@ -1,3 +1,5 @@
+<link rel="alternate" type="application/rss+xml" href="https://vittorioromeo.info/index.rss" />
+
 <article>
 
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>

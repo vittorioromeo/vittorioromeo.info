@@ -14,6 +14,8 @@
             <link>{{Link}}</link>
             <guid>{{Link}}</guid>
             <date>{{Date}}</date>
+            <description>{{Description}}</description>
+            <pubDate>{{PubDate}}</pubDate>
         </item>
     {{/Items}}
 
