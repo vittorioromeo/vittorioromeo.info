@@ -137,6 +137,11 @@ auto make_recursive_visitor(TF&& f, TFs&&... fs)
 
     auto fns_tuple = bh::make_tuple(FWD(f), FWD(fs)...);
 
+    (std::cout << (arity_detector(FWD(f)) ? "binary" : "unary"));
+    std::cout << "\n";
+    (std::cout << ... << (arity_detector(FWD(fs)) ? "binary" : "unary"));
+    std::cout << "\n";
+
     auto non_recs = bh::remove_if(fns_tuple, arity_detector);
 
     auto recs = bh::filter(fns_tuple, arity_detector);
@@ -178,8 +183,8 @@ int main()
 {
     auto vis = make_recursive_visitor<void>
     (
-        [](foo x) {  x.f(); },
-        [](auto, auto x) {  x.f(); }
+        [](auto x) {  x.f(); },
+        [](auto, bar x) { x.f(); }
     );
 
     var v; vr::visit(vis, v);
