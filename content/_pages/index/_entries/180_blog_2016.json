@@ -4,6 +4,17 @@
     [   
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "variants_lambdas_part_3",
+            "tags": ["c++", "c++14", "c++17", "variant", "lambda", "rambling"],
+            "expand":
+            {
+                "Title": "visiting variants using lambdas - part 3",
+                "Text": "180_blog_2016_md/13_variants3.md",
+                "Date": "12 may 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "accu2017_trip_report",
             "tags": ["accu", "c++", "conference", "talk", "experience", "report"],
             "expand":
