@@ -73,7 +73,7 @@ Let's look again at the recursive lambda-based visitation example:
 
 ```cpp
 auto evaluator = make_recursive_visitor<int>(
-    [](auto int x) { return x; },
+    [](auto, int x) { return x; },
     [](auto recurse, const std::unique_ptr<recr_expr>& x)
     {
         /* ... */
