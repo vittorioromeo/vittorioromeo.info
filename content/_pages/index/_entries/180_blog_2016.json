@@ -1,7 +1,18 @@
 {
     "link_name": "blog",
-    "elements": 
-    [   
+    "elements":
+    [
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2017_tripreport_pt1",
+            "tags": ["c++now", "c++", "conference", "talk", "experience", "report"],
+            "expand":
+            {
+                "Title": "c++now 2017 trip report - part 1/2",
+                "Text": "180_blog_2016_md/14_cppnow2017_p0.md",
+                "Date": "27 may 2017"
+            }
+        },
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "variants_lambdas_part_3",
