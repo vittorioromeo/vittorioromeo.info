@@ -4,6 +4,17 @@
     [
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2017_tripreport_pt2",
+            "tags": ["c++now", "c++", "conference", "talk", "experience", "report"],
+            "expand":
+            {
+                "Title": "c++now 2017 trip report - part 2/2",
+                "Text": "180_blog_2016_md/15_cppnow2017_p1.md",
+                "Date": "29 may 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "cppnow2017_tripreport_pt1",
             "tags": ["c++now", "c++", "conference", "talk", "experience", "report"],
             "expand":
