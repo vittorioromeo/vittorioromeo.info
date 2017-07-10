@@ -8,7 +8,7 @@
             "tags": ["c++", "future", "continuations", "tutorial", "article"],
             "expand":
             {
-                "Title": "zero allocation continuations - part one",
+                "Title": "zero allocation continuations - part 1",
                 "Text": "180_blog_2016_md/16_zeroalloc_continuations_p0.md",
                 "Date": "10 july 2017"
             }
