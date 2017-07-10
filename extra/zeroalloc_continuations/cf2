@@ -1,0 +1,4 @@
+#!/bin/bash
+g++ -std=c++1z -pthread -Wall -Wextra -Wpedantic -fdiagnostics-color=always -Ofast -DNDEBUG \
+-lboost_system -lboost_thread \
+-o/tmp/x.x $1 && /tmp/x.x

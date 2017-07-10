@@ -1,0 +1,2 @@
+#!/bin/bash
+cat $1 | sed -r '/.*.(string|space|ascii|text|section|comm|ident|file|quad|size|weak|type|p2align|asciz|align|globl|bss|uleb128|zero|_|byte|long|#|Ltmp|Lexc|L\.str|L[0-9]+|L.*).*$/d' | sed -r '/_Z.*$/d' | sed -r '/^$/d' | sed -r '/main:/d' | sed -r '/state:/d'

@@ -1,0 +1,4 @@
+#!/bin/bash
+g++ -std=c++1z -Wall -Wextra -Wpedantic -fdiagnostics-color=always -Ofast -DNDEBUG \
+-lboost_system -lboost_thread -S \
+-o$1.s $1
