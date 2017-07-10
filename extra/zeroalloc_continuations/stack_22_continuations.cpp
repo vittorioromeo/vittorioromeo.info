@@ -83,5 +83,5 @@ int main()
              .then([](int x){ return x + 1; })
              .then([](int x){ return x + 1; });
 
-    return f.execute(asynchronous_scheduler{});
+    return f.boop(asynchronous_scheduler{});
 }

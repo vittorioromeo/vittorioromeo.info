@@ -115,7 +115,11 @@ This shows a very approximate increment of 500-800 lines of assembly per `.then`
 
 > This is a terrible benchmark that doesn't prove anything!
 
-...and I almost completely agree. What I wanted to show is that due to the use of `boost::async`, *type erasure*, and potential *allocations*, the compiler is unable to "compress" the continuations into a single chain of operations and instead keeps every `future` instance allocated somewhere in memory. This might be desirable, depending on your use case - the `Callable` invoked by `.then` does take a `future` as an argument instead of the result of the future. But this might also be undesirable - the compiler can see every `.then` call, and could be more clever. Additionally, even if the overhead of allocations and scheduling is usually small compared to IO operations, it might add up if a program extensively uses asynchronous continuations.
+...and I almost completely agree. What I wanted to show is that due to the use of `boost::async`, *type erasure*, and potential *allocations*, the compiler is unable to "compress" the continuations into a single chain of operations and instead keeps every `future` instance allocated somewhere in memory.
+
+This might be desirable, depending on your use case - the `Callable` invoked by `.then` does indeed take a `future` as an argument instead of the result of `.get()`. But this might also be undesirable - in this situation the compiler can see the entire chain of `.then` calls, and could *ideally* allocate once for all of them.
+
+Additionally, even if the overhead of allocations and scheduling is usually small compared to IO operations, it might add up if a program extensively uses asynchronous continuations.
 
 
 
@@ -153,7 +157,7 @@ struct synchronous_scheduler
 
 <div class="inline-link">
 
-[*(on godbolt.org)*](https://godbolt.org/g/WQBAF5)
+[*(on godbolt.org)*](https://godbolt.org/g/UHMK5S)
 
 </div>
 
@@ -176,7 +180,7 @@ struct asynchronous_scheduler
 
 <div class="inline-link">
 
-[*(on godbolt.org)*](https://godbolt.org/g/jCVoTa)
+[*(on godbolt.org)*](https://godbolt.org/g/UTNpkb)
 
 </div>
 
@@ -195,11 +199,15 @@ auto f = initiate([]{ return 1; })
 
 <div class="inline-link">
 
-[*(on godbolt.org)*](https://godbolt.org/g/yQanAZ)
+[*(on godbolt.org)*](https://godbolt.org/g/f8KJWS)
 
 </div>
 
-...still produces [891 lines of assembly](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/stack_22_continuations.cpp.s).
+...still produces [891 lines of assembly](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/stack_22_continuations.cpp.s). This happens because `decltype(f)` is a huge type containing all the types of the continuations - the compiler is able to inline everything.
+
+
+
+### implementation
 
 Let's analyze the implementation, beginning with `initiate`:
 
@@ -279,6 +287,12 @@ So short, yet so interesting:
     * Has an explicit `decltype(auto)` *trailing return type*, to allow *references* to be returned from user-defined `Callable` objects. A lambda expressions defaults to `-> auto` otherwise, which always makes a copy.
 
     * Invokes the continuation `f_then` with the result of invoking the move-captured `*this`. This means that all the continuations will be executed on the stack and their results will be passed down the computation chain until it's over. Note that this could be improved by using [`std::invoke`](http://en.cppreference.com/w/cpp/utility/functional/invoke) to truly support generic `Callable` objects. Additionally, a scheduler-aware version of `then` could be provided, which might schedule the `static_cast<F&>(parent)()` call asynchronously instead of executing it synchronously, in order to avoid stack overflows - a possible drawback of that design choice could be introducing "deadlocks" in thread pools with a limited amount of threads *(that will be waiting on each other)*.
+
+> So, what is the type of `f`?
+
+`decltype(f)` is huge, because there is no type erasure. Let me show you an *intentionally-produced* compiler error from the snippet with 22 `.then` continuations:
+
+[![Beautiful.](resources/img/blog/zeroalloc_continuations_0_error.png)](https://vittorioromeo.info/resources/img/blog/zeroalloc_continuations_0_error.png)
 
 This is the end of the first part of "zero-allocation continuations". In the next one we'll take a look at a possible implementation of `when_all`, and experiment with thread pools.
 
