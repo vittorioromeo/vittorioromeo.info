@@ -1,6 +1,6 @@
 {
     "link_name": "blog",
-    "elements": 
+    "elements":
     [
         {
             "template": "templates/entries/blog.tpl",
