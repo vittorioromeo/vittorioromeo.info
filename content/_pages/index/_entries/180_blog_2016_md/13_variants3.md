@@ -427,3 +427,13 @@ Did I waste my time? Somewhat, but I learned very interesting things from this o
 Finally, I learned that when there are a lot of things in the language against you, it is not wise to obsess over your goal, trying to find hacky solutions and workaround. The correct approach is improving the language - this is why I hope that some sort of *language-level* pattern matching will make it into C++. There currently is a proposal by *David Sankel* for that: [**"Pattern Matching and Language Variants"**](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0095r1.html).
 
 Fingers crossed for C++20!
+
+
+
+### series
+
+* [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html)
+
+* [*"visiting variants using lambdas - part 2"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_2.html)
+
+* [*"visiting variants using lambdas - part 3"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_3.html)

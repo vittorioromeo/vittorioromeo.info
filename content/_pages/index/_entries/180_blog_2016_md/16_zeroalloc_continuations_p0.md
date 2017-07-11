@@ -299,3 +299,11 @@ This is the end of the first part of "zero-allocation continuations". In the nex
 I began experimenting with these kind of continuations a few months ago - I was writing a library called [`orizzonte`](https://github.com/SuperV1234/orizzonte) that I abandoned to focus on other project *(and because I was frustrated by the lack of C++17 compiler compliance back then)*. I made it public on GitHub today and might continue/rewrite it in the future - regardless, you might find [this file](https://github.com/SuperV1234/orizzonte/blob/master/include/orizzonte/temp.hpp) interesting, where very generic *(but slightly broken)* versions of `.then` and `when_all` reside.
 
 Thanks for reading!
+
+
+
+### series
+
+* [*"zero-allocation continuations - part 1"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html)
+
+* [*"zero-allocation continuations - part 2"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p1.html)

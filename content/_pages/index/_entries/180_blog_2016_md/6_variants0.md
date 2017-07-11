@@ -367,21 +367,21 @@ make_recursive_visitor<void>
     [](double x) { cout << x << "d\n"; },
 
     // "Special case", constrained.
-    [](auto x) -> enable_if_t<is_arithmetic<decay_t<decltype(x)>>{}> 
-    { 
-        cout << x << "n\n"; 
+    [](auto x) -> enable_if_t<is_arithmetic<decay_t<decltype(x)>>{}>
+    {
+        cout << x << "n\n";
     },
 
     // Recursive case, `std::vector`.
-    [](auto recurse, const varr& x) 
-    { 
-        for(const auto& y : x) recurse(y); 
+    [](auto recurse, const varr& x)
+    {
+        for(const auto& y : x) recurse(y);
     },
 
     // Recursive case, `std::map`.
-    [](auto recurse, const vmap& x) 
-    { 
-        for(const auto& y : x) recurse(y.second); 
+    [](auto recurse, const vmap& x)
+    {
+        for(const auto& y : x) recurse(y.second);
     }
 );
 ```
@@ -512,3 +512,13 @@ The code and the assembly output [is available here](https://github.com/SuperV12
 | Baseline         | 680   |   0                  |
 | `hana::fix`      | 765   |   +12.5%             |
 | `std::function`  | 7146  |   +950%              |
+
+
+
+### series
+
+* [*"visiting variants using lambdas - part 1"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_1.html)
+
+* [*"visiting variants using lambdas - part 2"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_2.html)
+
+* [*"visiting variants using lambdas - part 3"*](https://vittorioromeo.info/index/blog/variants_lambdas_part_3.html)
