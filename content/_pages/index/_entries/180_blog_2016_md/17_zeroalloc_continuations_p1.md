@@ -112,13 +112,13 @@ auto node</* ... */>::then(FThen&& f_then)
 
 > ..."recursively"...
 
-If we're doing to do stuff recursively, we need a base case: an empty `root` class will do the trick:
+If we're going to do stuff recursively, we need a base case: an empty `root` class will do the trick:
 
 ```cpp
 struct root { };
 ```
 
-The `initiate` function will create a `node` whoes parent is `root`:
+The `initiate` function will create a `node` whose parent is `root`:
 
 ```cpp
 template <typename F>
