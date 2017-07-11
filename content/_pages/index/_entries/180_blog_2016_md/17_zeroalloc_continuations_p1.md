@@ -176,7 +176,7 @@ struct world_s_best_thread_pool
 };
 ```
 
-Note that a non-blocking scheduler can only return `void`, as `f` will complete execution sometime in the future. This means that we need to change our `execute` method to be non-blocking, and provide a way to wait until the computation was fully executed. The strategy I'll use here is as follows:
+Note that a non-blocking scheduler can only return `void`, as `f` will complete execution sometime in the future. This means that we need to change our `execute` method to be non-blocking, and provide a way to wait until the computation is fully executed. The strategy I'll use here is as follows:
 
 * Assume that when `execute` is called, the chain of nodes will be alive until the entire computation is completed.
 
