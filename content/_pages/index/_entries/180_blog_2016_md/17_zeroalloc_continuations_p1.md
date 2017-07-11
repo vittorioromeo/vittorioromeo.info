@@ -23,7 +23,7 @@ auto f = initiate(A).then(B).then(C).then(D);
 */
 ```
 
-We previously stored the "parent" node by moving `*this` as part of a generalized lambda capture, and stored the `Callable` itself via SBO *(small buffer optimization)*. As we're doing to explicitly need access to the "parent" node's type to support non-blocking schedulers and implement `when_all` in this article, it's time significantly improve our design.
+We previously stored the "parent" node by moving `*this` as part of a generalized lambda capture, and stored the `Callable` itself via EBO *(empty base optimization)*. As we're doing to explicitly need access to the "parent" node's type to support non-blocking schedulers and implement `when_all` in this article, it's time significantly improve our design.
 
 
 
