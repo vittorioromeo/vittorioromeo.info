@@ -180,7 +180,7 @@ Note that a non-blocking scheduler can only return `void`, as `f` will complete 
 
 * Assume that when `execute` is called, the chain of nodes will be alive until the entire computation is completed.
 
-* Return `void`, and assume that the user will retrieve a possible final result on its own.
+* Return `void`, and assume that the user will retrieve a possible final result on their own.
 
 Here's an example of a simple non-blocking computation using this model:
 
