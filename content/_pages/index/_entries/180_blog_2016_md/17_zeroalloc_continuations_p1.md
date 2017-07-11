@@ -54,7 +54,7 @@ node(ParentFwd&&, FFwd&&)
     -> node<std::decay_t<ParentFwd>, std::decay_t<FFwd>>;
 ```
 
-Let's also add some simple getters in order to make SBO less painful:
+Let's also add some simple getters in order to make EBO less painful:
 
 ```cpp
 auto& node</* ... */>::as_parent() noexcept
