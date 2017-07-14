@@ -109,6 +109,10 @@ class root
     template <typename, typename...>
     friend class when_all;
 
+    template <typename>
+    friend class schedule;
+
+
 public:
     // The `root` produces `nothing`.
     using output_type = nothing;
@@ -119,7 +123,7 @@ private:
     template <typename Scheduler, typename Child, typename... Children>
     void walk_up(Scheduler&& s, Child& c, Children&... cs) &
     {
-        s([&]{ c.execute(s, nothing{}, cs...); });
+       c.execute(s, nothing{}, cs...);
     }
 };
 
@@ -206,6 +210,41 @@ public:
 template <typename ParentFwd, typename FFwd>
 node(ParentFwd&&, FFwd&&) -> node<std::decay_t<ParentFwd>, std::decay_t<FFwd>>;
 
+
+template <typename Parent>
+class schedule : private child_of<Parent>
+{
+public:
+    using typename child_of<Parent>::input_type;
+    using output_type = nothing;
+
+    template <typename ParentFwd>
+    schedule(ParentFwd&& p) : child_of<Parent>{FWD(p)} { }
+
+    template <typename FThen>
+    auto then(FThen&& f_then)
+    {
+        return ::node{std::move(*this), FWD(f_then)};
+    }
+
+    template <typename Scheduler, typename Result, typename Child, typename... Children>
+    void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
+    {
+        c.execute(s, nothing{}, cs...);
+    }
+
+    template <typename Scheduler, typename... Children>
+    void walk_up(Scheduler&& s, Children&... cs) &
+    {
+        this->as_parent().walk_up(s, *this, cs...);
+    }
+};
+
+template <typename ParentFwd>
+schedule(ParentFwd&&) -> schedule<std::decay_t<ParentFwd>>;
+
+
+
 template <typename Parent, typename... Fs>
 class when_all : child_of<Parent>, Fs...
 {
@@ -286,7 +325,7 @@ auto initiate(Fs&&... fs)
 {
     if constexpr(sizeof...(Fs) == 1)
     {
-        return node{root{}, FWD(fs)...};
+        return schedule{root{}}.then(FWD(fs)...);
     }
     else
     {
