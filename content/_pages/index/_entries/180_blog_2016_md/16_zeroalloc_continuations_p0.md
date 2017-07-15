@@ -27,7 +27,7 @@ f.execute(some_scheduler);
 
 In the above pseudocode snippet, the `http_get` requests can happen in parallel *(depending on how the `scheduler` works - you can imagine it's a thread pool)*. As soon as both requests are done, the final lambda is automatically invoked with both payloads.
 
-I find this really cool because it allows developers to define *directed acyclic graphs* of asynchronous/parallel computations with a very clear and readable syntax. This is why the currently crippled `std::future` is evolving into something more powerful that supports `.then` and `when_all`: these facilities are part of [**N4538**: "Extensions for concurrency"](http::wg21.link/n4538) - Anthony Williams introduced them excellently in his ACCU 2016 ["Concurrency, Parallelism and Coroutines"](https://www.youtube.com/watch?v=UhrIKqDADX8) talk.
+I find this really cool because it allows developers to define *directed acyclic graphs* of asynchronous/parallel computations with a very clear and readable syntax. This is why the currently crippled `std::future` is evolving into something more powerful that supports `.then` and `when_all`: these facilities are part of [**N4538**: "Extensions for concurrency"](http://wg21.link/n4538) - Anthony Williams introduced them excellently in his ACCU 2016 ["Concurrency, Parallelism and Coroutines"](https://www.youtube.com/watch?v=UhrIKqDADX8) talk.
 
 
 

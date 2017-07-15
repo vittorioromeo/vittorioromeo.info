@@ -4,6 +4,17 @@
     [
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "zeroalloc_continuations_p2",
+            "tags": ["c++", "future", "continuations", "tutorial", "article"],
+            "expand":
+            {
+                "Title": "zero allocation continuations - part 3",
+                "Text": "180_blog_2016_md/18_zeroalloc_continuations_p2.md",
+                "Date": "XX july 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "zeroalloc_continuations_p1",
             "tags": ["c++", "future", "continuations", "tutorial", "article"],
             "expand":

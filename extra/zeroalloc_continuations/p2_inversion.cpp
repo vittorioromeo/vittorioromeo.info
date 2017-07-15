@@ -41,7 +41,7 @@ decltype(auto) call_ignoring_nothing(F&& f, T&& x, Ts&&... xs)
 {
     return call_ignoring_nothing([&f, &x](auto&&... ys) -> decltype(auto)
     {
-        return f(FWD(x), FWD(ys)...);
+        return std::forward<F>(f)(std::forward<T>(x), FWD(ys)...);
     }, FWD(xs)...);
 }
 
@@ -50,7 +50,7 @@ decltype(auto) call_ignoring_nothing(F&& f, nothing, Ts&&... xs)
 {
     return call_ignoring_nothing([&f](auto&&... ys) -> decltype(auto)
     {
-        return f(FWD(ys)...);
+        return std::forward<F>(f)(FWD(ys)...);
     }, FWD(xs)...);
 }
 
@@ -79,6 +79,9 @@ struct type_wrapper
 template <typename T>
 inline constexpr type_wrapper<T> type_wrapper_v{};
 
+template <typename T>
+using unwrap = typename std::decay_t<T>::type;
+
 class bool_latch
 {
 private:
@@ -91,13 +94,13 @@ public:
     {
         std::scoped_lock lk{_mtx};
         _finished.store(true);
-        _cv.notify_one();
+        _cv.notify_all();
     }
 
     void wait()
     {
         std::unique_lock lk{_mtx};
-        _cv.wait(lk, [&]{ return _finished.load(); });
+        _cv.wait(lk, [this]{ return _finished.load(); });
     }
 };
 
@@ -112,7 +115,6 @@ class root
     template <typename>
     friend class schedule;
 
-
 public:
     // The `root` produces `nothing`.
     using output_type = nothing;
@@ -123,7 +125,7 @@ private:
     template <typename Scheduler, typename Child, typename... Children>
     void walk_up(Scheduler&& s, Child& c, Children&... cs) &
     {
-       c.execute(s, nothing{}, cs...);
+        c.execute(s, nothing{}, cs...);
     }
 };
 
@@ -145,6 +147,9 @@ protected:
     }
 };
 
+template <typename Parent, typename... Fs>
+class when_all;
+
 template <typename Parent, typename F>
 class node : private child_of<Parent>, private F
 {
@@ -157,10 +162,17 @@ public:
     {
     }
 
-    template <typename FThen>
-    auto then(FThen&& f_then)
+    template <typename... FThens>
+    auto then(FThens&&... f_thens) &&
     {
-        return ::node{std::move(*this), FWD(f_then)};
+        if constexpr(sizeof...(FThens) == 1)
+        {
+            return ::node{std::move(*this), FWD(f_thens)...};
+        }
+        else
+        {
+            return ::when_all{std::move(*this), FWD(f_thens)...};
+        }
     }
 
 private:
@@ -189,20 +201,27 @@ public:
     }
 
     template <typename Scheduler>
-    decltype(auto) wait_and_get(Scheduler&& s) &
+    decltype(auto) wait_and_get(Scheduler&& s) &&
     {
+std::cout << "wait_and_get(linear)" << std::endl;
+
         output_type out;
         bool_latch l;
 
-        auto f = then([&](auto&&... x)
+        auto f = std::move(*this).then([&](auto&&... x)
         {
             ((out = FWD(x)), ...);
+            std::cout << "count down" << std::endl;
             l.count_down();
         });
 
+std::cout << "walk up" << std::endl;
         f.walk_up(s);
 
+std::cout << "waiting" << std::endl;
         l.wait();
+
+        std::cout << "done waiting" << std::endl;
         return out;
     }
 };
@@ -221,16 +240,24 @@ public:
     template <typename ParentFwd>
     schedule(ParentFwd&& p) : child_of<Parent>{FWD(p)} { }
 
-    template <typename FThen>
-    auto then(FThen&& f_then)
+    template <typename... FThens>
+    auto then(FThens&&... f_thens) &&
     {
-        return ::node{std::move(*this), FWD(f_then)};
+        if constexpr(sizeof...(FThens) == 1)
+        {
+            return ::node{std::move(*this), FWD(f_thens)...};
+        }
+        else
+        {
+            return ::when_all{std::move(*this), FWD(f_thens)...};
+        }
     }
 
     template <typename Scheduler, typename Result, typename Child, typename... Children>
     void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
     {
-        c.execute(s, nothing{}, cs...);
+        std::cout << "execute schedule" << std::endl;
+        s([&]{ c.execute(s, nothing{}, cs...); });
     }
 
     template <typename Scheduler, typename... Children>
@@ -243,7 +270,14 @@ public:
 template <typename ParentFwd>
 schedule(ParentFwd&&) -> schedule<std::decay_t<ParentFwd>>;
 
-
+template <typename T>
+struct movable_atomic : std::atomic<T>
+{
+    using std::atomic<T>::atomic;
+    movable_atomic(movable_atomic&& rhs) : std::atomic<T>{rhs.load()}
+    {
+    }
+};
 
 template <typename Parent, typename... Fs>
 class when_all : child_of<Parent>, Fs...
@@ -252,15 +286,31 @@ public:
     using typename child_of<Parent>::input_type;
     using output_type = std::tuple<result_of_ignoring_nothing_t<Fs&, input_type>...>;
 
+private:
+    movable_atomic<int> left{sizeof...(Fs)};
+    output_type out;
+
+public:
     template <typename ParentFwd, typename... FFwds>
     when_all(ParentFwd&& p, FFwds&&... fs) : child_of<Parent>{FWD(p)}, Fs{FWD(fs)}...
     {
     }
 
-    template <typename FThen>
-    auto then(FThen&& f_then)
+    when_all(when_all&& rhs) = default;
+
+    ~when_all() { }
+
+    template <typename... FThens>
+    auto then(FThens&&... f_thens) &&
     {
-        return ::node{std::move(*this), FWD(f_then)};
+        if constexpr(sizeof...(FThens) == 1)
+        {
+            return ::node{std::move(*this), FWD(f_thens)...};
+        }
+        else
+        {
+            return ::when_all{std::move(*this), FWD(f_thens)...};
+        }
     }
 
 public:
@@ -273,38 +323,59 @@ public:
     template <typename Scheduler, typename Result>
     void execute(Scheduler&& s, Result&& r) &
     {
-        (s([&]{ call_ignoring_nothing(static_cast<Fs>(*this), r); }), ...);
+        enumerate_args([&](auto i, auto t)
+        {
+            using f_type = unwrap<decltype(t)>;
+
+            if constexpr(i == sizeof...(Fs) - 1)
+            {
+                call_ignoring_nothing(static_cast<f_type>(*this), r);
+            }
+            else
+            {
+                s([&]{ call_ignoring_nothing(static_cast<f_type>(*this), r); });
+            }
+        }, type_wrapper_v<Fs>...);
     }
 
     template <typename Scheduler, typename Result, typename Child, typename... Children>
     void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
     {
-        output_type out;
-        std::atomic<std::size_t> left{sizeof...(Fs)};
+        std::cout << "execute when_all (left: "<< left <<")" << std::endl;
 
+
+
+        // LEFT NEEDS TO BE A DATA MEMBER!
+
+        // TODO: one schedule too many?
         enumerate_args([&](auto i, auto t)
         {
             s([&]
             {
                 using type = typename decltype(t)::type;
                 std::get<decltype(i){}>(out) = call_ignoring_nothing(static_cast<type&>(*this), r);
-                left.fetch_sub(1);
+                std::cout << "left: " << left.load() << std::endl;
 
-                if(left.load() == 0)
+                if(left.fetch_sub(1) == 1)
                 {
+                    std::cout << "left done" << std::endl;
                     c.execute(s, std::move(out), cs...);
                 }
             });
         }, type_wrapper_v<Fs>...);
+
+        std::cout << "execute when_all done" << std::endl;
     }
 
     template <typename Scheduler>
-    decltype(auto) wait_and_get(Scheduler&& s) &
+    decltype(auto) wait_and_get(Scheduler&& s) &&
     {
+        std::cout << "wait_and_get" << std::endl;
+
         output_type out;
         bool_latch l;
 
-        auto f = then([&](auto&&... x)
+        auto f = std::move(*this).then([&](auto&&... x)
         {
             ((out = FWD(x)), ...);
             l.count_down();
@@ -312,7 +383,10 @@ public:
 
         f.walk_up(s);
 
+        std::cout << "waiting" << std::endl;
         l.wait();
+
+        std::cout << "DONE" << std::endl;
         return out;
     }
 };
@@ -323,14 +397,7 @@ when_all(ParentFwd&&, FFwds&&...) -> when_all<std::decay_t<ParentFwd>, std::deca
 template <typename... Fs>
 auto initiate(Fs&&... fs)
 {
-    if constexpr(sizeof...(Fs) == 1)
-    {
-        return schedule{root{}}.then(FWD(fs)...);
-    }
-    else
-    {
-        return when_all{root{}, FWD(fs)...};
-    }
+    return schedule{root{}}.then(FWD(fs)...);
 }
 
 
@@ -347,14 +414,15 @@ int main()
 {
     {
         auto f = initiate([]{ return 1; });
-        assert(f.wait_and_get(world_s_best_thread_pool{}) == 1);
+        assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 1);
     }
+
 
     {
         auto f = initiate([]{ return 1; })
              .then([](int x){ return x + 1; });
 
-        assert(f.wait_and_get(world_s_best_thread_pool{}) == 2);
+        assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 2);
     }
 
     {
@@ -362,26 +430,47 @@ int main()
              .then([](int x){ return x + 1; })
              .then([](int x){ return x + 1; });
 
-        assert(f.wait_and_get(world_s_best_thread_pool{}) == 3);
+        assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 3);
     }
 
-    auto f0 = initiate([]{ return 1; })
-              .then([](int x){ return x + 1; })
-              .then([](int x){ return x + 1; });
-
-    std::cout << f0.wait_and_get(world_s_best_thread_pool{})
-              << "\n";
-
-    auto f1 = initiate([]{ return 1; })
-              .then([](int x){ return x + 1; })
-              .then([](int){ std::cout << "void!"; });
-
-    f1.wait_and_get(world_s_best_thread_pool{});
-
-    auto f2 = initiate([]{ return 1; }, []{ return 2; }).then([](auto t)
     {
-        auto [a, b] = t; std::cout << a + b << "\n";
-    });
+        auto f = initiate([]{ return 1; })
+                .then([](int x){ return x + 1; })
+                .then([](int){ std::cout << "void!\n"; });
 
-    f2.wait_and_get(world_s_best_thread_pool{});
+        std::move(f).wait_and_get(world_s_best_thread_pool{});
+    }
+
+    {
+        auto f = initiate([]{ return 1; }, []{ return 2; });
+
+        assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == (std::tuple{1, 2}));
+    }
+
+    {
+        auto f = initiate([]{ return 1; }, []{ return 1; })
+                .then([](auto t){ auto [a, b] = t; return a + b; });
+
+        assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 2);
+    }
+
+    auto f2 = initiate([]{ std::cout << "A0" << std::endl; return 1; },
+                       []{ std::cout << "A1" << std::endl; return 2; })
+       .then([](auto t)
+    {
+        // auto [a, b] = t; std::cout << a + b << "\n";
+        (void) t;
+        std::cout << "B" << std::endl;
+        return std::string{"hi!"};
+    }).then([](auto x){ std::cout << x << "C0" << std::endl; return std::string{"hello"}; },
+            [](auto x){ std::cout << x << "C1" << std::endl; return std::string{"world"}; })
+      .then([](auto y){ auto [s0, s1] = y; std::cout << s0 << " " << s1 << "\n"; });
+
+    std::move(f2).wait_and_get(world_s_best_thread_pool{});
+
+    std::cout << "SUCCESS\n";
+    std::cout.flush();
+    return 0;
 }
+
+// https://wandbox.org/permlink/M330a4dk8weSCPNd
