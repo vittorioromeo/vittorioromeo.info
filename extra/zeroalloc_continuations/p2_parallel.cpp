@@ -379,7 +379,7 @@ void fuzzy()
 
     const auto rndsleep = [&]
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds{rndint(0, 10)});
+        std::this_thread::sleep_for(std::chrono::nanoseconds{rndint(0, 100)});
     };
 
     for(int i = 0; i < 1000; ++i)
