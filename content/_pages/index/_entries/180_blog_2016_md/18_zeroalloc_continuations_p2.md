@@ -471,7 +471,7 @@ else
 
 This prevents "wasting" the thread running `when_all</* ... */>::execute`.
 
-That's it! You can find [a complete example **on wandbox.org**](https://wandbox.org/permlink/ZKeDs2Ouy96yV38f) or [here **on GitHub**](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/p2_parallel.cpp).
+That's it! You can find [a complete example **on wandbox.org**](https://wandbox.org/permlink/5zbMAT8z5r7sWBCF) or [here **on GitHub**](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/p2_parallel.cpp).
 
 Note that the current implementation produces invalid assembly with `g++` due to a compiler bug. You can [find more information **here**](https://stackoverflow.com/questions/45117719/mystifying-ub-segfault-only-on-gcc-is-the-code-ill-formed) and it is trivial to work around the issue. Also, `clang++` produces some nonsensical warnings related to deduction guides that I suppressed using `-Wno-undefined-internal`.
 
@@ -479,10 +479,80 @@ Note that the current implementation produces invalid assembly with `g++` due to
 
 ### appendix: `call_ignoring_nothing`
 
-TODO
+Given a `FunctionObject` `f` and a set of arguments `xs...`, this utility invokes `f` with all `xs...` that are not `nothing`. Here are some examples of what `call_ignoring_nothing` does:
+
+* `call_ignoring_nothing(f, 0, 1, 2)` $\to$ `f(0, 1, 2)`
+
+* `call_ignoring_nothing(f, 0, nothing, 2)` $\to$ `f(0, 2)`
+
+* `call_ignoring_nothing(f, nothing)` $\to$ `f()`
+
+* `call_ignoring_nothing(f, 0, nothing, nothing, 1, nothing, 2, nothing)` $\to$ `f(0, 1, 2)`
+
+Its implementation is recursive. The base case is when there are no arguments: `f` is invoked immediately.
+
+```cpp
+template <typename F>
+decltype(auto) call_ignoring_nothing(F&& f)
+{
+    return returning_nothing_instead_of_void(FWD(f));
+}
+```
+
+Here's the recursive case:
+
+```cpp
+template <typename F, typename T, typename... Ts>
+decltype(auto) call_ignoring_nothing(F&& f, T&& x, Ts&&... xs)
+{
+    return call_ignoring_nothing([&](auto&&... ys) -> decltype(auto)
+    {
+        if constexpr(std::is_same_v<std::decay_t<T>, nothing>)
+        {
+            return FWD(f)(FWD(ys)...);
+        }
+        else
+        {
+            return FWD(f)(FWD(x), FWD(ys)...);
+        }
+    }, FWD(xs)...);
+}
+```
+
+Basically, it matches the first argument `x` and a possibly empty set of remaining arguments `xs...`. It recurses over `call_ignoring_nothing`, binding `x` to `f` if it's not `nothing`, otherwise completely ignoring it.
+
+Using `call_ignoring_nothing` allows users to write...
+
+```cpp
+initiate([]{ }).then([]{ });
+```
+
+...instead of:
+
+```cpp
+initiate([](nothing){ }).then([](nothing){ });
+```
 
 
 
 ### appendix: `enumerate_args`
 
-TODO
+This one is quite simple, but useful. The interface `enumerate_args` function invokes `enumerate_args_impl`, passing an `std::index_sequence<0, 1, ..., N>`, where `N` is the number of arguments:
+
+```cpp
+template <typename F, typename... Ts>
+void enumerate_args(F&& f, Ts&&... xs)
+{
+    enumerate_args_impl(std::index_sequence_for<Ts...>{}, FWD(f), FWD(xs)...);
+}
+```
+
+Inside `enumerate_args_impl` I use a [*fold expression*](http://en.cppreference.com/w/cpp/language/fold) that expands both `Is...` and `xs...` in lockstep to produce "pairs" of "index + argument":
+
+```cpp
+template <typename F, typename... Ts, std::size_t... Is>
+void enumerate_args_impl(std::index_sequence<Is...>, F&& f, Ts&&... xs)
+{
+    (f(std::integral_constant<std::size_t, Is>{}, FWD(xs)), ...);
+}
+```

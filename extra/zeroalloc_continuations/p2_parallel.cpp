@@ -37,18 +37,16 @@ decltype(auto) call_ignoring_nothing(F&& f)
 template <typename F, typename T, typename... Ts>
 decltype(auto) call_ignoring_nothing(F&& f, T&& x, Ts&&... xs)
 {
-    return call_ignoring_nothing([&f, &x](auto&&... ys) -> decltype(auto)
+    return call_ignoring_nothing([&](auto&&... ys) -> decltype(auto)
     {
-        return std::forward<F>(f)(std::forward<T>(x), FWD(ys)...);
-    }, FWD(xs)...);
-}
-
-template <typename F, typename... Ts>
-decltype(auto) call_ignoring_nothing(F&& f, nothing, Ts&&... xs)
-{
-    return call_ignoring_nothing([&f](auto&&... ys) -> decltype(auto)
-    {
-        return std::forward<F>(f)(FWD(ys)...);
+        if constexpr(std::is_same_v<std::decay_t<T>, nothing>)
+        {
+            return FWD(f)(FWD(ys)...);
+        }
+        else
+        {
+            return FWD(f)(FWD(x), FWD(ys)...);
+        }
     }, FWD(xs)...);
 }
 
