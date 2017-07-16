@@ -332,3 +332,5 @@ This post has gotten longer than I wanted, so `when_all(...)` will have to be de
 * [*"zero-allocation continuations - part 1"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html)
 
 * [*"zero-allocation continuations - part 2"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p1.html)
+
+* [*"zero-allocation continuations - part 3"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p2.html)

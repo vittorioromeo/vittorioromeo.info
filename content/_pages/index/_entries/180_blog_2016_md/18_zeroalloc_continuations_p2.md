@@ -11,7 +11,7 @@
 }
 </style>
 
-In [**part 1**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) and [**part 2**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) we have explored some techniques that allow us to build simple `future`-like computation chains without type-erasure or allocations. While our examples demonstrated the idea of TODO nesting types by moving `*this` into a parent node, they did not implement any operation that could be executed in parallel.
+In [**part 1**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) and [**part 2**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) we have explored some techniques that allow us to build simple `future`-like computation chains without type-erasure or allocations. While our examples demonstrated the idea of nesting computations by moving `*this` into a parent node *(resulting in "huge types")*, they did not implement any operation that could be executed in parallel.
 
 Our goal is to have a new `when_all` node type at the end of this article, which takes an arbitrary amount of `Callable` objects, invokes them **in parallel**, aggregates the results, and invokes an eventual continuation afterwards. We'll do this in a **non-blocking manner**: the thread that completes the last `Callable` will continue executing the rest of the computation chain without blocking or context-switching.
 
@@ -25,8 +25,19 @@ Unfortunately, the answer is no.
 
 ### table of contents
 
-TODO
+* [flaws with the current design](#flaws-with-the-current-design)
 
+* [going up](#going-up)
+
+* [going down](#going-down)
+
+* [implementation: linear `node`](#implementation-linear-node)
+
+* [implementation: `when_all`](#implementation-when_all)
+
+* [appendix: `call_ignoring_nothing`](#appendix-call_ignoring_nothing)
+
+* [appendix: `enumerate_args`](#appendix-enumerate_args)
 
 
 ### flaws with the current design
@@ -253,7 +264,7 @@ void node</* ... */>::execute(Scheduler&& s, Result&& r,
 
 Firstly, it executes the stored computation with the value received from the parent node: `as_f()(FWD(r))`. It then invokes `.execute` on the next child, propagating the scheduler, the result of the computation, and the eventual rest of the children.
 
-`as_f()(FWD(r))` is a *lie*. The real code is actually `call_ignoring_nothing(as_f(), FWD(r))`. The `call_ignoring_nothing(f, xs...)` invokes `f` passing all `xs...` that are not `nothing` as arguments. Its implementation is explained [in the appendix](TODO). The previously encountered `result_of_ignoring_nothing_t` behaves like [`std::invoke_result_t`](http://en.cppreference.com/w/cpp/types/result_of), but uses `call_ignoring_nothing` instead of `std::invoke`.
+`as_f()(FWD(r))` is a *lie*. The real code is actually `call_ignoring_nothing(as_f(), FWD(r))`. The `call_ignoring_nothing(f, xs...)` invokes `f` passing all `xs...` that are not `nothing` as arguments. Its implementation is explained [in the appendix](#appendix-call_ignoring_nothing). The previously encountered `result_of_ignoring_nothing_t` behaves like [`std::invoke_result_t`](http://en.cppreference.com/w/cpp/types/result_of), but uses `call_ignoring_nothing` instead of `std::invoke`.
 
 That's basically it for linear nodes - you can find [a complete example **on wandbox.org**](https://wandbox.org/permlink/LMzrCQBFYvNQE7n3) or [here **on GitHub**](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/p2_linear.cpp).
 
@@ -405,7 +416,7 @@ enumerate_args([&](auto i, auto t)
 }, type_wrapper_v<Fs>...)
 ```
 
-This is a simple metaprogramming utility that, given an arbitrary amount of compile-time values, executes an user-defined action passing the *index* as the first argument and the *value* as the second argument. You can think about it as a compile-time version of [Python's `enumerate(...)`](https://docs.python.org/3/library/functions.html#enumerate) function. Its implementation is explained [in the appendix](TODO).
+This is a simple metaprogramming utility that, given an arbitrary amount of compile-time values, executes an user-defined action passing the *index* as the first argument and the *value* as the second argument. You can think about it as a compile-time version of [Python's `enumerate(...)`](https://docs.python.org/3/library/functions.html#enumerate) function. Its implementation is explained [in the appendix](#appendix-enumerate_args).
 
 We're passing `type_wrapper_v<Fs>...` to `enumerate_args`. As the name suggests, `type_wrapper` is a simple compile-time value-like wrapper over a type - if you're familiar with [Boost.Hana](http://boostorg.github.io/hana/) this should seem natural to you. Here's its implementation:
 
@@ -556,3 +567,13 @@ void enumerate_args_impl(std::index_sequence<Is...>, F&& f, Ts&&... xs)
     (f(std::integral_constant<std::size_t, Is>{}, FWD(xs)), ...);
 }
 ```
+
+
+
+### series
+
+* [*"zero-allocation continuations - part 1"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html)
+
+* [*"zero-allocation continuations - part 2"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p1.html)
+
+* [*"zero-allocation continuations - part 3"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p2.html)
