@@ -6,6 +6,8 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
+#include <random>
+#include <chrono>
 
 #define FWD(...) ::std::forward<decltype(__VA_ARGS__)>(__VA_ARGS__)
 
@@ -365,8 +367,51 @@ struct world_s_best_thread_pool
     }
 };
 
+void fuzzy()
+{
+    std::random_device rd;
+    std::default_random_engine re(rd());
+
+    const auto rndint = [&](int min, int max)
+    {
+        return std::uniform_int_distribution<int>{min, max - 1}(re);
+    };
+
+    const auto rndsleep = [&]
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds{rndint(0, 10)});
+    };
+
+    for(int i = 0; i < 1000; ++i)
+    {
+        auto f = initiate([&]{ rndsleep(); return 1; },
+                          [&]{ rndsleep(); return 2; },
+                          [&]{ rndsleep(); return 3; })
+            .then([&](auto t)
+            {
+                rndsleep();
+                auto [a, b, c] = t;
+                assert(a + b + c == 1 + 2 + 3);
+                return 0;
+            },
+            [&](auto t)
+            {
+                rndsleep();
+                auto [a, b, c] = t;
+                assert(a + b + c == 1 + 2 + 3);
+                return 1;
+            }).then([](auto t){ auto [a, b] = t; assert(a+b==1); return std::string{"hello"}; },
+                    [](auto t){ auto [a, b] = t; assert(a+b==1); return std::string{"world"}; })
+            .then([](auto y){ auto [s0, s1] = y; assert(s0 + s1 == "helloworld"); });
+
+        std::move(f).wait_and_get(world_s_best_thread_pool{});
+    }
+}
+
 int main()
 {
+    fuzzy();
+
     {
         auto f = initiate([]{ return 1; });
         assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 1);
