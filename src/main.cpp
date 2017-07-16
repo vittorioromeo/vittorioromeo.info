@@ -180,7 +180,7 @@ namespace utils
             return ssvu::getReplacedAll(
                 std::string{std::istreambuf_iterator<char>(ifs),
                     std::istreambuf_iterator<char>()},
-                "src=\"resources/", "src=\"/resources/");
+                "=\"resources/", "=\"/resources/");
             ;
         }
 
