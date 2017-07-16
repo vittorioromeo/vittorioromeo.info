@@ -350,21 +350,28 @@ public:
         // TODO: one schedule too many?
         enumerate_args([&](auto i, auto t)
         {
-            s([&]
+            auto do_computation = [&]
             {
                 using type = typename decltype(t)::type;
-                std::get<decltype(i){}>(out) = call_ignoring_nothing(static_cast<type&>(*this), r);
-                std::cout << "left: " << left.load() << std::endl;
+
+                std::get<decltype(i){}>(out) =
+                    call_ignoring_nothing(static_cast<type&>(*this), r);
 
                 if(left.fetch_sub(1) == 1)
                 {
-                    std::cout << "left done" << std::endl;
                     c.execute(s, std::move(out), cs...);
                 }
-            });
-        }, type_wrapper_v<Fs>...);
+            };
 
-        std::cout << "execute when_all done" << std::endl;
+            if constexpr(i == sizeof...(Fs) - 1)
+            {
+                do_computation();
+            }
+            else
+            {
+                s([&]{ do_computation(); });
+            }
+        }, type_wrapper_v<Fs>...);
     }
 
     template <typename Scheduler>

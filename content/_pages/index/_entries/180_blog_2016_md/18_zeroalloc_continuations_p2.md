@@ -11,7 +11,7 @@
 }
 </style>
 
-In [**part 1**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) and [**part 2**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) we have explored some techniques that allow us to build simple `future`-like computation chains without type-erasure or allocations. While our examples demonstrated the idea of nesting types by moving `*this` into a parent node, they did not implement any operation that could be executed in parallel.
+In [**part 1**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) and [**part 2**](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html) we have explored some techniques that allow us to build simple `future`-like computation chains without type-erasure or allocations. While our examples demonstrated the idea of TODO nesting types by moving `*this` into a parent node, they did not implement any operation that could be executed in parallel.
 
 Our goal is to have a new `when_all` node type at the end of this article, which takes an arbitrary amount of `Callable` objects, invokes them **in parallel**, aggregates the results, and invokes an eventual continuation afterwards. We'll do this in a **non-blocking manner**: the thread that completes the last `Callable` will continue executing the rest of the computation chain without blocking or context-switching.
 
@@ -45,13 +45,13 @@ Note that we could make `when_all` fit in our current design, but it would need 
 
 [![Diagram: blocking `when_all` in current design](resources/img/blog/zeroalloc_p2/d1.jpg)](resources/img/blog/zeroalloc_p2/d1.jpg)
 
-In order to allow `when_all` to have non-blocking behavior, we have to almost literally turn our design upside-down: we'll being at the root, recursively executing the children of the current node.
+In order to allow `when_all` to have non-blocking behavior, we have to almost literally turn our design upside-down: we'll begin at the root, recursively executing the children of the current node.
 
 * When we are at the `root`, we'll simply execute its child.
 
 * When executing a `node`, we'll invoke the stored computation and execute its child **in the same thread**, with the result of the function.
 
-* When executing a `when_all`, we'll invoke every stored computation in parallel - the last one that finished will execute the next child **in the same thread**.
+* When executing a `when_all`, we'll invoke every stored computation in parallel - the last one that finishes will execute the next child **in the same thread**.
 
 We'll have to solve two problems:
 
@@ -81,7 +81,7 @@ Remember that:
 
 The answer is, of course, **recursion**. We'll define a `walk_up` member function that, when invoked, will invoke itself recursively on the parent, passing the current node as an argument. This will build a linear chain of nodes as a variadic set of function arguments.
 
-```¢pp
+```cpp
 template <typename Scheduler, typename... Children>
 void node</* ... */>::walk_up(Scheduler&& s, Children&... cs) &
 {
@@ -115,7 +115,7 @@ The semantics of `.execute` are as follows:
 
 * It uses the scheduler only when appropriate.
 
-    * For linear nodes it will completely avoid using it, in order to chain everything on the same thread.
+    * For linear nodes `.execute` will completely avoid using the scheduler, in order to chain everything on the same thread.
 
     * For fork/join nodes with $N$ computations it will execute one computation on the current thread, and schedule the remaining $N - 1$.
 
@@ -142,7 +142,7 @@ Here's a diagram showing a simplified example of going down a linear chain:
 
 [![Diagram: `.execute` in a linear chain](resources/img/blog/zeroalloc_p2/d3.jpg)](resources/img/blog/zeroalloc_p2/d3.jpg)
 
-You can see the benefit of this approach in the following diagram. The scenario is as follows: after the root, there is a `when_all` node with three computations *($A_0$, $A_1$, $A_2$)*. In the particular hypotethical example run shown in the diagram, $A_2$ is the last node to complete execution. Since $A_2$ knows that its children are $B$ and $C$, it can invoke `.execute` on $B$ on the same thread, without requiring blocking/synchronization.
+You can see the benefit of this approach in the following diagram. The scenario is as follows: after the root, there is a `when_all` node with three computations *($A_0$, $A_1$, $A_2$)*. In the particular hypothetical example run shown in the diagram, $A_2$ is the last node to complete execution. Since $A_2$ knows that its children are $B$ and $C$, it can invoke `.execute` on $B$ on the same thread, without requiring blocking/synchronization.
 
 [![Diagram: `.execute` with fork/join](resources/img/blog/zeroalloc_p2/d4.jpg)](resources/img/blog/zeroalloc_p2/d4.jpg)
 
@@ -233,7 +233,7 @@ With our new design, `wait_and_get` remains unchanged. The definition of `node</
 
 ```cpp
 template <typename FThen>
-auto then(FThen&& f_then) &&
+auto node</* ... */>::then(FThen&& f_then) &&
 {
     return ::node{std::move(*this), FWD(f_then)};
 }
@@ -244,7 +244,8 @@ Let's now take a look at `.execute` *(general case)*:
 ```cpp
 template <typename Scheduler, typename Result,
           typename Child, typename... Children>
-void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
+void node</* ... */>::execute(Scheduler&& s, Result&& r,
+                              Child& c, Children&... cs) &
 {
     c.execute(s, as_f()(FWD(r)), cs...);
 }
@@ -258,6 +259,230 @@ That's basically it for linear nodes - you can find [a complete example **on wan
 
 
 
+### implementation: `when_all`
+
+Finally, we're going to see some parallelism in action. The plan is as follows: we'll create a new type of node called `when_all` that:
+
+* Stores $N$ computations.
+
+* Schedules $N - 1$ computations and executes the remaining one on the current thread.
+
+* Uses an internal `std::atomic` counter to keep track of pending computations. Whenever a computation is completed, the counter will be decremented and checked atomically: if it reached $0$, it means that we're the last computation to complete and that we need to move further down the chain.
+
+* Stores a `std::tuple` of the final results that will be filled by every computation.
+
+This is what the interface looks like:
+
+```cpp
+template <typename Parent, typename... Fs>
+struct when_all : child_of<Parent>, Fs...
+{
+    using typename child_of<Parent>::input_type;
+    using output_type =
+        std::tuple<result_of_ignoring_nothing_t<Fs&, input_type>...>;
+
+    movable_atomic<std::size_t> _left{sizeof...(Fs)};
+    output_type _out;
+
+    template <typename ParentFwd, typename... FFwds>
+    when_all(ParentFwd&&, FFwds&&...);
+
+    template <typename... FThens>
+    auto then(FThens&&...) &&;
+
+    template <typename Scheduler, typename... Children>
+    void walk_up(Scheduler&&, Children&... cs) &;
+
+    template <typename Scheduler, typename Result>
+    void execute(Scheduler&&, Result&&) &;
+
+    template <typename Scheduler, typename Result,
+              typename Child, typename... Children>
+    void execute(Scheduler&&, Result&&, Child&, Children&...) &;
+
+    template <typename Scheduler>
+    decltype(auto) wait_and_get(Scheduler&&) &&;
+};
+
+template <typename ParentFwd, typename... FFwds>
+when_all(ParentFwd&&, FFwds&&...)
+    -> when_all<std::decay_t<ParentFwd>, std::decay_t<FFwds>...>;
+```
+
+It is almost identical to a linear `node`, but has a few important differences:
+
+* The constructor and deduction guide accept $N$ `Callable` objects. We could statically assert that $N > 1$.
+
+* The struct contains the `_left` and `_out` members: these represent the **shared state** between all parallel computations. The `_left` atomic, as previously said, is used to figure out what computation finished last. The `_out` data member is used to store computations' result values.
+
+    * Note that these cannot be local variables in `.execute`, as it is completely non-blocking. We previously got away with a stateless `node` class because we had no scheduling and a single execution path: in that particular case we could just call `.execute` on the next child with the result value of the computation, executed in the same thread.
+
+You might also have noticed that `.then` is now a *variadic* function template. It will now either produce a `node` or a `when_all` depending on the amount of passed functions:
+
+```cpp
+template <typename... FThens>
+auto /* ... */::then(FThens&&... f_thens) &&
+{
+    static_assert(sizeof...(FThens) > 0);
+
+    if constexpr(sizeof...(FThens) == 1)
+    {
+        return ::node{std::move(*this), FWD(f_thens)...};
+    }
+    else
+    {
+        return ::when_all{std::move(*this), FWD(f_thens)...};
+    }
+}
+```
+
+The `initiate` function has also become more interesting: it will instantiate a `schedule`, which is a new auxiliary node type which simply schedules the next child *(instead of running it on the main thread)*. This allows more fine-grained control in the future, as the user might or might not want to schedule a computation chain depending on the context. Every invocation of `initiate` will either return a `node` or a `when_all`:
+
+```cpp
+template <typename... Fs>
+auto initiate(Fs&&... fs)
+{
+    return schedule{root{}}.then(FWD(fs)...);
+}
+```
+
+Before diving into `when_all::execute`, let's take a look at an usage example:
+
+```cpp
+auto f = initiate([]{ std::puts("A0"); return 1; },
+                  []{ std::puts("A1"); return 2; })
+       .then([](auto t)
+       {
+           auto [a0, a1] = t;
+           return a0 + a1;
+       });
+
+assert(std::move(f).wait_and_get(world_s_best_thread_pool{}) == 3);
+```
+
+In the above code snippet, `initiate` will produce a `when_all` node with two computations. In practice, you will see `"A0"` and `"A1"` being printed in an arbitrary order. When the last of the two computations is completed, the `.then` continuation will be invoked with a tuple containing $(1, 2)$. We then use [*structured bindings*](http://en.cppreference.com/w/cpp/language/structured_binding) to unpack the tuple and return the final result, which should always be $3$. As always, `wait_and_get` guarantees to block until the whole chain is completed thanks to a *latch*.
+
+Let's now look at the most interesting part: `when_all::execute`. We'll only analyze the *general case*, as the *leaf case* is pretty much the same.
+
+```cpp
+template <typename Scheduler, typename Result,
+          typename Child, typename... Children>
+void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
+{
+    enumerate_args([&](auto i, auto t)
+    {
+        auto do_computation = [&]
+        {
+            using type = typename decltype(t)::type;
+
+            std::get<decltype(i){}>(_out) =
+                call_ignoring_nothing(static_cast<type&>(*this), r);
+
+            if(_left.fetch_sub(1) == 1)
+            {
+                c.execute(s, std::move(_out), cs...);
+            }
+        };
+
+        if constexpr(i == sizeof...(Fs) - 1)
+        {
+            do_computation();
+        }
+        else
+        {
+            s([&]{ do_computation(); });
+        }
+    }, type_wrapper_v<Fs>...);
+}
+```
+
+There's a lot going on here. Firstly, let's look at `enumerate_args`:
+
+```cpp
+enumerate_args([&](auto i, auto t)
+{
+    // ...
+}, type_wrapper_v<Fs>...)
+```
+
+This is a simple metaprogramming utility that, given an arbitrary amount of compile-time values, executes an user-defined action passing the *index* as the first argument and the *value* as the second argument. You can think about it as a compile-time version of [Python's `enumerate(...)`](https://docs.python.org/3/library/functions.html#enumerate) function. Its implementation is explained [in the appendix](TODO).
+
+We're passing `type_wrapper_v<Fs>...` to `enumerate_args`. As the name suggests, `type_wrapper` is a simple compile-time value-like wrapper over a type - if you're familiar with [Boost.Hana](http://boostorg.github.io/hana/) this should seem natural to you. Here's its implementation:
+
+```cpp
+template <typename T>
+struct type_wrapper { using type = T; };
+
+template <typename T>
+inline constexpr type_wrapper<T> type_wrapper_v{};
+
+template <typename T>
+using unwrap = typename std::decay_t<T>::type;
+```
+
+Our lambda will be invoked multiple times, like this:
+
+* `lambda(std::integral_constant<int, 0>{}, type_wrapper_v<f0>)`
+
+* `lambda(std::integral_constant<int, 1>{}, type_wrapper_v<f1>)`
+
+* ...
+
+* `lambda(std::integral_constant<int, N>{}, type_wrapper_v<fN>)`
+
+Inside the lambda passed to `enumerate_args` we define another lambda: `do_computation`. It contains the instructions to execute for the current computation and will be invoked either with or without the scheduler:
+
+```cpp
+auto do_computation = [&]
+{
+    // Get the current computation's type out of the type wrapper.
+    using type = typename decltype(t)::type;
+
+    // Invoke the computation and assign its result to the `i`-th
+    // element of the `_out` tuple.
+    std::get<decltype(i){}>(_out) =
+        call_ignoring_nothing(static_cast<type&>(*this), r);
+
+    // If this was the last computation to finish, continue further
+    // down the computation chain.
+    if(_left.fetch_sub(1) == 1)
+    {
+        c.execute(s, std::move(_out), cs...);
+    }
+};
+```
+
+The `_left.fetch_sub(1) == 1` makes sure that the decrement and check is performed atomically. We're checking equality against `1` and not `0` as [`std::atomic<T>::fetch_sub`](https://en.cppreference.com/w/cpp/atomic/atomic/fetch_sub) returns the value of the atomic prior to the decrement.
+
+Finally, we branch at compile-time to check whether or not we should schedule the current computation:
+
+```cpp
+if constexpr(i == sizeof...(Fs) - 1)
+{
+    // If this is the last computation, do not schedule it.
+    do_computation();
+}
+else
+{
+    // Otherwise, schedule it.
+    s([&]{ do_computation(); });
+}
+```
+
+This prevents "wasting" the thread running `when_all</* ... */>::execute`.
+
+That's it! You can find [a complete example **on wandbox.org**](https://wandbox.org/permlink/ZKeDs2Ouy96yV38f) or [here **on GitHub**](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/p2_parallel.cpp).
+
+Note that the current implementation produces invalid assembly with `g++` due to a compiler bug. You can [find more information **here**](https://stackoverflow.com/questions/45117719/mystifying-ub-segfault-only-on-gcc-is-the-code-ill-formed) and it is trivial to work around the issue. Also, `clang++` produces some nonsensical warnings related to deduction guides that I suppressed using `-Wno-undefined-internal`.
+
+
+
 ### appendix: `call_ignoring_nothing`
+
+TODO
+
+
+
+### appendix: `enumerate_args`
 
 TODO
