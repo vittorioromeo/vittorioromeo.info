@@ -28,8 +28,9 @@
 </script>
 
 
+
         <script type="text/javascript" async
-            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?...">
         </script>
     </head>
 
@@ -38,10 +39,10 @@
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
 
-  
-        
+
+
         <div class="header-container">
-            <header class="wrapper clearfix">       
+            <header class="wrapper clearfix">
                 <div class="headerLogos">
                     <div class="headerLogoMain"> <img src="{{ResourcesPath}}/img/logoMain.png" width="85" height="85"> </div>
                     <div class="headerTextHeading"> <img src="{{ResourcesPath}}/img/textHeading.png" width="315" height="68"> </div>
@@ -49,7 +50,7 @@
             </header>
         </div>
 
-        {{MainMenu}}     
+        {{MainMenu}}
 
         <div class="main-container">
             <div class="main wrapper clearfix">
@@ -59,41 +60,41 @@
                         <h3 style="text-align: justify">contact me</h3>
                         <div class="socialIcons">
                             <div class="socialIcon">
-                                <a href="mailto:vittorio.romeo@outlook.com" target="_blank"> 
+                                <a href="mailto:vittorio.romeo@outlook.com" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialEmail.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialEmailGray.png" width="45" height="45"> </div>
                                 </a>
                             </div>
                             <div class="socialIcon">
-                                <a href="http://www.facebook.com/vittorioromeovee" target="_blank"> 
+                                <a href="http://www.facebook.com/vittorioromeovee" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialFacebook.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialFacebookGray.png" width="45" height="45"> </div>
                                 </a>
                             </div>
                             <div class="socialIcon">
-                                <a href="https://github.com/SuperV1234" target="_blank"> 
+                                <a href="https://github.com/SuperV1234" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialGitHub.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialGitHubGray.png" width="45" height="45"> </div>
                                 </a>
                             </div>
                             <div class="socialIcon">
-                                <a href="http://www.youtube.com/user/SuperVictorius" target="_blank"> 
+                                <a href="http://www.youtube.com/user/SuperVictorius" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialYouTube.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialYouTubeGray.png" width="45" height="45"> </div>
                                 </a>
                             </div>
                             <div class="socialIcon">
-                                <a href="https://twitter.com/supahvee1234" target="_blank"> 
+                                <a href="https://twitter.com/supahvee1234" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialTwitter.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialTwitterGray.png" width="45" height="45"> </div>
                                 </a>
-                            </div>          
+                            </div>
                             <div class="socialIcon">
-                                <a href="http://stackexchange.com/users/294676/vittorio-romeo" target="_blank"> 
+                                <a href="http://stackexchange.com/users/294676/vittorio-romeo" target="_blank">
                                     <img src="{{ResourcesPath}}/img/socialStackExchange.png" width="45" height="45">
                                     <div class="socialIconGray"> <img src="{{ResourcesPath}}/img/socialStackExchangeGray.png" width="45" height="45"> </div>
                                 </a>
-                            </div>      
+                            </div>
                         </div>
                     </aside>
                     <div>
@@ -116,15 +117,15 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="footer-container">
             <footer class="wrapper">
                 <p>vittorio romeo 2012 - 2016</p>
-                
-    
+
+
 
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="3CDK85YJC3RAA"><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!"><img alt="" border="0" src="https://www.paypalobjects.com/it_IT/i/scr/pixel.gif" width="1" height="1"></form>
-            
+
 
             </footer>
 
