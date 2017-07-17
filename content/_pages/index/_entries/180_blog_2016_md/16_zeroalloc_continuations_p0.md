@@ -307,3 +307,5 @@ Thanks for reading!
 * [*"zero-allocation continuations - part 1"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p0.html)
 
 * [*"zero-allocation continuations - part 2"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p1.html)
+
+* [*"zero-allocation continuations - part 3"*](https://vittorioromeo.info/index/blog/zeroalloc_continuations_p2.html)
