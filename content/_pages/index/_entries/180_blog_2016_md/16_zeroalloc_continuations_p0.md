@@ -63,7 +63,7 @@ auto then(std::experimental::future<T>& parent, std::launch policy, F&& f)
 }
 ```
 
-Hmm... `std::async`, type erasure... this means that there might be potential allocations! Let's attempt to rougly measure their overhead. I created [five `.cpp` files](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/) where I used `boost::async` and `boost::future` to create a chain of `.then` continuations, starting with zero continuations and ending with four. Example:
+Hmm... `std::async`, type erasure... this means that there might be potential allocations! Let's attempt to roughly measure their overhead. I created [five `.cpp` files](https://github.com/SuperV1234/vittorioromeo.info/blob/master/extra/zeroalloc_continuations/) where I used `boost::async` and `boost::future` to create a chain of `.then` continuations, starting with zero continuations and ending with four. Example:
 
 ```cpp
 // zero continuations
