@@ -258,18 +258,20 @@ decltype(auto) node</* ... */>::wait_and_get(Scheduler&& s) &
     result_type out;
     std::atomic<bool> finished{false};
     std::condition_variable cv;
+    std::mutex mtx;
 
     auto f = then([&](auto&& x)
                     {
                         out = FWD(x);
+
+                        std::scoped_lock lk{mtx};
                         finished.store(true);
                         cv.notify_one();
                     });
 
     f.execute(s);
 
-    std::mutex mtx;
-    std::unique_lock lk(mtx);
+    std::unique_lock lk{mtx};
     cv.wait(lk, [&]{ return finished.load(); });
 
     return out;
