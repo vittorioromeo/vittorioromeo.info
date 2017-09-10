@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <memory>
 #include <utility>
 #include <cassert>
 #include <future>
@@ -281,7 +282,7 @@ class when_all : private child_of<Parent>, private Fs...,
 {
 public:
     using typename child_of<Parent>::input_type;
-    using output_type = std::tuple<result_of_ignoring_nothing_t<Fs&, input_type>...>;
+    using output_type = std::tuple<result_of_ignoring_nothing_t<Fs&, input_type&>...>;
 
 private:
     movable_atomic<int> _left{sizeof...(Fs)};
@@ -323,6 +324,10 @@ public:
     template <typename Scheduler, typename Result, typename Child, typename... Children>
     void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
     {
+        // This is necessary as `r` only lives as long as `execute` is active on the call stack.
+        // Computations might still be active when `execute` ends, even if the last one is executed on the same thread.
+        // This is because the scheduled computations might finish after the last one.
+        // TODO: what if `Result` is an lvalue reference?
         new (&_input_buf) std::decay_t<Result>(FWD(r));
 
         enumerate_args([&](auto i, auto t)
@@ -332,10 +337,12 @@ public:
                 using type = typename decltype(t)::type;
 
                 std::get<decltype(i){}>(_out) =
-                    call_ignoring_nothing(static_cast<type&>(*this), reinterpret_cast<Result&&>(_input_buf));
+                    call_ignoring_nothing(static_cast<type&>(*this), reinterpret_cast<Result&>(_input_buf));
 
                 if(_left.fetch_sub(1) == 1)
                 {
+                    // TODO: make sure this destruction is correct, probably should not destroy if storing lvalue reference
+                    reinterpret_cast<input_type&>(_input_buf).~input_type();
                     c.execute(s, _out, cs...);
                 }
             };
@@ -346,6 +353,7 @@ public:
             }
             else
             {
+                // `do_computation` has to be moved here as it will die at the end of the `enumerate_args` lambda scope.
                 s([g = std::move(do_computation)]{ g(); });
             }
         }, type_wrapper_v<Fs>...);
@@ -369,6 +377,9 @@ struct world_s_best_thread_pool
         std::thread{FWD(f)}.detach();
     }
 };
+
+std::atomic<int> ctr = 0;
+struct sctr { sctr(){ ++ctr; } ~sctr(){ --ctr; } };
 
 void fuzzy()
 {
@@ -411,7 +422,22 @@ void fuzzy()
 
         std::move(f).wait_and_get(world_s_best_thread_pool{});
     }
+
+
+    for(int i = 0; i < 1000; ++i)
+    {
+        assert(ctr == 0);
+        auto f = initiate([]{ return std::make_shared<sctr>(); })
+                .then([](auto&){  assert(ctr == 1); },
+                      [](auto&){ assert(ctr == 1); })
+                .then([](auto){ assert(ctr == 0); });
+
+        std::move(f).wait_and_get(world_s_best_thread_pool{});
+        assert(ctr == 0);
+    }
 }
+
+
 
 int main()
 {
@@ -477,6 +503,21 @@ int main()
 
     auto f4 = initiate([]{},[]{}).then([](auto){});
     std::move(f4).wait_and_get(world_s_best_thread_pool{});
+
+    auto f5 = initiate([]{ std::cout << "A0\n"; return 1; },
+                       []{ std::cout << "A1\n"; return 2; })
+       .then([](auto t)
+    {
+        auto [a, b] = t;
+        assert(a + b == 3);
+        return a + b;
+    }).then([](auto x){ assert(x == 3); std::cout << x << " C0\n"; return 2; },
+            [](auto x){ assert(x == 3); std::cout << x << " C1\n"; return 3; })
+      .then([](auto t){ auto [a, b] = t; auto x = a+b; assert(x == 5); std::cout << x << " C2\n"; return 4; },
+            [](auto t){ auto [a, b] = t; auto x = a+b; assert(x == 5); std::cout << x << " C3\n"; return 5; })
+      .then([](auto y){ auto [a, b] = y; assert(a+b == 9); });
+
+    std::move(f5).wait_and_get(world_s_best_thread_pool{});
 
     std::cout.flush();
     return 0;
