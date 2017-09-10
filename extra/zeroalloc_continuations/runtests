@@ -1,10 +1,10 @@
 #!/bin/bash
 
-clang++ -g -O0 -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -Ofast -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -O0 -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -O0 -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -O0 -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -Ofast -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && \
-clang++ -g -Ofast -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && \
+clang++ -g -O0 -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -Ofast -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -O0 -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -O0 -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -O0 -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -Ofast -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
+clang++ -g -Ofast -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
 clang++ -g -Ofast -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@

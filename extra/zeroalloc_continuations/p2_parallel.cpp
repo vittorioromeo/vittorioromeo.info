@@ -286,6 +286,7 @@ public:
 private:
     movable_atomic<int> _left{sizeof...(Fs)};
     output_type _out;
+    std::aligned_storage_t<sizeof(input_type), alignof(input_type)> _input_buf;
 
 public:
     template <typename ParentFwd, typename... FFwds>
@@ -322,6 +323,8 @@ public:
     template <typename Scheduler, typename Result, typename Child, typename... Children>
     void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
     {
+        new (&_input_buf) std::decay_t<Result>(FWD(r));
+
         enumerate_args([&](auto i, auto t)
         {
             auto do_computation = [&]
@@ -329,11 +332,11 @@ public:
                 using type = typename decltype(t)::type;
 
                 std::get<decltype(i){}>(_out) =
-                    call_ignoring_nothing(static_cast<type&>(*this), r);
+                    call_ignoring_nothing(static_cast<type&>(*this), reinterpret_cast<Result&&>(_input_buf));
 
                 if(_left.fetch_sub(1) == 1)
                 {
-                    c.execute(s, std::move(_out), cs...);
+                    c.execute(s, _out, cs...);
                 }
             };
 
@@ -343,7 +346,7 @@ public:
             }
             else
             {
-                s([&]{ do_computation(); });
+                s([g = std::move(do_computation)]{ g(); });
             }
         }, type_wrapper_v<Fs>...);
     }
@@ -369,11 +372,13 @@ struct world_s_best_thread_pool
 
 void fuzzy()
 {
+    std::mutex mtx;
     std::random_device rd;
     std::default_random_engine re(rd());
 
     const auto rndint = [&](int min, int max)
     {
+        std::scoped_lock l{mtx};
         return std::uniform_int_distribution<int>{min, max - 1}(re);
     };
 
@@ -459,12 +464,19 @@ int main()
        .then([](auto t)
     {
         auto [a, b] = t;
+        assert(a + b == 3);
         return a + b;
-    }).then([](auto x){ std::cout << x << " C0\n"; return std::string{"hello"}; },
-            [](auto x){ std::cout << x << " C1\n"; return std::string{"world"}; })
-      .then([](auto y){ auto [s0, s1] = y; std::cout << s0 << " " << s1 << "\n"; });
+    }).then([](auto x){ assert(x == 3); std::cout << x << " C0\n"; return std::string{"hello"}; },
+            [](auto x){ assert(x == 3); std::cout << x << " C1\n"; return std::string{"world"}; })
+      .then([](auto y){ auto [s0, s1] = y; assert(s0 == "hello"); assert(s1 == "world"); std::cout << s0 << " " << s1 << "\n"; });
 
     std::move(f2).wait_and_get(world_s_best_thread_pool{});
+
+    auto f3 = initiate([]{}).then([]{});
+    std::move(f3).wait_and_get(world_s_best_thread_pool{});
+
+    auto f4 = initiate([]{},[]{}).then([](auto){});
+    std::move(f4).wait_and_get(world_s_best_thread_pool{});
 
     std::cout.flush();
     return 0;
