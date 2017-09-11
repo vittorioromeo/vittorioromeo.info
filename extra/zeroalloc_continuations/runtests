@@ -1,10 +1,21 @@
 #!/bin/bash
 
-clang++ -g -O0 -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -Ofast -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -O0 -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -O0 -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -O0 -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -Ofast -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -Ofast -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && \
-clang++ -g -Ofast -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@
+RED='\033[0;31m'
+NC='\033[0m'
+
+clang++ -g -O0 -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 (OK)${NC}\n" \
+clang++ -g -Ofast -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast (OK)${NC}\n" \
+clang++ -g -O0 -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 asan (OK)${NC}\n" \
+clang++ -g -O0 -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 ubsan (OK)${NC}\n" \
+clang++ -g -O0 -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 tsan (OK)${NC}\n" \
+clang++ -g -Ofast -fsanitize=address -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast asan (OK)${NC}\n" \
+clang++ -g -Ofast -fsanitize=undefined -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast ubsan (OK)${NC}\n" \
+clang++ -g -Ofast -fsanitize=thread -std=c++1z -pthread -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast tsan (OK)${NC}\n" \
+g++ -g -O0 -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ O0 (OK)${NC}\n" \
+g++ -g -Ofast -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ Ofast (OK)${NC}\n" \
+g++ -g -O0 -fsanitize=address -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ O0 asan (OK)${NC}\n" \
+g++ -g -O0 -fsanitize=undefined -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ O0 ubsan (OK)${NC}\n" \
+g++ -g -O0 -fsanitize=thread -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ O0 tsan (OK)${NC}\n" \
+g++ -g -Ofast -fsanitize=address -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ Ofast asan (OK)${NC}\n" \
+g++ -g -Ofast -fsanitize=undefined -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ Ofast ubsan (OK)${NC}\n" \
+g++ -g -Ofast -fsanitize=thread -std=c++1z -pthread $@ && ./a.out && echo -e "${RED}g++ Ofast tsan (OK)${NC}\n"

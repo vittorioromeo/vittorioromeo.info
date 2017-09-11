@@ -17,6 +17,12 @@ struct nothing { };
 template <typename T>
 using void_to_nothing_t = std::conditional_t<std::is_void_v<T>, nothing, T>;
 
+template <typename T>
+using is_nothing_t = std::is_same<std::decay_t<T>, nothing>;
+
+template <typename T>
+constexpr auto is_nothing_v = is_nothing_t<T>::value;
+
 template <typename F, typename... Ts>
 decltype(auto) returning_nothing_instead_of_void(F&& f, Ts&&... xs)
 {
@@ -42,7 +48,7 @@ decltype(auto) call_ignoring_nothing(F&& f, T&& x, Ts&&... xs)
 {
     return call_ignoring_nothing([&](auto&&... ys) -> decltype(auto)
     {
-        if constexpr(std::is_same_v<std::decay_t<T>, nothing>)
+        if constexpr(is_nothing_v<T>)
         {
             return FWD(f)(FWD(ys)...);
         }
@@ -79,7 +85,7 @@ template <typename T>
 inline constexpr type_wrapper<T> type_wrapper_v{};
 
 template <typename T>
-using unwrap = typename std::decay_t<T>::type;
+using unwrap_type = typename std::decay_t<T>::type;
 
 class bool_latch
 {
@@ -276,6 +282,39 @@ struct movable_atomic : std::atomic<T>
     }
 };
 
+template <typename T>
+struct tuple_of_nothing_to_empty;
+
+template <typename T>
+struct tuple_of_nothing_to_empty<std::tuple<T>>
+{
+    using type = std::tuple<T>;
+};
+
+template <>
+struct tuple_of_nothing_to_empty<std::tuple<nothing>>
+{
+    using type = std::tuple<>;
+};
+
+template <typename T>
+using tuple_of_nothing_to_empty_t = typename tuple_of_nothing_to_empty<T>::type;
+
+
+template <typename T>
+struct adapt_tuple_of_nothing;
+
+template <typename... Ts>
+struct adapt_tuple_of_nothing<std::tuple<Ts...>>
+{
+    using type = decltype(
+        std::tuple_cat(std::declval<tuple_of_nothing_to_empty_t<std::tuple<Ts>>>()...)
+    );
+};
+
+template <typename T>
+using adapt_tuple_of_nothing_t = typename adapt_tuple_of_nothing<T>::type;
+
 template <typename Parent, typename... Fs>
 class when_all : private child_of<Parent>, private Fs...,
                  public node_base<when_all<Parent, Fs...>>
@@ -283,6 +322,11 @@ class when_all : private child_of<Parent>, private Fs...,
 public:
     using typename child_of<Parent>::input_type;
     using output_type = std::tuple<result_of_ignoring_nothing_t<Fs&, input_type&>...>;
+
+    // TODO: should this be done, or should the tuple be applied to following node?
+    // using output_type = adapt_tuple_of_nothing_t<
+    //     std::tuple<result_of_ignoring_nothing_t<Fs&, input_type&>...>
+    // >;
 
 private:
     // TODO: the size of the entire computation might grow by a lot. Is it possible to reuse this space for multiple nodes?
@@ -307,17 +351,31 @@ public:
     template <typename Scheduler, typename Result>
     void execute(Scheduler&& s, Result&& r) &
     {
+        // TODO: what if `Result` is an lvalue reference?
+        new (&_input_buf) std::decay_t<Result>(FWD(r));
+
         enumerate_args([&](auto i, auto t)
         {
-            using f_type = unwrap<decltype(t)>;
+            auto do_computation = [&]
+            {
+                call_ignoring_nothing(static_cast<unwrap_type<decltype(t)>&>(*this),
+                                      reinterpret_cast<Result&>(_input_buf));
+
+                if(_left.fetch_sub(1) == 1)
+                {
+                    // TODO: make sure this destruction is correct, probably should not destroy if storing lvalue reference
+                    reinterpret_cast<input_type&>(_input_buf).~input_type();
+                }
+            };
 
             if constexpr(i == sizeof...(Fs) - 1)
             {
-                call_ignoring_nothing(static_cast<f_type>(*this), r);
+                do_computation();
             }
             else
             {
-                s([&]{ call_ignoring_nothing(static_cast<f_type>(*this), r); });
+                // `do_computation` has to be moved here as it will die at the end of the `enumerate_args` lambda scope.
+                s([g = std::move(do_computation)]{ g(); });
             }
         }, type_wrapper_v<Fs>...);
     }
@@ -338,13 +396,14 @@ public:
                 using type = typename decltype(t)::type;
 
                 std::get<decltype(i){}>(_out) =
-                    call_ignoring_nothing(static_cast<type&>(*this), reinterpret_cast<Result&>(_input_buf));
+                    call_ignoring_nothing(static_cast<unwrap_type<decltype(t)>&>(*this),
+                                          reinterpret_cast<Result&>(_input_buf));
 
                 if(_left.fetch_sub(1) == 1)
                 {
                     // TODO: make sure this destruction is correct, probably should not destroy if storing lvalue reference
                     reinterpret_cast<input_type&>(_input_buf).~input_type();
-                    c.execute(s, _out, cs...);
+                    c.execute(s, _out, cs...); // TODO: apply the tuple here to pass multiple arguments
                 }
             };
 
