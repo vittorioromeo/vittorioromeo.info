@@ -285,6 +285,7 @@ public:
     using output_type = std::tuple<result_of_ignoring_nothing_t<Fs&, input_type&>...>;
 
 private:
+    // TODO: the size of the entire computation might grow by a lot. Is it possible to reuse this space for multiple nodes?
     movable_atomic<int> _left{sizeof...(Fs)};
     output_type _out;
     std::aligned_storage_t<sizeof(input_type), alignof(input_type)> _input_buf;
