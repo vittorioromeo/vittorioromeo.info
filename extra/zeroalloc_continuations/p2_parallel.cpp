@@ -393,8 +393,6 @@ public:
         {
             auto do_computation = [&]
             {
-                using type = typename decltype(t)::type;
-
                 std::get<decltype(i){}>(_out) =
                     call_ignoring_nothing(static_cast<unwrap_type<decltype(t)>&>(*this),
                                           reinterpret_cast<Result&>(_input_buf));
