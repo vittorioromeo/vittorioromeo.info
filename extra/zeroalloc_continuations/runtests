@@ -4,19 +4,19 @@ RED='\033[0;31m'
 NC='\033[0m'
 FLAGS='-g -pthread -std=c++1z -Wall -Wextra -Wpedantic'
 
-clang++ -O0 $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 (OK)${NC}\n" \
-clang++ -Ofast $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast (OK)${NC}\n" \
-clang++ -O0 -fsanitize=address $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 asan (OK)${NC}\n" \
-clang++ -O0 -fsanitize=undefined $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 ubsan (OK)${NC}\n" \
-clang++ -O0 -fsanitize=thread $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 tsan (OK)${NC}\n" \
-clang++ -Ofast -fsanitize=address $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast asan (OK)${NC}\n" \
-clang++ -Ofast -fsanitize=undefined $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast ubsan (OK)${NC}\n" \
-clang++ -Ofast -fsanitize=thread $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast tsan (OK)${NC}\n" \
-g++ -O0 $FLAGS $@ && ./a.out && echo -e "${RED}g++ O0 (OK)${NC}\n" \
-g++ -Ofast $FLAGS $@ && ./a.out && echo -e "${RED}g++ Ofast (OK)${NC}\n" \
-g++ -O0 -fsanitize=address $FLAGS $@ && ./a.out && echo -e "${RED}g++ O0 asan (OK)${NC}\n" \
-g++ -O0 -fsanitize=undefined $FLAGS $@ && ./a.out && echo -e "${RED}g++ O0 ubsan (OK)${NC}\n" \
-g++ -O0 -fsanitize=thread $FLAGS $@ && ./a.out && echo -e "${RED}g++ O0 tsan (OK)${NC}\n" \
-g++ -Ofast -fsanitize=address $FLAGS $@ && ./a.out && echo -e "${RED}g++ Ofast asan (OK)${NC}\n" \
-g++ -Ofast -fsanitize=undefined $FLAGS $@ && ./a.out && echo -e "${RED}g++ Ofast ubsan (OK)${NC}\n" \
-g++ -Ofast -fsanitize=thread $FLAGS $@ && ./a.out && echo -e "${RED}g++ Ofast tsan (OK)${NC}\n"
+clang++ -O0 $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 (OK)${NC}\n"
+clang++ -Ofast $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast (OK)${NC}\n"
+clang++ -O0 -fsanitize=address $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 asan (OK)${NC}\n"
+clang++ -O0 -fsanitize=undefined $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 ubsan (OK)${NC}\n"
+clang++ -O0 -fsanitize=thread $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ O0 tsan (OK)${NC}\n"
+clang++ -Ofast -fsanitize=address $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast asan (OK)${NC}\n"
+clang++ -Ofast -fsanitize=undefined $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast ubsan (OK)${NC}\n"
+clang++ -Ofast -fsanitize=thread $FLAGS -Wno-undefined-internal $@ && ./a.out && echo -e "${RED}clang++ Ofast tsan (OK)${NC}\n"
+g++ -O0 $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ O0 (OK)${NC}\n"
+g++ -Ofast $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ Ofast (OK)${NC}\n"
+g++ -O0 -fsanitize=address $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ O0 asan (OK)${NC}\n"
+g++ -O0 -fsanitize=undefined $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ O0 ubsan (OK)${NC}\n"
+g++ -O0 -fsanitize=thread $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ O0 tsan (OK)${NC}\n"
+g++ -Ofast -fsanitize=address $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ Ofast asan (OK)${NC}\n"
+g++ -Ofast -fsanitize=undefined $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ Ofast ubsan (OK)${NC}\n"
+g++ -Ofast -fsanitize=thread $FLAGS $@ -Wno-strict-aliasing -Wno-maybe-uninitialized && ./a.out && echo -e "${RED}g++ Ofast tsan (OK)${NC}\n"

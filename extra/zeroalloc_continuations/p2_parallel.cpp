@@ -21,7 +21,7 @@ template <typename T>
 using is_nothing_t = std::is_same<std::decay_t<T>, nothing>;
 
 template <typename T>
-constexpr auto is_nothing_v = is_nothing_t<T>::value;
+constexpr bool is_nothing_v = is_nothing_t<T>::value;
 
 template <typename F, typename... Ts>
 decltype(auto) returning_nothing_instead_of_void(F&& f, Ts&&... xs)
@@ -59,6 +59,15 @@ decltype(auto) call_ignoring_nothing(F&& f, T&& x, Ts&&... xs)
     }, FWD(xs)...);
 }
 
+template <typename F, typename T>
+decltype(auto) apply_ignoring_nothing(F&& f, T&& t)
+{
+    return std::apply([&](auto&&... xs) -> decltype(auto)
+    {
+        return call_ignoring_nothing(FWD(f), FWD(xs)...);
+    }, FWD(t));
+}
+
 template <typename F, typename... Ts>
 using result_of_ignoring_nothing_t =
     decltype(call_ignoring_nothing(std::declval<F>(), std::declval<Ts>()...));
@@ -90,25 +99,24 @@ using unwrap_type = typename std::decay_t<T>::type;
 class bool_latch
 {
 private:
-    std::atomic<bool> _finished{false};
     std::condition_variable _cv;
     std::mutex _mtx;
+    bool _finished{false};
 
 public:
     void count_down()
     {
         std::scoped_lock lk{_mtx};
-        _finished.store(true);
+        _finished = true;
         _cv.notify_all();
     }
 
     void wait()
     {
         std::unique_lock lk{_mtx};
-        _cv.wait(lk, [this]{ return _finished.load(); });
+        _cv.wait(lk, [this]{ return _finished; });
     }
 };
-
 
 template <typename Parent, typename F>
 class node;
@@ -237,6 +245,8 @@ public:
     template <typename Scheduler, typename Result, typename Child, typename... Children>
     void execute(Scheduler&& s, Result&& r, Child& c, Children&... cs) &
     {
+        // `r` doesn't need to be stored inside the node here as it is used
+        // to synchronously invoke `as_f()`.
         c.execute(s, call_ignoring_nothing(as_f(), FWD(r)), cs...);
     }
 
@@ -340,7 +350,7 @@ public:
     {
     }
 
-    using crtp_base_type =  node_base<when_all<Parent, Fs...>>;
+    using crtp_base_type = node_base<when_all<Parent, Fs...>>;
     friend crtp_base_type;
 
     using crtp_base_type::then;
@@ -352,14 +362,14 @@ public:
     void execute(Scheduler&& s, Result&& r) &
     {
         // TODO: what if `Result` is an lvalue reference?
-        new (&_input_buf) std::decay_t<Result>(FWD(r));
+        new (&_input_buf) input_type(FWD(r));
 
         enumerate_args([&](auto i, auto t)
         {
             auto do_computation = [&]
             {
                 call_ignoring_nothing(static_cast<unwrap_type<decltype(t)>&>(*this),
-                                      reinterpret_cast<Result&>(_input_buf));
+                                      reinterpret_cast<input_type&>(_input_buf));
 
                 if(_left.fetch_sub(1) == 1)
                 {
@@ -387,7 +397,7 @@ public:
         // Computations might still be active when `execute` ends, even if the last one is executed on the same thread.
         // This is because the scheduled computations might finish after the last one.
         // TODO: what if `Result` is an lvalue reference?
-        new (&_input_buf) std::decay_t<Result>(FWD(r));
+        new (&_input_buf) input_type(FWD(r));
 
         enumerate_args([&](auto i, auto t)
         {
@@ -395,7 +405,7 @@ public:
             {
                 std::get<decltype(i){}>(_out) =
                     call_ignoring_nothing(static_cast<unwrap_type<decltype(t)>&>(*this),
-                                          reinterpret_cast<Result&>(_input_buf));
+                                          reinterpret_cast<input_type&>(_input_buf));
 
                 if(_left.fetch_sub(1) == 1)
                 {
