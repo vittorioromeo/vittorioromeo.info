@@ -105,7 +105,7 @@ auto node</* ... */>::then(FThen&& f_then)
     return ::node{std::move(*this),
         [f_then = FWD(f_then)](auto& parent) mutable
         {
-            return parent.call_with_parent();
+            return f_then(parent.call_with_parent());
         }};
 }
 ```
