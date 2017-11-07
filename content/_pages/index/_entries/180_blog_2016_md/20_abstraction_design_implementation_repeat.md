@@ -58,6 +58,31 @@ Cannot get simpler than that - let's implement it!
 ```cpp
 template <typename N, typename F>
 constexpr void repeat(N n, F&& f)
+{
+    for(N i = 0; i < n; ++i)
+    {
+        f();
+    }
+}
+```
+
+<div class="inline-link">
+
+[*(on godbolt.org)*](https://godbolt.org/g/ijYidG)
+
+</div>
+
+As you can see from the *godbolt.org* link above, `repeat` is completely inlined by both **g++** and **clang++** with `-O2`. You should not be surprised by this - *templates* and *lambda expressions* are completely transparent to the compiler.
+
+Even in this simple `repeat` implementation, there is an interesting point to note:
+
+* We marked `repeat` as `constexpr`... even though it returns `void`. If you're asking yourself *"does this even make sense?"* the answer is **yes**, and it's best explained [with this example on *godbolt.org*](https://godbolt.org/g/14EFTk). Getting rid of `constexpr` would prevent it from compiling. The lesson to learn here is that `constexpr` doesn't imply immutability - mutable state is allowed *(and often useful)* during compile-time computations. Note that lambdas are implicitly `constexpr` when possible since C++17.
+
+Unfortunately, this implementation is not completely correct. It doesn't properly propagate `noexcept`-ness! In order to fix that, we need to add a `noexcept` specifier composed of various `noexcept` operator checks, which make sure that all the operations we use inside the body are indeed `noexcept`:
+
+```cpp
+template <typename N, typename F>
+constexpr void repeat(N n, F&& f)
     noexcept(noexcept(f())
           && noexcept(N(0))
           && noexcept(n < n)
@@ -77,13 +102,7 @@ constexpr void repeat(N n, F&& f)
 
 </div>
 
-As you can see from the *godbolt.org* link above, `repeat` is completely inlined by both **g++** and **clang++** with `-O2`. You should not be surprised by this - *templates* and *lambda expressions* are completely transparent to the compiler.
-
-Even in this simple `repeat` implementation, there are a few interesting points to note:
-
-* We need to use `noexcept(noexcept(...))` in order to correctly propagate `noexcept`-ness of the operations executed in the body of `repeat`. To be exhaustive, we had to check operations on `N` as well - the user could pass a custom type that exposes an `int`-like interface but may throw.
-
-* We marked `repeat` as `constexpr`... even though it returns `void`. If you're asking yourself *"does this even make sense?"* the answer is **yes**, and it's best explained [with this example on *godbolt.org*](https://godbolt.org/g/2kjwmQ). Getting rid of `constexpr` would prevent it from compiling. The lesson to learn here is that `constexpr` doesn't imply immutability - mutable state is allowed *(and often useful)* during compile-time computations. Note that lambdas are implicitly `constexpr` when possible since C++17.
+This is important if you're trying to write a `noexcept`-friendly library: the user could pass a custom type to `repeat` that exposes an `int`-like interface but may throw. Unfortunately this compromises the readability of the implementation.
 
 
 
