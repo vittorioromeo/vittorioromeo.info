@@ -4,6 +4,17 @@
     [
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "abstraction_design_implementation_repeat",
+            "tags": ["c++", "c++17", "lambda", "library"],
+            "expand":
+            {
+                "Title": "abstraction design and implementation: `repeat`",
+                "Text": "180_blog_2016_md/20_abstraction_design_implementation_repeat.md",
+                "Date": "7 november 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "programming_slides_with_js",
             "tags": ["slides", "javascript", "marp", "article"],
             "expand":

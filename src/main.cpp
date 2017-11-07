@@ -510,6 +510,7 @@ auto escape_xml(const std::string& x)
             case '\'': s.append("&apos;"); break;
             case '<': s.append("&lt;"); break;
             case '>': s.append("&gt;"); break;
+            case '`': break;
             default: s.append(&x[i], 1); break;
         }
     }
