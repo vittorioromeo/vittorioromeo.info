@@ -4,8 +4,19 @@
     [
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "compile_time_repeat_noexcept_correctness",
+            "tags": ["c++", "c++17", "lambda", "library", "noexcepet"],
+            "expand":
+            {
+                "Title": "compile-time `repeat` & `noexcept`-correctness",
+                "Text": "180_blog_2016_md/21_compile_time_repeat_noexcept_correctness.md",
+                "Date": "13 november 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "abstraction_design_implementation_repeat",
-            "tags": ["c++", "c++17", "lambda", "library"],
+            "tags": ["c++", "c++17", "lambda", "library", "noexcept"],
             "expand":
             {
                 "Title": "abstraction design and implementation: `repeat`",
