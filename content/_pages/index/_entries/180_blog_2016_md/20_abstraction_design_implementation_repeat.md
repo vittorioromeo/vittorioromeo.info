@@ -248,4 +248,4 @@ I wanted to tell you about multiple unrelated things with this article. Here are
 
 I hope you enjoyed this unusual, mixed article - I'm planning to write a short sequel covering `repeat<I>`, a similar abstraction that instead of looping at run-time, loops at compile-time *(i.e. generates unrolled code and provides access to the index in a `constexpr`-friendly manner)*.
 
-The next article in the series, [**"compile-time `repeat` & `noexcept`-correctness"**](TODO), covers a compile-time version of `repeat` and the importance of *`noexcept`-correctness*.
+The next article in the series, [**"compile-time `repeat` & `noexcept`-correctness"**](https://vittorioromeo.info/index/blog/compile_time_repeat_noexcept_correctness.html), covers a compile-time version of `repeat` and the importance of *`noexcept`-correctness*.

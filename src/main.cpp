@@ -161,6 +161,7 @@ namespace utils
 
             {
                 std::ostringstream oss;
+                #if 1
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
                     << "/usr/local/bin/pp -en " << p << " > " << tempf
@@ -168,6 +169,16 @@ namespace utils
                     << "pandoc --mathjax --highlight-style=pygments " << tempf
                     << "x.md"
                     << " -o " << tempf << "temp.html";
+                #else
+                oss << "mkdir -p " << tempf << " ; touch " << tempf
+                    << "temp.html ; chmod 777 " << tempf << "temp.html ; "
+                    << "/usr/local/bin/pp -en " << p << " > " << tempf
+                    << "x.md ; "
+                    << "pandoc -s -f markdown+four_space_rule --mathjax "
+                       "--highlight-style pygments "
+                    << tempf << "x.md"
+                    << " -o " << tempf << "temp.html";
+                #endif
 
                 utils::exec_cmd(oss.str());
             }
