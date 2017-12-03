@@ -4,8 +4,19 @@
     [
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "adts_over_exceptions",
+            "tags": ["c++", "c++17", "exception", "safety", "monad"],
+            "expand":
+            {
+                "Title": "why choose sum types over exceptions?",
+                "Text": "180_blog_2016_md/22_adts_over_exceptions.md",
+                "Date": "3 december 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "compile_time_repeat_noexcept_correctness",
-            "tags": ["c++", "c++17", "lambda", "library", "noexcepet"],
+            "tags": ["c++", "c++17", "lambda", "library", "noexcept"],
             "expand":
             {
                 "Title": "compile-time `repeat` & `noexcept`-correctness",
