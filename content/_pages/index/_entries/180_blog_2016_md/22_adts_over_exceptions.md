@@ -15,7 +15,7 @@ Simon Brand *(a.k.a. [TartanLlama](https://twitter.com/TartanLlama))* recently p
 
 The article focuses on the usage of `std::optional`, on `std::expected`, and on two monadic operations, `map` and `and_then`, which reduce boilerplate and increase readability of the code. While Simon briefly mentions the benefits of ADTs *([algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type))* over exceptions, I think that the topic deserves more attention, as some readers missed the point.
 
-Here's an example comment from the [/r/cpp thread for the article](https://www.reddit.com/r/cpp/comments/7gua48/functional_exceptionless_errorhandling_with/):
+Here's an example comment from the [article's **/r/cpp** thread](https://www.reddit.com/r/cpp/comments/7gua48/functional_exceptionless_errorhandling_with/):
 
 > ```cpp
 > return crop_to_cat(img)
@@ -60,7 +60,7 @@ image_view get_cute_cat(image_view img)
 }
 ```
 
-These might be the signtures of the operations on `image_view`:
+These might be the signatures of the operations on `image_view`:
 
 ```cpp
 void crop_to_cat(image_view&);
@@ -70,9 +70,9 @@ void make_smaller(image_view&);
 void add_rainbow(image_view&);
 ```
 
-What do these signtures tell us about potential failures or error cases? **Nothing.**
+What do these signatures tell us about potential failures or error cases? **Nothing.**
 
-With this design, the user is **not** aware that these functions might fail/throw an exception unless it's explicitly documented. Similarly, the *type system* does not expose any failure cases - this means that the compiler won't be able to help us remember to handle them.
+With this design, the user is **not** aware that these functions might fail/throw an exception unless it's explicitly documented. Similarly, the *type system* does not expose any failure case - this means that the compiler won't be able to help us remember to handle them.
 
 Here's an example of what I mean:
 
@@ -104,7 +104,7 @@ These questions do **not** have obvious answers. The developer/reviewer is force
 
 In my opinion, these are the major pain points with an exception-based solution:
 
-**1. Function signtures do not expose possible failure states.**
+**1. Function signatures do not expose possible failure states.**
 
 **2. It is not immediately obvious whether or not an operation can fail and how.**
 
@@ -129,7 +129,7 @@ tl::optional<image_view> get_cute_cat(image_view img)
 }
 ```
 
-These might be the signtures of the operations on `image_view`:
+These might be the signatures of the operations on `image_view`:
 
 ```cpp
 tl::optional<image_view> crop_to_cat(image_view);
@@ -176,11 +176,11 @@ This version of the snippet is much more readable and easier to understand, as a
     send(cropped);
     ```
 
-    The type system is protecting us from human mistakes here. By using `cropped.map`, we **explicitly** handle the possible failure case, and only invoke `send` with a valid argument.
+    The type system is protecting us from human mistakes here. By using `cropped.map`, we **explicitly** handle the possible failure case and only invoke `send` with a valid argument.
 
 Did we solve all of the previously mentioned pain points?
 
-**1. Function signtures do not expose possible failure states.**
+**1. Function signatures do not expose possible failure states.**
 
 * Thanks to ADTs, it is obvious when a function might or might not fail. Glancing at the signature is enough to understand whether or not a possible failure must be handled.
 
