@@ -1,0 +1,12 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/header.tpl",
+            "expand": {
+                "Title": "talks",
+                "Text": "I like to give presentations and share my knowledge.
+                        <hr>"
+            }
+        }
+    ]
+}

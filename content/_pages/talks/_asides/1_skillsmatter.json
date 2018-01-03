@@ -1,0 +1,11 @@
+{
+    "elements": [
+        {
+            "template": "templates/asides/text.tpl",
+            "expand": {
+                "Title": "SkillsMatter playlist",
+                "Text": "You can find the playlist for my C++ London talks <a href=\"https://skillsmatter.com/legacy_profile/vittorio-romeo#skillscasts\" target=\"_blank\"> here.</a>"
+            }
+        }
+    ]
+}

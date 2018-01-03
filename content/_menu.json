@@ -3,17 +3,17 @@
         "label": "home",
         "href": "/index.html"
     },
-   
+
     {
-        "label": "portfolio",
-        "href": "/portfolio.html"
+        "label": "talks",
+        "href": "/talks.html"
     },
-  
+
     {
         "label": "projects",
         "href": "/projects.html"
     },
-   
+
     {
         "label": "tutorials",
         "href": "/tutorials.html"

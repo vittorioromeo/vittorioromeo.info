@@ -1,0 +1,11 @@
+{
+    "elements": [
+        {
+            "template": "templates/asides/text.tpl",
+            "expand": {
+                "Title": "YouTube playlist",
+                "Text": "You can find a playlist with all my talks available on YouTube <a href=\"https://www.youtube.com/playlist?list=PLTEcWGdSiQelEQw64Z7EL2vk6LsKW_Ouj\" target=\"_blank\"> here.</a>"
+            }
+        }
+    ]
+}
