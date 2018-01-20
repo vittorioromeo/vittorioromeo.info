@@ -1,19 +1,22 @@
 {
     "elements": [
         {
-            "template": "templates/entries/text.tpl",
+            "template": "templates/entries/talk_text.tpl",
             "expand": {
                 "Title": "Quick Game Development with C++11 / C++14",
-                "Text": "<img src=\"resources/img/openHexagon.png\">
-                        <p>Modern C++ has made game development a much more pleasurable experience. Features such as smart pointers and variadic templates are invaluable in speeding up the development process and in making the code cleaner and more robust. New easy-to-use multimedia libraries such as SFML, SDL and Cinder make dealing with graphics, sounds and input very easy, and work well with modern code principles. This talk guides the audience through the creation of an Arkanoid/Breakout clone in under 200 lines of code, using C++11/C++14 features and idioms. Chronologically sequential code segments, compiled and executed one by one, will show the attendees how a game is created from scratch, slowly becoming a playable product, step by step. The end result will be a small game, completely written in modern C++ code. Topics covered will range from basic graphics programming to entity management and collision detection/response.</p>"
+                "Text": "Modern C++ has made game development a much more pleasurable experience. Features such as smart pointers and variadic templates are invaluable in speeding up the development process and in making the code cleaner and more robust. New easy-to-use multimedia libraries such as SFML, SDL and Cinder make dealing with graphics, sounds and input very easy, and work well with modern code principles. This talk guides the audience through the creation of an Arkanoid/Breakout clone in under 200 lines of code, using C++11/C++14 features and idioms. Chronologically sequential code segments, compiled and executed one by one, will show the attendees how a game is created from scratch, slowly becoming a playable product, step by step. The end result will be a small game, completely written in modern C++ code. Topics covered will range from basic graphics programming to entity management and collision detection/response."
             }
         },
         {
-            "template": "templates/entries/menu.tpl",
+            "template": "templates/entries/talk_menu.tpl",
             "expand": {
                 "MenuItems": [
                     {
                         "Title": "CppCon 2014",
+                        "Link": "https://www.youtube.com/watch?v=TC9zhufV_Z8"
+                    },
+                    {
+                        "Title": "++it Meetup Firenze 2015",
                         "Link": "https://www.youtube.com/watch?v=TC9zhufV_Z8"
                     }
                 ]

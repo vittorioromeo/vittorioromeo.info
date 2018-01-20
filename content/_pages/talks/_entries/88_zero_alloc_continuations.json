@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Zero-allocation continuations",
+                "Text": "This talk shows an alternative design for future-like continuations that doesn't require any dynamic allocation or type-erasure, while still enabling users to build chains of parallel computations with intuitive constructs such as '.then(...)' and 'when_all(...)'. The idea is to encode every step of the computation chain in the type of a final object, resulting in a very long type that represent the whole tree."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++ London 2017/09",
+                        "Link": "https://skillsmatter.com/skillscasts/10802-c-plus-plus-london-september"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Implementing 'variant' visitation using lambdas",
+                "Text": "The addition of 'std::variant' to the upcoming C++17 standard will introduce a \"type-safe sum type\" to the Standard Library.   Variants model a \"choice between types\" - they essentially are type-safe \"tagged unions\".   The interface they expose, however, is often more cumbersome to use than it needs to be: defining exhaustive visitors requires the user to create a class with several 'operator()' overloads, or to create a chain of 'if constexpr(...)' calls. Both solutions are not very elegant.   After a brief overview of 'std: :variant' and its usefulness, this talk will focus on the implementation of a \"lambda-based in-place visitation\" approach, where the user can visit a variant by simply providing a set of lambdas on the spot. This will require implementing a way of overloading arbitrary function objects.   Recursive variant types will then be covered and the \"lambda-based\" visitation techniques will be applied to them. This will require implementing the \"Y combinator\" higher-order function to achieve zero-runtime-overhead lambda recursion.   This talk is intended for developers familiar with C++11 and C++14 core language features (lambdas, variadic templates, 'auto', etc...). Prior knowledge of 'std: :variant' or sum types is not required."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++Now 2017",
+                        "Link": "https://www.youtube.com/watch?v=3KyW5Ve3LtI"
+                    },
+                    {
+                        "Title": "ACCU 2017",
+                        "Link": "https://www.youtube.com/watch?v=mqei4JJRQ7s"
+                    },
+                    {
+                        "Title": "C++ London 2017/05",
+                        "Link": "https://skillsmatter.com/skillscasts/10172-implementing-variant-visitation-using-lambdas"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "'Meaningful' casts",
+                "Text": "(Lightning talk) Casting is an essential in all projects, but can be a source of errors when used improperly.   C++ improved upon C's \"cast operator\" by defining new, stricter and safer casts.   To improve code readability and prevent even more mistakes, we can define our own even stricter and safer \"meaningful\" casts."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "Meeting C++ 2015",
+                        "Link": "https://www.youtube.com/watch?v=62c_Xm6Zh1k"
+                    }
+                ]
+            }
+        }
+    ]
+}

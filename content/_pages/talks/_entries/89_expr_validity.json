@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Checking Expression Validity in C++11/14/17",
+                "Text": "This talk shows multiple ways to gracefully detect whether an expression is ill-formed, progressively covering techniques from C++11 to C++17, using SFINAE, 'static_if', 'if constexpr' and more."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++ London 2016/12",
+                        "Link": "https://skillsmatter.com/skillscasts/9471-vittorio-romeo"
+                    }
+                ]
+            }
+        }
+    ]
+}

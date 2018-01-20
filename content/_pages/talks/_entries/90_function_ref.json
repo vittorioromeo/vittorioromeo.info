@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "'function_ref': a non-owning reference to a 'Callable'",
+                "Text": "(Lightning talk) Since the advent of C++11 writing more functional code has become easier: functional programming patterns and idioms have become powerful additions to the C++ developer's toolbox. \"Higher-order functions\" are one of the key ideas of the functional paradigm - in short, they are functions that take functions as arguments and/or return functions as results. The need of referring to an existing Callable object comes up often when writing functional C++ code, but the Standard Library unfortunately doesn't provide a flexible facility that allows to do so. This talk shows the design and the implementation of 'function_ref', a new non-owning reference to a 'Callable' which has been proposed for standardization."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "Meeting C++ 2017",
+                        "Link": "https://www.youtube.com/watch?v=6EQRoqELeWc"
+                    }
+                ]
+            }
+        }
+    ]
+}

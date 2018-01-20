@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Introduction to C++ origami",
+                "Text": "Fold expressions, introduced in C++17, allow us to easily generate code that combines variadic template arguments together or performs an action on them. After a brief overview of the feature's syntax, this short talk shows some cool and useful utilities that can be implemented using fold expressions. The audience should be familiar with variadic templates - knowledge of C++17 features is not required."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++ London 2018/01",
+                        "Link": "https://skillsmatter.com/skillscasts/11363-introduction-to-c-plus-plus-origami"
+                    }
+                ]
+            }
+        }
+    ]
+}

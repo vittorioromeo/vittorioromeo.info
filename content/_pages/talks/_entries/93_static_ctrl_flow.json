@@ -1,0 +1,30 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Implementing 'static' control flow in C++14",
+                "Text": "There has always been great interest in imperative compile-time control flow: as an example, consider all the existing 'static_if' proposals and the recently accepted 'constexpr_if' construct for C++17.   What if you were told that it is actually possible to implement imperative control flow in C++14?   In this tutorial, the implementation and design of a compile-time 'static_if' branching construct and of a compile-time 'static_for' iteration construct will be shown and analyzed. These constructs will then be compared to traditional solutions and upcoming C++17 features, examining advantages and drawbacks."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "CppCon 2016",
+                        "Link": "https://www.youtube.com/watch?v=aXSsUqVSe2k"
+                    },
+                    {
+                        "Title": "Meeting C++ 2016",
+                        "Link": "https://www.youtube.com/watch?v=F5II2-cTgNw"
+                    },
+                    {
+                        "Title": "C++Now 2016",
+                        "Link": "https://www.youtube.com/watch?v=tMuXZkPiVOY"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "'for_each_argument' explained and expanded",
+                "Text": "During January 2015, Sean Parent posted a very interesting short piece of code on Twitter. The code iterates at compile-time over any number of function arguments, forwarding them one by one to a callable object.   How does this code work? What are the possible use cases? Can we make it even more generic and useful?   My talk answers all of the questions above, using independently compiled chronologically sequential code segments that show the audience the analysis and improvement process of 'for_each_argument'."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "CppCon 2015",
+                        "Link": "https://www.youtube.com/watch?v=2l83JlqkzBk"
+                    }
+                ]
+            }
+        }
+    ]
+}

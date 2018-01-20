@@ -4,7 +4,7 @@
             "template": "templates/entries/header.tpl",
             "expand": {
                 "Title": "talks",
-                "Text": "I like to give presentations and share my knowledge.
+                "Text": "I love sharing my knowledge through talks! <br> (Click on the abstracts to expand them.)
                         <hr>"
             }
         }

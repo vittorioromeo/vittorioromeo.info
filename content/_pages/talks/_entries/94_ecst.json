@@ -1,0 +1,26 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Implementation of a multithreaded compile-time ECS in C++14",
+                "Text": "An alternative to deep inheritance trees for game and application architecture design is \"composition\". Separating data from logic allows the code to be more reusable and more efficient, alongside additional benefits. Using modern C++14 features and heavy metaprogramming, it is possible to design an efficient and user-friendly compile-time multithreaded component-based entity system library, striving for intuitive syntax and cost-free abstractions. By leveraging the compile-time knowledge regarding components and systems, the implementation can figure out what computations can run in parallel and how to efficiently store and manage components."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++Now 2016",
+                        "Link": "https://www.youtube.com/watch?v=3N1pLtTV2Uc"
+                    },
+                    {
+                        "Title": "Meeting C++ 2016",
+                        "Link": "https://www.youtube.com/watch?v=3N1pLtTV2Uc"
+                    }
+                ]
+            }
+        }
+    ]
+}

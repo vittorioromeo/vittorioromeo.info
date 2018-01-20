@@ -1,0 +1,26 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "You must type it three times",
+                "Text": "(Lightning talk) When developing a library, it is desirable to provide higher-order functions that correctly propagate 'noexcept'-ness and SFINAE-friendliness, in order to behave consistently with the arguments passed by library users. Unfortunately, the language forces us to copy-paste our code three times to achieve this. Why? Can we do better?"
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++Now 2017",
+                        "Link": "https://www.youtube.com/watch?v=I3T4lePH-yA"
+                    },
+                    {
+                        "Title": "C++ London && SwedenCpp 2017",
+                        "Link": "https://youtu.be/vIVZsVneVDg?t=5625"
+                    }
+                ]
+            }
+        }
+    ]
+}

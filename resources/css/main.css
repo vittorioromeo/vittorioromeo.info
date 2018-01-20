@@ -35,6 +35,12 @@
   padding-top: 45px
   }
 
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 hr {
   display: block;
   height: 1px;
@@ -131,14 +137,14 @@ code {
   width: 35px;
 }
 
-nav ul li {  width: 90px;
+nav ul li { min-width: 90px;
       float: left;
       margin: 3px;}
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   letter-spacing: 0.09em;
-  line-height: 0.8em;
+  line-height: 0.85em;
 }
 
 h2 {

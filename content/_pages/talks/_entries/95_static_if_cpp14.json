@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "'static_if' in C++14",
+                "Text": "(Lightning talk) \"static if\" and similar constructs would allow C++ developers to create compile-time branches that enable different parts of code depending on a compile-time condition, using familiar \"imperative\" syntax.   This talk shows how to implement a working version of \"static_if\" in C++14."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "Meeting C++ 2015",
+                        "Link": "https://www.youtube.com/watch?v=hDwhfjBPKv8"
+                    }
+                ]
+            }
+        }
+    ]
+}
