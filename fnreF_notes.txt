@@ -1,0 +1,75 @@
+* agreed that ref-qualified signatures are not useful / needed
+* agreed that `const` is useful and in line with the `noexcept` qualification in the signature
+
+* add special case for `std::reference_wrapper` (optimization) (EDIT & ASK)
+    * does this require a change in interface? or can this be done as an implementation detail in the body of the `F&&` constructor?
+        * probably not, probably under as-if rule, ask LWG
+* prevent `std::function` initialization and assignment from `std::function_ref` (EDIT & ASK)
+    * probably requires changes to `std::function::function`
+        * not a problem
+        * alternatively attempt to `=delete` implicit conversion operator
+
+* define copy construction and copy assignment as `=default` for triviality (EDIT)
+    * add "exposition only" void* and fnptr* members to paper (suggested by Eric) (LWG)
+* use `remove_cvref_t` instead of `decay_t` (EDIT)
+    * should be ok, ask LWG
+
+* ask if we can get rid of `F&&` assignment operator because get the same behavior from an implicit conversion to `function_ref` and defaulted copy `operator=` (LWG)
+
+* this should probably be in its own freestanding header
+    * forgot to straw poll, i think...
+
+
+
+---
+
+Nothing regarding design, just a few extra TODOs for the next revision:
+
+* We want to make sure that when initializing `function_ref` from a `reference_wrapper` the implementation is able to just steal the pointer from the wrapper (to avoid unnecessary double indirection). This shouldn't require extra wording and should be covered by the as-if rule (QoL), but might be worth asking LWG experts.
+
+* We decided to not prevent `std::function` construction from `std::function_ref` as it would special-case function and there are other things in the Standard Library that would need a similar change (e.g. `std::bind`).
+
+* We decided to make both copy assignment and copy construction `noexcept = default`, and add two pointers "for exposition only" in the synopsis to clarify what they should do. (Not sure how to word this, will need help).
+
+* Probably should use `remove_cvref` instead `decay`, will have to make sure it works.
+
+* We might be able to remove the `F&&` assignment operator and rely on implicit conversion + `F&&` constructor to have assignment, but that was not changing the design so it should probably be discussed in LWG. Also I cannot think of any other Standard Library class that does the same, there might be a good reason to not do this.
+
+
+
+---
+
+
+Agustín Bergé [10:49 PM]
+all sounds reasonable
+will you be targeting Rappersvil?
+
+Vittorio Romeo [10:50 PM]
+Yeah, will likely not be there though
+
+Agustín Bergé [10:51 PM]
+let's see if we can make an implementation fully conforming to the proposed wording by then
+
+Vittorio Romeo [10:51 PM]
+Should I clean-up the proposal for LWG (i.e. remove "changelog", "open questions", ...)? (edited)
+I agree with you on that
+The current one is not really refined
+
+Agustín Bergé [10:52 PM]
+keep changelog, move the open questions to an annex
+presumably they are no longer open?
+or rather replace them with the answers
+
+Vittorio Romeo [10:52 PM]
+Yeah, they were all resolved. I can move to a "previously open questions" annex and provide the answers
+
+Agustín Bergé [10:52 PM]
+LWG won't actually look at anything outside of proposed wording, unless they have doubts and you are not there to answer
+
+Vittorio Romeo [10:54 PM]
+Ah, there also was some talk about moving the thing to its own free-standing header but I believe we forgot to straw poll that
+
+Agustín Bergé [10:55 PM]
+talk to ben, the per-header granularity didn't really work out
+
+but yeah, it should be freestanding, as freestanding as `std::reference_wrapper` and `std::plus`
