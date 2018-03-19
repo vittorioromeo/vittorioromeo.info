@@ -10,15 +10,6 @@
 }
 </style>
 
-TODO:
-* on behalf of bloomberg, thank bloomberg for sponsoring
-* why I went to the meeting: my papers and...
-* day-by-day
-* Idea for article: using c++20 lambda template syntax for loops over types and ct-loops
-* ask tony lewis for pics and credit him
-* panorama pics night/day
-* send internal bloomberg email with tripe report link (mine and bryce) and company-relevant updates
-
 I'm back in London from Jacksonville, where I attended my first ISO C++ meeting. Apart from the long flights and long working hours, it has been a very enjoyable experience for multiple reasons:
 
 * I was able to actively participate in the evolution of the language and influence it by voting and discussing;
@@ -638,17 +629,70 @@ The room agreed that this was a failure for LEWG: not for the contents of the pr
 
 Nevertheless, the work done for P0672 is in my opinion still valuable. While I strongly believe that the paper is not a good fit for the Standard, it would make an high-quality `boost` or standalone library that fills a particular niche.
 
+Guy Davidson, who presented the paper, has written up [a great trip report](https://hatcat.com/?p=33) on his website that also covers this topic in depth.
 
+After the debate on 2D graphics, we moved onto my proposal: [(P0792R1) "`function_ref`: a non-owning reference to a Callable"](http://wg21.link/P0792). It proposes the addition of `function_ref<R(Args...)>` to the Standard Library, intended to be a "vocabulary type" for non-owning references to [`Callable`](http://en.cppreference.com/w/cpp/concept/Callable) objects.
 
+Here's an overview:
 
+```cpp
+int foo(function_ref<int()> f)
+{
+    return f();
+}
+
+void bar()
+{
+    auto l = [i = 0]() mutable { return i++; };
+    assert(foo(l) == 0); // <== reference semantics
+    assert(foo(l) == 1);
+    assert(foo(l) == 2);
+
+    auto g = [](function_ref<int() const> k){ k(); };
+    g(l); // <== does not compile  ^^^^^
+
+    g([]{ return 0; }); // <== works with temporaries
+}
+```
+
+This paper is the final result of work I started with my ["passing functions to functions"](https://vittorioromeo.info/index/blog/passing_functions_to_functions.html) article written in January 2017.
+
+As proven by my research of existing practice, there is a huge need for a way to define *higher-order functions* without having to use `std::function` (owning semantics, hard to optimize) or templates (hard to constrain, must be defined in headers). `function_ref` solves this problem by providing something lightweight and easy to use.
+
+We began by splitting the room in small groups - each group was assigned a paper to review and discuss. I give my special thanks to *Zhihao Yuan*, *Tim Shen*, and *Vicente J. Botet Escriba* for working closely with me during the small group session and providing very valuable feedback.
+
+No major issues were found with the paper. We discussed the possibility of allowing users to specify *ref-qualifiers* in the signature, but ultimately agreed that there was no real use case for it (however, it can be added in the future as a non-breaking change). Additionally, we decided to make copy construction and assignment *trivial* by using `= default`.
+
+After discussing the paper in front of LEWG, **the room agreed to forward it to LWG without any opposition!** This was an highlight of the meeting for me, as I feel like the proposal has a high chance to make it into the Standard Library, thus being my first official contribution to the C++ Standard!
+
+I will make some small tweaks to the paper and send a new revision to LWG in the next mailing list.
 
 ![(Photo by Tony Lewis)](resources/img/blog/tr/p7.jpg)
+
 
 
 ### day 6/6
 
 #### plenary
 
-TODO
+The last day began and ended with a plenary session during the morning. The chairs of every working group presented their results, and national bodies + official ISO members voted on the final motions.
+
+You can find concise reports of the approved motions here:
+
+* ["2018 Jacksonville ISO C++ Committee Reddit Trip Report"](https://www.reddit.com/r/cpp/comments/854mu9/) - by Bryce Lelbach
+
+* ["Jacksonville’18 ISO C++ Report"](https://usingstdcpp.org/2018/03/18/jacksonville18-iso-cpp-report/) - by J. Daniel García
 
 ![(Photo by Tony Lewis)](resources/img/blog/tr/p8.jpg)
+
+
+
+### closing thoughts
+
+That's it for my trip report!
+
+I thorougly enjoyed the experience and recommend it to everyone interested in contributing to the evolution of the language.
+
+I want to restate my appreciation for everyone involved - being able to see the huge amount of work behind C++ changes your perspective on the committee and its decisions.
+
+Thanks!
