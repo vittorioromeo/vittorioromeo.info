@@ -2,24 +2,24 @@
     "link_name": "blog",
     "elements":
     [
-        {
-            "template": "templates/entries/blog.tpl",
-            "link_name": "cache_aligned_tuple",
-            "tags": ["c++", "c++17", "library", "abstraction"],
-            "expand":
-            {
-                "Title": "implementing a cache-aligned tuple",
-                "Text": "180_blog_2016_md/24_cache_aligned_tuple.md",
-                "Date": "XXX march 2018"
-            }
-        },
+    //    {
+    //        "template": "templates/entries/blog.tpl",
+    //        "link_name": "cache_aligned_tuple",
+    //        "tags": ["c++", "c++17", "library", "abstraction"],
+    //        "expand":
+    //        {
+    //            "Title": "implementing a cache-aligned tuple",
+    //            "Text": "180_blog_2016_md/24_cache_aligned_tuple.md",
+    //            "Date": "XXX march 2018"
+    //        }
+    //    },
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "mar18_iso_meeting_report",
             "tags": ["c++", "c++20", "ISO", "meeting"],
             "expand":
             {
-                "Title": "my first ISO C++ meeting",
+                "Title": "trip report: first ISO C++ meeting experience",
                 "Text": "180_blog_2016_md/23_mar18_iso_meeting_report.md",
                 "Date": "XXX march 2018"
             }

@@ -11,16 +11,15 @@
 </style>
 
 TODO:
-* intro, with pic from twitter
 * on behalf of bloomberg, thank bloomberg for sponsoring
 * why I went to the meeting: my papers and...
 * day-by-day
 * Idea for article: using c++20 lambda template syntax for loops over types and ct-loops
 * ask tony lewis for pics and credit him
 * panorama pics night/day
+* send internal bloomberg email with tripe report link (mine and bryce) and company-relevant updates
 
-
-I'm on a plane back to London from Jacksonville, where I attended my first ISO C++ meeting. Apart from the long flights and long working hours, it has been a very enjoyable experience for multiple reasons:
+I'm back in London from Jacksonville, where I attended my first ISO C++ meeting. Apart from the long flights and long working hours, it has been a very enjoyable experience for multiple reasons:
 
 * I was able to actively participate in the evolution of the language and influence it by voting and discussing;
 
@@ -42,11 +41,13 @@ The outcome of those discussions will be covered in this trip report, where I'll
 
 
 
-### day 1/7
+### day 1/6
 
 #### arrival
 
 After landing in Jacksonville on Sunday, I was feeling like a zombie due to my sleep deprivation kicking in. It seems like my DNA has this *amazing* mutation that prevents me from sleeping on planes.
+
+![[Flying towards JAX](resources/img/blog/tr/p0.jpg)](resources/img/blog/tr/p0.jpg)
 
 I rushed to the hotel to get some sleep as the first day of the ISO meeting was quickly approaching. Eight hours later I packed my laptop and my paper notebook and walked to the venue of the meeting, eager to finally have a glimpse of what goes behind the scenes of the C++ standardization process.
 
@@ -68,11 +69,11 @@ The first discussion revolved around reports of *constrained non-templates* bein
 
 This interaction and many subsequent ones made it clear that the committee is only willing to discuss and debate on topics and issues that are accurately described by a paper. This is important as it formalizes the process, minimizes ambiguities/misunderstandings, and makes the content available to everyone.
 
-Don't take it personally when someone tells you *"write a paper"* while discussing a proposal!
+Don't take it personally when someone tells you to *"write a paper"*!
 
 
 
-After that, we discussed a very interesting paper whose aim was to describes the procedures by which WG21 would be willing to break backwards compatibility: [(P0684R2) "C++ Stability, Velocity, and Deployment Plans"](http://open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0684r2.pdf), by Titus Winters. In short, the paper classifies changes made to the language/library in multiple categories, depending on whether or not the change is statically detectable and on whether or not it has potential to break legacy code.
+After that, we discussed a very interesting paper whose aim was to describe the procedures by which WG21 would be willing to break backwards compatibility: [(P0684R2) "C++ Stability, Velocity, and Deployment Plans"](http://open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0684r2.pdf), by Titus Winters. In short, the paper classifies future possible changes to the language/library in multiple categories, depending on whether or not the change is statically detectable and on whether or not it has potential to break legacy code.
 
 I strongly believe that without making huge breaking changes the C++ will never be able to get rid of dangerous and outdated language and library constructs. Most of the weird booby traps in the language today originate from backwards-compatibility with C and previous standards. I also understand that that same backwards-compatibility is a huge strength of C++.
 
@@ -102,7 +103,7 @@ export void foo()
 }
 ```
 
-I think this is a reasonable way forward (unsure about technical feasibility), but I got resistance from the room when I spoke about this idea in the room. Several experts were concerned about fragmentation of the language and about the possibility of multiple "dialects" spawning from this approach.
+I think this is a reasonable way forward (unsure about technical feasibility), but I got resistance from the room when I spoke about this idea in EWG. Several experts were concerned about fragmentation of the language and about the possibility of multiple "dialects" spawning from this approach.
 
 I think those concerns are not valid: my idea is not to provide many "knobs" that users can finely tune to create their own preferred combination of language features - the point is to have a linear progression that allows WG21 to "fix" the language by breaking backwards-compatibility. There would be **no more fragmentation than what we have today** (e.g. codebase targeting different standards/toolchains), but we would be **finally able to extract the "much smaller and cleaner language struggling to get out"** that Bjarne was talking about in "The Design and Evolution of C++".
 
@@ -154,7 +155,7 @@ The paper also expressed the desire to get rid of macros, which was shared by pr
 
 After the joint session, I decided to check out LEWG.
 
-One of the papers we discussed was [(P0966R TODO) "TODO"](TODO), which dealt with a very surprising part of [`std::string::reserve`](TODO)'s behavior: it is allowed(TODO required?) to shrink the amount of allocated memory if the argument passed to `reserve` is smaller than the current `capacity` of the `std::string` instance. I wasn't aware of this, and I always believed that it behaved in the same way as [`std::vector::reserve`](TODO) or [`std::unordered_set::reserve`](TODO), which can only increase the allocated memory.
+One of the papers we discussed was [(P0966R0) "`string::reserve` Should Not Shrink"](http://wg21.link/P0966), which dealt with a very surprising part of [`std::string::reserve`](http://en.cppreference.com/w/cpp/string/basic_string/reserve)'s behavior: it is allowed to shrink the amount of allocated memory if the argument passed to `reserve` is smaller than the current `capacity` of the `std::string` instance. I wasn't aware of this, and I always believed that it behaved in the same way as [`std::vector::reserve`](http://en.cppreference.com/w/cpp/container/vector/reserve) or [`std::unordered_map::reserve`](http://en.cppreference.com/w/cpp/container/unordered_map/reserve), which can only increase the allocated memory.
 
 The paper proposed to make `std::string::reserve` consistent with the other containers - the main motivation was to avoid performance issues in code such as:
 
@@ -172,7 +173,7 @@ If `memory_for(x)` returns wildly different values on each iteration, that could
 
 While this paper proposed a change that seems completely reasonable, a good counterpoint was provided by someone in the room: being allowed to shrink the memory allows implementations to bring a dynamically-allocated `std::string` back into the SBO (small buffer optimization) realm.
 
-I had similar experiences throughout the meeting: almost every interaction when debating a paper was very well motivated, and I found myself thinking *"that's a very good point"* very often, even when two conflicting opinions were being stated one after another.
+I had similar experiences throughout the meeting: almost every interaction when debating a paper was very well motivated, and I found myself thinking *"that's a very good point"* very often, even when two conflicting opinions were being stated one right after the other.
 
 
 
@@ -182,15 +183,15 @@ Almost every day of the meeting had one or more evening sessions planned after d
 
 Anyway, this evening session was about terse (a.k.a. natural) syntax for concepts. This has been a very controversial topic for a plethora of reasons which have been extensively discussed already. We had several papers at the meeting that were presented and debated during the evening session:
 
-* [(P0915) "Concept-constrained `auto`"](http://wg21.link/P0915) *(by Vittorio Romeo and John Lakos)*
+* [(P0915R0) "Concept-constrained `auto`"](http://wg21.link/P0915) *(by Vittorio Romeo and John Lakos)*
 
-* [(TODO) "TODO"](TODO) *(by TODO)*
+* [(P0782R0) "A Case for Simplifying/Improving Natural Syntax Concepts"](http://wg21.link/P0782) *(by Erich Keane, Adam David Alan Martin, Allan Deutsch)*
 
-* [(TODO) "TODO"](TODO) *(by TODO)*
+* [(P0807R0) "An Adjective Syntax for Concepts"](http://wg21.link/P0807) *(by Thomas Köppe)*
 
-* [(TODO) "TODO"](TODO) *(by TODO)*
+* [(P0745R0) "Concepts in-place syntax"](http://wg21.link/P0745) *(by Herb Sutter)*
 
-* [(TODO) "TODO"](TODO) *(by TODO)*
+* [(P0956R0) "Answers to concept syntax suggestions"](http://wg21.link/P0956) *(by Bjarne Stroustrup)*
 
 I was the first one to present. In short, our proposal was aiming to introduce an **unambiguous** syntax for concept-constrained variable declarations. E.g.
 
@@ -209,7 +210,7 @@ Unfortunately I kept getting shut down with the argument that *"generic programm
 
 I am not opposed to something close to the terse syntax proposed by Bjarne - however I strongly believe that a migration path that starts with `auto<Concept>` and then moves towards just `Concept` when the inconsistencies between non-template and template functions are addressed would be a safer and better approach. Let developers be explicit if they want to: they might have very good reasons to do so.
 
-Thomas Koppe (TODO umlaut?)'s paper was also shut down for similar reasons - this saddened me as the document presented a very elegant, unambiguous, and flexible approach that worked well in every circumstance a concept name could be used. Again, the audience simply did not appreciate the fact that `ForwardIterator typename T` had to be spelled instead of `ForwardIterator T`. I feel that sacrificing an elegant solution such as Thomas's only due to the concern that some people might be put off by writing `typename` and `auto` is a real shame, especially when those keywords could have been made optional in the future.
+Thomas Köppe's paper was also shut down for similar reasons - this saddened me as the document presented a very elegant, unambiguous, and flexible approach that worked well in every circumstance a concept name could be used. Again, the audience simply did not appreciate the fact that `ForwardIterator typename T` had to be spelled instead of `ForwardIterator T`. I feel that sacrificing an elegant solution such as Thomas's only due to the concern that some people might be put off by writing `typename` and `auto` is a real shame, especially when those keywords could have been made optional in the future.
 
 After the other papers were presented and discussed, the audience had to vote. Further work on our proposal and Thomas's was discouraged, and the room generally agreed to move forward with Herb Sutter's proposed syntax, having "independent bindings" when the same concept name was being used multiple times, and having an explicit syntactical indication of what a concept is. I am generally happy with the outcome, as it pretty much addresses my concerns. Herb's proposed syntax roughly looks as follows:
 
@@ -250,9 +251,11 @@ void foo(ForwardIterator{auto} x);
 
 
 
-### day 2/7
+### day 2/6
 
-I spent the entire day in EWG. We discussed [(TODO) "TODO"](TODO) *(by TODO)*, which proposed to make the language more consistent by allowing a *structured bindings declaration* as part of an `if` statement:
+#### EWG
+
+I spent the entire day in EWG. We discussed [(P0963R0) "Structured binding declaration as a condition"](http://wg21.link/P0963) *(by Zhihao Yuan)*, which proposed to make the language more consistent by allowing a *structured bindings declaration* as part of an `if` statement:
 
 ```cpp
 if(auto [ok, elem] = some_map[key]; ok) { /* ... */ }
@@ -273,7 +276,7 @@ In the end, the motivation was weak and the risks of this feature being misused 
 
 
 
-Afterwards we looked at [(P0946R TODO) "TODO"](TODO) *(by TODO)*, whose aim was to provide consistency between comparisons performed with the new spaceship `<=>` operator and the existing two-way comparison operators (e.g. `<`, `==`, `>=`). The debate and subsequent voting resulted in some very interesting and bold changes that, if eventually merged into the Standard, would break compatibility not only with C++17 but also with C! In short:
+Afterwards we looked at [(P0946R0) "Towards consistency between `<=>` and other comparison operators"](http://wg21.link/P0946) *(by Richard Smith)*, whose aim was to provide consistency between comparisons performed with the new spaceship `<=>` operator and the existing two-way comparison operators (e.g. `<`, `==`, `>=`). The debate and subsequent voting resulted in some very interesting and bold changes that, if eventually merged into the Standard, would break compatibility not only with C++17 but also with C! In short:
 
 * Two-way comparisons between `enum` and floating-point values would be deprecated;
 
@@ -281,7 +284,7 @@ Afterwards we looked at [(P0946R TODO) "TODO"](TODO) *(by TODO)*, whose aim was 
 
 * Three-way comparsions between `enum` and integral types would be allowed;
 
-* **(!)** Comparisons between signed and unsigned integral types would now mathematical semantics. E.g.
+* **(!)** Comparisons between arithmetical types would now have mathematical semantics. E.g.
 
     ```cpp
     assert(-1 < 0u);
@@ -289,35 +292,32 @@ Afterwards we looked at [(P0946R TODO) "TODO"](TODO) *(by TODO)*, whose aim was 
     // Would pass with the proposed changes
     ```
 
-TODO: more examples and significant changes?
-
-Note that this was not merged in the WD ("working draft") or sent to Core (TODO: sure?), the polls were merely encouraging more work in that direction.
+(Note that only the changes regarding `enum` were sent forward to Core.)
 
 
 
-[(P0919R TODO) "TODO"](TODO) *(by TODO)* was next - coroutines! TODO: was this paper an attempt to merge into WD?
-TODO: explain what happened at the beginning.
+[(P0912R0) "Merge Coroutines TS into C++20 working draft"](http://wg21.link/P0912) *(by Gor Nishanov)* was next. This paper proposed merging the current Coroutines TS into C++20!
 
-Google presented [(TODO) "TODO"](TODO), a paper criticizing the current design for coroutines. The main point against it was:
+Google *(Geoff Romer and James Dennett)* presented [(D0973R0) "Coroutines TS Use Cases and Design Issues"](http://wg21.link/D0973), a paper criticizing the current design for coroutines and urging to not adopt P0912R0. The main point against it was:
 
-* Even though for situations where they coroutines could be a **zero-overhead abstraction** (e.g. generators, monadic error handling), they are not. They will still allocate on the heap and in order to prevent extra costs we must rely on a (very likely) optimization... which is not guaranteed and doesn't happen in `-O0`.
+* Even though for situations where coroutines could have a **zero-overhead abstraction** guarantee (e.g. generators, monadic error handling), they will still always allocate on the heap. In order to prevent extra costs we must rely on a (very likely) optimization... which is not *guaranteed* and doesn't happen in `-O0`.
 
 The presenter claimed to have an alternative design (plus implementation experience) that guarantees no dynamic allocation is performed in cases where it can be avoided, and that a paper describing it wasn't at this meeting due to time constraints.
 
-At the end, the general consensus was that we really want coroutines in C++20, and we would proceed with the current TS ("technical specification") unless Google is able to bring a detailed paper in (TODO: how to spell Rapysvils)??.
+At the end, the general consensus was that we really want coroutines in C++20, and we would proceed with the current TS ("technical specification") unless Google is able to bring a detailed paper in Rapperswil.
 
-I generally agree with the points raised by Google, but I also agree with the fact that we cannot indefinitely delay an useful feature, especially when concrete evidence of a better design/implementation is not available. Hopefully they'll deliver at the next meeting and we'll have an improved version of Gor (TODO and who else??? TODO)'s very valuable and appreciated work.
+I generally agree with the points raised by Google, but I also agree with the fact that we cannot indefinitely delay an useful feature, especially when concrete evidence of a better design/implementation is not available. Hopefully they'll deliver at the next meeting and we'll have an improved version of Gor (and other contributors)'s very valuable and appreciated work.
 
 
 
-The last paper we discussed was [(TODO) "TODO"](TODO) *(by TODO)*, which addressed a huge annoyance I've had with lambda expressions since C++14. We are going to finally be able to say:
+The last paper we discussed was [(D0780R2) "Allow pack expansion in lambda init-capture"](http://wg21.link/P0780) *(by Barry Rezvin)*, which addressed a huge annoyance I've had with lambda expressions since C++14. We are going to finally be able to say:
 
 ```cpp
 template <typename... Ts>
 void foo(Ts... xs)
 {
     auto l = [...xs = std::move(xs)]{ /* ... */ };
-    // Capture the `xs` pack by move into the closure
+    // Capture the `xs` pack "by move" into the closure
 }
 ```
 
@@ -327,14 +327,14 @@ The original proposal's syntax had the ellipsis on the right hand side of the in
 
 ```cpp
 template <typename ...Ts>
-//                 ^~~~~
+//                 ^^^^^
 // Declaration of template parameters (left)
 void foo(Ts ...xs)
-//          ^~~~~
+//          ^^^^^
 // Declaration of function parameters (left)
 {
     bar(xs...);
-//      ^~~~~
+//      ^^^^^
 // Expansion of existing pack (right)
 }
 ```
@@ -343,4 +343,180 @@ Developers usually do not format the code like in the snippet above, but Core's 
 
 
 
-### day 3/7 (TODO /6?)
+### day 3/6
+
+#### EWG
+
+My Wednesday morning began in EWG, with intricate discussion about possible ADL issues with modules and different linkages: [(P0923R0) "Modules:Dependent ADL"](http://wg21.link/P0923) *(by Nathan Sidwell)*.
+
+The discussion then moved onto [(P0924R0) "Modules:Context-Sensitive Keyword"](http://wg21.link/P0923) *(by Nathan Sidwell)*, where we tried to agree on a decision regarding the `module` keyword. The committee really would like to use `module` as a keyword, unfortunately there are major issues with making it uncontextual - see [(P0795R0) "From Vulkan with love: a plea to reconsider the Module Keyword to be contextual"](http://wg21.link/P0795) *(by Simon Brand, Neil Henning, Michael Wong, Christopher Di Bella, Kenneth Benzie)* as an example. Basically, we had a few choices:
+
+* Make `module` an uncontextual keyword and break existing code using `module` as an identifier;
+
+* Make `module` a contextual keyword according to P0924R0. This would add some rules to allow the token `module` to be used both as a keyword and as an identifier;
+
+* Provide a way of allowing users to force a token to be interpreted as an identifier (e.g. `@module` or `__identifier(module)`);
+
+* Standardize `module` and future keywords with an unambigious sigil prefix that cannot be used for identifiers (e.g. `@module` is unambiguously a keyword, `module` is unambiguously an identifier).
+
+I suggested the last bullet point, but it encountered heavy resistance from the audience. I liked the idea as it could have also cleanly solved the issue with `co_await` and `co_yield` (`@await` and `@yield` look nicer), and also would have allowed WG21 to keep standardizing useful and terse keywords without risking code breakage. Oh well - some frustration was also part of the ISO meeting experience...
+
+In the end, the committee agreed on two things:
+
+* Leaving the TS as-is, keeping `module` as an uncontextual keyword;
+
+* Encouraging further work on utilities such as `__identifier` or `@identifier`.
+
+
+
+#### LEWG
+
+LEWG was next on my list.
+
+We discussed [(P0670R2) "Static reflection of functions"](http://wg21.link/P0670) *(by David Sankel)*, which described an API for static reflection of functions. In order to reflect over a function, you have to use the `reflexpr` operator over a function invocation expression:
+
+```cpp
+reflexpr(foo(5))
+```
+
+Note that the above does not reflect on the result of `foo(5)`, but instead reflects on `foo`. So, why is the `foo(5)` expression necessary?
+
+Sadly, it is not possible to reflect over *overload sets* or *templates* and get back information such as *"what are all the overloads of `foo`?"* or *"how many template parameters does `foo` have?"*. I asked David about the reasons this path was not pursued, and unfortunately the answer was simple yet brutal: implementors informed the reflection study group about the unfeasibility of that particular design.
+
+Therefore performing overload resolution with `reflexpr(foo(5))` instead of getting back all possible overloads/meanings of `foo` with `reflexpr(foo)` was necessary in order to make this feature work.
+
+I recall everyone in the room being fine with P0670.
+
+During the session we also relaxed the *Lakos rule* by encouraging types in the Standard Library to have conditional `noexcept` when they have "wrapping" semantics - see [(P0884R0) "Extending the noexcept Policy"](http://wg21.link/P0884) *(by Nicolai Josuttis)* if you're interested.
+
+
+
+#### CWG
+
+I decided to give CWG (Core Working Group) a go, curious about the kind of discussions that were happening in that room. I walked in during issue processing: the group was going through [Core language issues](http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html) in order of priority, briefly discussing them and assigning them to CWG members in order to produce a solution.
+
+I will admit that understanding most of the discussions required a very in-depth knowledge of the Standard that I currently lack.
+
+Here are some examples of interesting issues that were discussed:
+
+* [CWG issue #2118 - "Stateful metaprogramming via friend injection"](http://wg21.link/cwg2118)
+
+    * This one was particularly amusing as I really enjoyed the [crazy metaprogramming articles](http://b.atch.se/) that relied on this behavior. I asked CWG *why* they wanted to make this ill-formed (as I don't find *"this technique is arcane"* motivation on the issue a good reason), and they explained that since this relies on non well-specified behavior it should not be imposed on implementations.
+
+* [CWG issue #2306 - "Nested friend templates of class templates"](http://wg21.link/cwg2306)
+
+* [CWG issue #2303 - "Partial ordering and recursive variadic inheritance"](http://wg21.link/cwg2303)
+
+This was a nice glimpse of what CWG is like - I wanted to check it out again during paper discussion but didn't manage to find the time this meeting. Looking forward to do that in a future meeting!
+
+
+
+#### evening session - reflection
+
+This was a very interesting evening session - we discussed many important design decisions about reflection and the future of metaprogramming, which are two of my favorite topics.
+
+Firstly [(P0953R0) "`constexpr reflexpr`"](http://wg21.link/P0953) *(by Matúš Chochlík, Axel Naumann, David Sankel)* was presented: this paper proposes an API for reflection that doesn't look like traditional template metaprogramming, instead moving towards a `constexpr` value-based approach. While this sounds similar to [`boost::hana`](http://www.boost.org/doc/libs/master/libs/hana/doc/html/index.html), it goes beyond that: `boost::hana`'s value-based metaprogramming revolves around encoding types inside values, while the proposed model uses some sort of "magic" `constexpr` values that - albeit having the same type - can store different information.
+
+I like to think of this as a form of "compile-time type erasure" for `constexpr` values.
+
+```cpp
+template <typename T, typename U>
+void foo()
+{
+    constexpr const reflect::Type* t = reflexpr(T);
+    constexpr const reflect::Type* u = reflexpr(U);
+}
+```
+
+`t` and `u` above have the same type, but they are "magically" pointing to compile-time objects filled with data about `T` and `U` respectively.
+
+Most of the people in the room found the approach superior to both traditional TMP and `boost::hana`-like type-value encoding. However, in order to make this viable, some new language features would be required - an example of that is `constexpr for`:
+
+```cpp
+template <typename T>
+void print(const T& t)
+{
+    constexpr const reflect::Class* t = reflexpr(T);
+    constexpr for(const reflect::RecordMember* x : t->get_public_data_members())
+    {
+        std::cout << '\n' << member->get_name() << "=";
+        constexpr const reflect::Constant* p = x->get_pointer();
+        print(t.*unreflexpr(p));
+    }
+}
+```
+
+The `constexpr for` above, albeit looking like a regular run-time loop, would generate code for each of the members of `t` at compile-time.
+
+Note that no wording nor any implementation was provided for `constexpr for` - however the audience was really interested in pursuing this direction and encourage further work and research on it.
+
+
+
+Bjarne Stroustroup then presented [(P0954R0) "What do we want to do with reflection?"](http://wg21.link/P0954), which was a short overview of the most desired use cases by C++ developers. This paper basically showed a very small subset of [(P0385R2) "Static reflection: Rationale, design and evolution"](wg21.link/P0385) *(by Matúš Chochlík, Axel Naumann, David Sankel)*, making the point that users have been wanting a feature to solve that subset of problems for a lot of years and that we should aim to provide a solution for C++20.
+
+
+
+Lastly, Herb Sutter presented the changes made in the latest revision of [(P0707R3) "Metaclasses: Generative C++"](http://wg21.link/P0707). Metaclasses are still well-liked and are moving forward. The main change in R3 was switching from the old `$class` syntax...
+
+```cpp
+$class interface
+{
+    // ...
+}
+```
+
+...to a new, more familiar and composable, `constexpr`-based one:
+
+```cpp
+constexpr void interface(meta::type target, const meta::type source)
+{
+    // ...
+}
+```
+
+In the above snippet, `target` is basically an "output parameter", where `source` is the original AST of a class. The function `interface` can then be applied to a class in order to transform it.
+
+We also voted on a syntax to apply metaclasses to classes. Something along the lines of...
+
+```cpp
+class<M0, M1> foo
+{
+    // `M0` and `M1` are metaclasses
+    // ...
+};
+```
+
+was hated the least. In comparison to simply `M0 foo`, this allows multiple metaclasses to be applied on the spot and it is easier to parse for implementations. The room also agreed that we need syntax to apply a metaclass directly in the definition of a class (useful to replace macros like `Q_OBJECT`). That would look something like:
+
+```cpp
+class foo
+{
+    constexpr { __apply(M0); }
+    constexpr { __apply(M1); }
+    // ...
+};
+```
+
+### day 4/6
+
+#### EWG
+
+I spent the entirety of Thursday in EWG.
+
+TODO
+
+
+
+### day 5/6
+
+#### LEWG
+
+TODO
+
+
+
+### day 6/6
+
+#### plenary
+
+TODO
