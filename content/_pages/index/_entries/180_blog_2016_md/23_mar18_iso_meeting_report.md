@@ -45,9 +45,9 @@ The outcome of those discussions will be covered in this trip report, where I'll
 
 #### arrival
 
-After landing in Jacksonville on Sunday, I was feeling like a zombie due to my sleep deprivation kicking in. It seems like my DNA has this *amazing* mutation that prevents me from sleeping on planes.
+After landing in Jacksonville on Sunday, I was feeling like a zombie due to my sleep deprivation kicking in. It seems like my genetic makeup has this *feature* that prevents me from sleeping on planes.
 
-![[Flying towards JAX](resources/img/blog/tr/p0.jpg)](resources/img/blog/tr/p0.jpg)
+![Flying towards JAX](resources/img/blog/tr/p0.jpg)
 
 I rushed to the hotel to get some sleep as the first day of the ISO meeting was quickly approaching. Eight hours later I packed my laptop and my paper notebook and walked to the venue of the meeting, eager to finally have a glimpse of what goes behind the scenes of the C++ standardization process.
 
@@ -149,6 +149,7 @@ Something like [(P0936R0) "Bind Returned/Initialized Objects to the Lifetime of 
 
 The paper also expressed the desire to get rid of macros, which was shared by pretty much everybody. One of the action points that came out of the discussion on that topic was to produce a paper that lists all the use cases for macros, so that we can understand how to provide features that can replace them. Me and some other attendees volunteered to write the document, under the lead of Ville Voutilainen (chair of EWG).
 
+![View from my hotel room](resources/img/blog/tr/p1.jpeg)
 
 
 #### LEWG
@@ -249,7 +250,7 @@ void foo(ForwardIterator{auto} x);
 
 ...which is very similar to what John and I were proposing in our paper. Unfortunately the sentiment of the room did not change.
 
-
+![(Photo by [Tony Lewis](https://www.linkedin.com/in/tony-lewis-6bab3814b) - thanks!)](resources/img/blog/tr/p2.jpg)
 
 ### day 2/6
 
@@ -341,7 +342,7 @@ void foo(Ts ...xs)
 
 Developers usually do not format the code like in the snippet above, but Core's argument does make sense and EWG unanimously agreed to change the syntax.
 
-
+![(Photo by Tony Lewis)](resources/img/blog/tr/p3.jpg)
 
 ### day 3/6
 
@@ -409,7 +410,7 @@ Here are some examples of interesting issues that were discussed:
 
 This was a nice glimpse of what CWG is like - I wanted to check it out again during paper discussion but didn't manage to find the time this meeting. Looking forward to do that in a future meeting!
 
-
+![(Photo by Tony Lewis)](resources/img/blog/tr/p4.jpg)
 
 #### evening session - reflection
 
@@ -497,22 +498,151 @@ class foo
 };
 ```
 
+![(Photo by Tony Lewis)](resources/img/blog/tr/p5.jpg)
+
 ### day 4/6
 
 #### EWG
 
 I spent the entirety of Thursday in EWG.
 
-TODO
+We began by looking at [(P0893R0) "Chaining Comparisons"](http://wg21.link/P0893) *(by Barry Rezvin and Herb Sutter)*. This paper proposes changing the semantics of comparisons like these ones...
 
+```cpp
+if(a < b < c)   { /* ... */ }
+if(a == b == c) { /* ... */ }
+```
 
+...giving them mathematical meaning. Currently, `a < b < c` is evaluated as `(a < b) < c`. With the proposal, it would be evaluated as `a < b && b < c`.
+
+This is obviously a breaking change from C and previous standards of C++. However, the argument made in the paper is that comparisons like the ones above existing in codebases today are almost certainly wrong. The authors researched open-source code for occurrences of breakage, and reported that currently-broken code would actually be fixed is this proposal were to be accepted!
+
+Chained comparisons would be limited to situations where the relational operators evaluate to a type convertible to `bool`, in order to avoid breaking DSLs (domain-specific languages).
+
+The paper also proposes to sligthly change *fold expressions* so that they do not generated parenthesized code when folding over a relational operator - this allows them to produce chaining comparsions:
+
+```cpp
+template <typename... Ts>
+bool are_ordered(Ts... vals)
+{
+    return (... <= vals);
+}
+
+assert(are_ordered(0, 1, 2, 3, 4));
+```
+
+The authors were given encouragement to split the proposal in two (separating the fold expression changes) and to revise the rules so that multiple chains with different operators cannot be mixed together.
+
+After some more spaceship operator (`<=>`) fun, we discussed one of my favorite papers from the meeting: [(P0732R0) "Class Types in Non-Type Template Parameters"](http://wg21.link/P0732) *(by Jeff Snyder)*. This paper proposes to extend the set of types allowed as *non-type template parameters* to include any class type with a `default`ed `operator <=>`.
+
+This means that, as long as your class has...
+
+```cpp
+std::strong_equality operator<=>(const foo&, const foo&) = default;
+```
+
+...then it can be used as a *non-type template parameter*!
+
+This opens up many amazing possibilities. Obviously, fixed-length strings would be allowed. Great compile-time utilities like [Hana Dusikova's regex literals](https://www.youtube.com/watch?v=3WGsN_Hp9QY) or [Victor Zverovich's `fmt` library format specifiers](http://fmtlib.net/latest/index.html) would now be intuitive and easy-to-use:
+
+```cpp
+matches_regex<"^\d{3}-\d{3}-\d{4}$">("foobar");
+// ^ evaluates to `false`
+
+print<"{} is not equal to {}">(5, 4);
+// ^ outputs "5 is not equal to 4"
+```
+
+"Strong typedefs" are another compelling example:
+
+```cpp
+struct id
+{
+    std::size_t _id;
+    friend auto operator<=>(id, id) = default;
+};
+
+template <id I, typename T>
+auto register_type();
+```
+
+The proposal received unanimous consent and was sent to Core. There are some wording issues to be addressed in a future revision, but my understanding is that this paper has a good chance to make it into C++20!
+
+You might be thinking - why is the restriction to have a `default`ed `operator<=>`? Currently, we have this invariant in the language: given...
+
+```cpp
+template <auto>
+void foo();
+```
+
+...then, if `a == b`, `&foo<a> == &foo<b>` must hold. This invariant is beneficial for the simplicity of the language and gives the linker a way to decide whether two template instantiations are the same or not. Typically, mangled symbols name of template instantiations contain the values of *non-type template parameters* as part of the symbol.
+
+Since a `default`ed `operator<=>` means that equality can recursively be defined in terms of fundamental types, implementations can rely on it to hold the invariant. In my opinion, this is a simple and elegant solution.
+
+Herb Sutter then presented [(P0934R0) "A Modest Proposal: Fixing ADL"](http://wg21.link/P0934), which attempted to resurrect a paper from 2005 whose aim was to fix some surprising a potentially dangerous corner cases of ADL. Unfortunately, some details were missing and additional research was required. Herb was encouraged to play around with the proposed solutions and experiment with an implementation.
+
+[(P0784R1) "Standard containers and constexpr"](http://wg21.link/P0784) *(by Louis Dionne, Richard Smith, Nina Ranns, Daveed Vandevoorde)* was next. This is another of my favorite proposals from Jacksonville. In short, it allows destructors to be marked `constexpr` and allows dynamic memory allocation in `constexpr` functions. The final goal is to allow usage of Standard Library containers such as `std::vector<T>` or `std::map<T>` in `constexpr` contexts! While it seemed that some extra changes are required to achieve that, EWG was happy with the paper and sent it to Core.
+
+I was negatively surprised by special-casing `std::allocator<T>` so that it could work in a `constexpr` context, but my concerns were alleviated by the fact that there already is special wording in the Standard for it, and that this allows `constexpr` functions using Standard Library containers to be used at run-time as well (compared to something like `constexpr_allocator`).
+
+![(Photo by Tony Lewis)](resources/img/blog/tr/p6.jpg)
 
 ### day 5/6
 
 #### LEWG
 
-TODO
+I spent the entire day in LEWG, eager to present the second revision of my `function_ref` paper.
 
+The first proposal we discussed was [(P0608R1) "A sane variant converting constructor"](http://wg21.link/P0608) *(by Zhihao Yuan)*. This short paper solves the very surprising and dangerous implicit conversions that happen during `std::variant`'s construction/assingment. Here's an example: what do you think the *active alternative* of the following `variant` is?
+
+```cpp
+std::variant<std::string, bool> x = "abc";
+```
+
+If you guessed `bool`, you are correct... yuck. Zhihao's paper provides a set of formal rules to make sure that the converting constructor of `std::variant` always does the most obvious thing: in short, it doesn't take narrowing conversions and boolean conversions into account. While this breaks some code, the room agreed on forwarding this to LWG as there is not much C++17 code in the wild and as these fixes are greatly needed to increase the adoption of `std::variant`.
+
+We looked at [(P0887R0) "The identity metafunction"](http://wg21.link/P0887) *(by Timur Doumler)* next, which proposes the addition of a simple "identity" metafunction to the Standard Library:
+
+```cpp
+template <typename T>
+struct identity
+{
+    using type = T;
+};
+```
+
+The name `identity` had met strong opposition in the first revision (as `identity` is often used for normal functions), so most of the discussion was spent trying to figure out a good and unambigious name for an utility that pretty much everyone wanted. It was quite difficult to reach an agreement. I also pointed out that this is not just a metafunction, but it's very useful to just wrap a type into a value:
+
+```cpp
+template <typename T>
+struct type_wrapper
+{
+    using type = T;
+};
+
+template <typename T>
+inline constexpr type_wrapper<T> t;
+
+auto x = some_metaprogramming_thing(t<int>);
+```
+
+In the end, we voted and the name `type_identity` won. The paper was forwarded to LWG.
+
+Afterwards, we discussed [(P0267R7) "A Proposal to Add 2D Graphics Rendering and Display to C++"](http://wg21.link/P0267) *(by Michael B. McLaughlin, Herb Sutter, Jason Zink, Guy Davidson)*. I explained why I oppose this proposal in my [ACCU 2017 trip report](https://vittorioromeo.info/index/blog/accu2017_trip_report.html):
+
+> I think that the scope of "2D graphics API" is way too broad. Some people need high-performance 2D graphics, others need vector graphics, others need something quick for prototyping, others need image manipulation capabilities... and so on. There are good and robust libraries for all of the things I mentioned above (and more). Is standardizing a small API that would be only useful for prototyping or non-performance-intensive applications the right way to go? While it would allow users to quickly display some images/text on the screen, it wouldn't be a huge improvement from simply including something like `SFML` or `cairo` itself. If importing a graphics library in your project is such as hassle that encourages standardization then the real problem is package/dependency management.
+
+Even though this proposal was encouraged further work for seven revisions, the room was quite brutal this time, and attempted to shut it down completely. Everyone said something along the lines of my quote above to justify the opposition, and experts from NVIDIA also expressed strong disagreement with the paper.
+
+The room agreed that this was a failure for LEWG: not for the contents of the proposal, but for the fact that that it wasn't stopped early, wasting a lot of time for both the working group and the authors. Saying *"no"* is sometimes hard, but it would have prevented this situation if it had been done a while ago.
+
+Nevertheless, the work done for P0672 is in my opinion still valuable. While I strongly believe that the paper is not a good fit for the Standard, it would make an high-quality `boost` or standalone library that fills a particular niche.
+
+
+
+
+
+![(Photo by Tony Lewis)](resources/img/blog/tr/p7.jpg)
 
 
 ### day 6/6
@@ -520,3 +650,5 @@ TODO
 #### plenary
 
 TODO
+
+![(Photo by Tony Lewis)](resources/img/blog/tr/p8.jpg)
