@@ -341,7 +341,7 @@ Developers usually do not format the code like in the snippet above, but Core's 
 
 My Wednesday morning began in EWG, with intricate discussion about possible ADL issues with modules and different linkages: [(P0923R0) "Modules:Dependent ADL"](http://wg21.link/P0923) *(by Nathan Sidwell)*.
 
-The discussion then moved onto [(P0924R0) "Modules:Context-Sensitive Keyword"](http://wg21.link/P0923) *(by Nathan Sidwell)*, where we tried to agree on a decision regarding the `module` keyword. The committee really would like to use `module` as a keyword, unfortunately there are major issues with making it uncontextual - see [(P0795R0) "From Vulkan with love: a plea to reconsider the Module Keyword to be contextual"](http://wg21.link/P0795) *(by Simon Brand, Neil Henning, Michael Wong, Christopher Di Bella, Kenneth Benzie)* as an example. Basically, we had a few choices:
+The discussion then moved onto [(P0924R0) "Modules:Context-Sensitive Keyword"](http://wg21.link/P0923) *(by Nathan Sidwell)*, where we tried to agree on a decision regarding the `module` keyword. The committee would really like to use `module` as a keyword, unfortunately there are major issues with making it uncontextual - see [(P0795R0) "From Vulkan with love: a plea to reconsider the Module Keyword to be contextual"](http://wg21.link/P0795) *(by Simon Brand, Neil Henning, Michael Wong, Christopher Di Bella, Kenneth Benzie)* as an example. Basically, we had a few choices:
 
 * Make `module` an uncontextual keyword and break existing code using `module` as an identifier;
 
@@ -440,7 +440,7 @@ void print(const T& t)
 
 The `constexpr for` above, albeit looking like a regular run-time loop, would generate code for each of the members of `t` at compile-time.
 
-Note that no wording nor any implementation was provided for `constexpr for` - however the audience was really interested in pursuing this direction and encourage further work and research on it.
+Note that no wording nor any implementation was provided for `constexpr for` - the audience was regardless really interested in moving towards this direction and encouraged further work and research on it.
 
 
 
@@ -478,7 +478,7 @@ class<M0, M1> foo
 };
 ```
 
-was hated the least. In comparison to simply `M0 foo`, this allows multiple metaclasses to be applied on the spot and it is easier to parse for implementations. The room also agreed that we need syntax to apply a metaclass directly in the definition of a class (useful to replace macros like `Q_OBJECT`). That would look something like:
+...was hated the least. In comparison to simply `M0 foo`, this allows multiple metaclasses to be applied on the spot and it is easier to parse for implementations. The room also agreed that we need syntax to apply a metaclass directly in the definition of a class (useful to replace macros like `Q_OBJECT`). That would look something like:
 
 ```cpp
 class foo
@@ -506,11 +506,11 @@ if(a == b == c) { /* ... */ }
 
 ...giving them mathematical meaning. Currently, `a < b < c` is evaluated as `(a < b) < c`. With the proposal, it would be evaluated as `a < b && b < c`.
 
-This is obviously a breaking change from C and previous standards of C++. However, the argument made in the paper is that comparisons like the ones above existing in codebases today are almost certainly wrong. The authors researched open-source code for occurrences of breakage, and reported that currently-broken code would actually be fixed is this proposal were to be accepted!
+This is obviously a breaking change from C and previous standards of C++. However, the argument made in the paper is that comparisons like the ones above existing in codebases today are almost certainly wrong. The authors researched open-source code for occurrences of breakage, and reported that currently-broken code would actually be fixed if this proposal were to be accepted!
 
 Chained comparisons would be limited to situations where the relational operators evaluate to a type convertible to `bool`, in order to avoid breaking DSLs (domain-specific languages).
 
-The paper also proposes to sligthly change *fold expressions* so that they do not generated parenthesized code when folding over a relational operator - this allows them to produce chaining comparsions:
+The paper also proposes to sligthly change *fold expressions* so that they do not generate parenthesized code when folding over a relational operator - this allows them to produce chaining comparisons:
 
 ```cpp
 template <typename... Ts>
@@ -526,7 +526,7 @@ The authors were given encouragement to split the proposal in two (separating th
 
 After some more spaceship operator (`<=>`) fun, we discussed one of my favorite papers from the meeting: [(P0732R0) "Class Types in Non-Type Template Parameters"](http://wg21.link/P0732) *(by Jeff Snyder)*. This paper proposes to extend the set of types allowed as *non-type template parameters* to include any class type with a `default`ed `operator <=>`.
 
-This means that, as long as your class has...
+This means that, as long as your class is a [*literal type*](http://en.cppreference.com/w/cpp/concept/LiteralType) and has...
 
 ```cpp
 std::strong_equality operator<=>(const foo&, const foo&) = default;
@@ -534,7 +534,7 @@ std::strong_equality operator<=>(const foo&, const foo&) = default;
 
 ...then it can be used as a *non-type template parameter*!
 
-This opens up many amazing possibilities. Obviously, fixed-length strings would be allowed. Great compile-time utilities like [Hana Dusikova's regex literals](https://www.youtube.com/watch?v=3WGsN_Hp9QY) or [Victor Zverovich's `fmt` library format specifiers](http://fmtlib.net/latest/index.html) would now be intuitive and easy-to-use:
+This opens up many amazing possibilities. Obviously, fixed-length strings would be allowed. Great compile-time utilities like [Hana Dusikova's regex literals](https://www.youtube.com/watch?v=3WGsN_Hp9QY) or [Victor Zverovich's `fmt` compile-time library format specifiers](http://fmtlib.net/latest/index.html) would now be intuitive and easy-to-use:
 
 ```cpp
 matches_regex<"^\d{3}-\d{3}-\d{4}$">("foobar");
@@ -559,7 +559,7 @@ auto register_type();
 
 The proposal received unanimous consent and was sent to Core. There are some wording issues to be addressed in a future revision, but my understanding is that this paper has a good chance to make it into C++20!
 
-You might be thinking - why is the restriction to have a `default`ed `operator<=>`? Currently, we have this invariant in the language: given...
+You might be thinking - why the restriction to have a `default`ed `operator<=>`? Currently, we have the following invariant in the language: given...
 
 ```cpp
 template <auto>
@@ -590,7 +590,7 @@ The first proposal we discussed was [(P0608R1) "A sane variant converting constr
 std::variant<std::string, bool> x = "abc";
 ```
 
-If you guessed `bool`, you are correct... yuck. Zhihao's paper provides a set of formal rules to make sure that the converting constructor of `std::variant` always does the most obvious thing: in short, it doesn't take narrowing conversions and boolean conversions into account. While this breaks some code, the room agreed on forwarding this to LWG as there is not much C++17 code in the wild and as these fixes are greatly needed to increase the adoption of `std::variant`.
+If you guessed `bool`, you are correct... yuck. Zhihao's paper provides a set of formal rules to make sure that the converting constructor of `std::variant` always does the most obvious thing: in short, it doesn't allow *narrowing conversions* and *boolean conversions*. While this breaks some code, the room agreed on forwarding this to LWG as there is not much C++17 code in the wild and as these fixes are greatly needed to increase the adoption of `std::variant`.
 
 We looked at [(P0887R0) "The identity metafunction"](http://wg21.link/P0887) *(by Timur Doumler)* next, which proposes the addition of a simple "identity" metafunction to the Standard Library:
 
@@ -619,15 +619,15 @@ auto x = some_metaprogramming_thing(t<int>);
 
 In the end, we voted and the name `type_identity` won. The paper was forwarded to LWG.
 
-Afterwards, we discussed [(P0267R7) "A Proposal to Add 2D Graphics Rendering and Display to C++"](http://wg21.link/P0267) *(by Michael B. McLaughlin, Herb Sutter, Jason Zink, Guy Davidson)*. I explained why I oppose this proposal in my [ACCU 2017 trip report](https://vittorioromeo.info/index/blog/accu2017_trip_report.html):
+Afterwards, we discussed [(P0267R7) "A Proposal to Add 2D Graphics Rendering and Display to C++"](http://wg21.link/P0267) *(by Michael B. McLaughlin, Herb Sutter, Jason Zink, Guy Davidson)*. I explained why I oppose this proposal back in my [ACCU 2017 trip report](https://vittorioromeo.info/index/blog/accu2017_trip_report.html):
 
-> I think that the scope of "2D graphics API" is way too broad. Some people need high-performance 2D graphics, others need vector graphics, others need something quick for prototyping, others need image manipulation capabilities... and so on. There are good and robust libraries for all of the things I mentioned above (and more). Is standardizing a small API that would be only useful for prototyping or non-performance-intensive applications the right way to go? While it would allow users to quickly display some images/text on the screen, it wouldn't be a huge improvement from simply including something like `SFML` or `cairo` itself. If importing a graphics library in your project is such as hassle that encourages standardization then the real problem is package/dependency management.
+> I think that the scope of "2D graphics API" is way too broad. Some people need high-performance 2D graphics, others need vector graphics, others need something quick for prototyping, others need image manipulation capabilities... and so on. There are good and robust libraries for all of the things I mentioned above (and more). Is standardizing a small API that would be only useful for prototyping or non-performance-intensive applications the right way to go? While it would allow users to quickly display some images/text on the screen, it wouldn't be a huge improvement from simply including something like `SFML` or `cairo` itself. If importing a graphics library in your project is such an hassle that encourages standardization of a library just to avoid the pain, then the real problem is package/dependency management.
 
-Even though this proposal was encouraged further work for seven revisions, the room was quite brutal this time, and attempted to shut it down completely. Everyone said something along the lines of my quote above to justify the opposition, and experts from NVIDIA also expressed strong disagreement with the paper.
+Even though further work on this proposal was for six revisions, the room was quite brutal this time, and attempted to shut it down completely. Everyone said something along the lines of my quote above to justify the opposition, and experts from NVIDIA also expressed strong disagreement with the paper.
 
-The room agreed that this was a failure for LEWG: not for the contents of the proposal, but for the fact that that it wasn't stopped early, wasting a lot of time for both the working group and the authors. Saying *"no"* is sometimes hard, but it would have prevented this situation if it had been done a while ago.
+The room agreed that this was a failure for LEWG: not for the contents of the proposal, but for the fact that it wasn't stopped early, wasting a lot of time for both the working group and the authors. Saying *"no"* is sometimes hard, but it would have prevented this situation if it had been done a while ago.
 
-Nevertheless, the work done for P0672 is in my opinion still valuable. While I strongly believe that the paper is not a good fit for the Standard, it would make an high-quality `boost` or standalone library that fills a particular niche.
+Nevertheless, the work done for P0672 is in my opinion still valuable. While I strongly believe that the paper is not a good fit for the Standard, it would make a high-quality `boost` or standalone library that fills a particular niche.
 
 Guy Davidson, who presented the paper, has written up [a great trip report](https://hatcat.com/?p=33) on his website that also covers this topic in depth.
 
@@ -677,7 +677,7 @@ I will make some small tweaks to the paper and send a new revision to LWG in the
 
 The last day began and ended with a plenary session during the morning. The chairs of every working group presented their results, and national bodies + official ISO members voted on the final motions.
 
-You can find concise reports of the approved motions here:
+You can find well-written reports of the approved motions here:
 
 * ["2018 Jacksonville ISO C++ Committee Reddit Trip Report"](https://www.reddit.com/r/cpp/comments/854mu9/) - by Bryce Lelbach
 
