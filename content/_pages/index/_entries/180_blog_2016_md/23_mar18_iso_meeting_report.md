@@ -66,9 +66,9 @@ Don't take it personally when someone tells you to *"write a paper"*!
 
 After that, we discussed a very interesting paper whose aim was to describe the procedures by which WG21 would be willing to break backwards compatibility: [(P0684R2) "C++ Stability, Velocity, and Deployment Plans"](http://open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0684r2.pdf), by Titus Winters. In short, the paper classifies future possible changes to the language/library in multiple categories, depending on whether or not the change is statically detectable and on whether or not it has potential to break legacy code.
 
-I strongly believe that without making huge breaking changes the C++ will never be able to get rid of dangerous and outdated language and library constructs. Most of the weird booby traps in the language today originate from backwards-compatibility with C and previous standards. I also understand that that same backwards-compatibility is a huge strength of C++.
+I strongly believe that without making huge breaking changes the C++ will never be able to get rid of dangerous and outdated language and library constructs. Most of the weird booby traps in the language today originate from backwards-compatibility with C and previous standards. I also understand that same backwards-compatibility is a huge strength of C++.
 
-However, I do see a way out: **modules**. Languages such as Rust have introduced concepts such as ["epochs"](https://github.com/rust-lang/rfcs/pull/2052): module-level switches that change the meaning of a program. Imagine the following:
+However, I do see a way out: **modules**. Languages such as Rust have introduced concepts such as ["editions" (previously called "epochs")](https://github.com/rust-lang/rfcs/pull/2052): module-level switches that change the meaning of a program. Imagine the following:
 
 * What if we could make uninitialized variable declaration (e.g. `int i;`) ill-formed?
 
@@ -228,7 +228,7 @@ void foo(ConvertibleTo{T} x);
 // `x` is a type that must be convertible to `T`.
 
 template <typename T>
-void foo(ConvertibleTo{U, T} x);
+void foo(ConvertibleTo{U}<T> x);
 // `x` is a type that must be convertible to `T`. `U` is a placeholder for
 // the type deduced for `x`.
 ```
@@ -302,7 +302,7 @@ I generally agree with the points raised by Google, but I also agree with the fa
 
 
 
-The last paper we discussed was [(D0780R2) "Allow pack expansion in lambda init-capture"](http://wg21.link/P0780) *(by Barry Rezvin)*, which addressed a huge annoyance I've had with lambda expressions since C++14. We are going to finally be able to say:
+The last paper we discussed was [(D0780R2) "Allow pack expansion in lambda init-capture"](http://wg21.link/P0780) *(by Barry Revzin)*, which addressed a huge annoyance I've had with lambda expressions since C++14. We are going to finally be able to say:
 
 ```cpp
 template <typename... Ts>
@@ -497,7 +497,7 @@ class foo
 
 I spent the entirety of Thursday in EWG.
 
-We began by looking at [(P0893R0) "Chaining Comparisons"](http://wg21.link/P0893) *(by Barry Rezvin and Herb Sutter)*. This paper proposes changing the semantics of comparisons like these ones...
+We began by looking at [(P0893R0) "Chaining Comparisons"](http://wg21.link/P0893) *(by Barry Revzin and Herb Sutter)*. This paper proposes changing the semantics of comparisons like these ones...
 
 ```cpp
 if(a < b < c)   { /* ... */ }
@@ -691,7 +691,7 @@ You can find well-written reports of the approved motions here:
 
 That's it for my trip report!
 
-I thorougly enjoyed the experience and recommend it to everyone interested in contributing to the evolution of the language.
+I thoroughly enjoyed the experience and recommend it to everyone interested in contributing to the evolution of the language.
 
 I want to restate my appreciation for everyone involved - being able to see the huge amount of work behind C++ changes your perspective on the committee and its decisions.
 
