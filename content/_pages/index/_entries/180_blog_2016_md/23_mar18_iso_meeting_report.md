@@ -510,7 +510,7 @@ This is obviously a breaking change from C and previous standards of C++. Howeve
 
 Chained comparisons would be limited to situations where the relational operators evaluate to a type convertible to `bool`, in order to avoid breaking DSLs (domain-specific languages).
 
-The paper also proposes to sligthly change *fold expressions* so that they do not generate parenthesized code when folding over a relational operator - this allows them to produce chaining comparisons:
+The paper also proposes to slightly change *fold expressions* so that they do not generate parenthesized code when folding over a relational operator - this allows them to produce chaining comparisons:
 
 ```cpp
 template <typename... Ts>
@@ -566,11 +566,11 @@ template <auto>
 void foo();
 ```
 
-...then, if `a == b`, `&foo<a> == &foo<b>` must hold. This invariant is beneficial for the simplicity of the language and gives the linker a way to decide whether two template instantiations are the same or not. Typically, mangled symbols name of template instantiations contain the values of *non-type template parameters* as part of the symbol.
+...then, if `a == b`, `&foo<a> == &foo<b>` must hold. This invariant is beneficial for the simplicity of the language and gives the linker a way to decide whether two template instantiations are the same or not. Typically, mangled symbol names of template instantiations contain the values of *non-type template parameters* as part of the symbol.
 
 Since a `default`ed `operator<=>` means that equality can recursively be defined in terms of fundamental types, implementations can rely on it to hold the invariant. In my opinion, this is a simple and elegant solution.
 
-Herb Sutter then presented [(P0934R0) "A Modest Proposal: Fixing ADL"](http://wg21.link/P0934), which attempted to resurrect a paper from 2005 whose aim was to fix some surprising a potentially dangerous corner cases of ADL. Unfortunately, some details were missing and additional research was required. Herb was encouraged to play around with the proposed solutions and experiment with an implementation.
+Herb Sutter then presented [(P0934R0) "A Modest Proposal: Fixing ADL"](http://wg21.link/P0934), which attempted to resurrect a paper from 2005 whose aim was to fix some surprising and potentially dangerous corner cases of ADL. Unfortunately, some details were missing and additional research was required. Herb was encouraged to play around with the proposed solutions and experiment with an implementation.
 
 [(P0784R1) "Standard containers and constexpr"](http://wg21.link/P0784) *(by Louis Dionne, Richard Smith, Nina Ranns, Daveed Vandevoorde)* was next. This is another of my favorite proposals from Jacksonville. In short, it allows destructors to be marked `constexpr` and allows dynamic memory allocation in `constexpr` functions. The final goal is to allow usage of Standard Library containers such as `std::vector<T>` or `std::map<T>` in `constexpr` contexts! While it seemed that some extra changes are required to achieve that, EWG was happy with the paper and sent it to Core.
 
