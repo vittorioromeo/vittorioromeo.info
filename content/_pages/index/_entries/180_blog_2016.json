@@ -1,292 +1,432 @@
 {
     "link_name": "blog",
-    "elements":
-    [
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cache_aligned_tuple",
-    //        "tags": ["c++", "c++17", "library", "abstraction"],
-    //        "expand":
-    //        {
-    //            "Title": "implementing a cache-aligned tuple",
-    //            "Text": "180_blog_2016_md/24_cache_aligned_tuple.md",
-    //            "Date": "XXX march 2018"
-    //        }
-    //    },
+    "elements": [
+        //    {
+        //        "template": "templates/entries/blog.tpl",
+        //        "link_name": "cache_aligned_tuple",
+        //        "tags": ["c++", "c++17", "library", "abstraction"],
+        //        "expand":
+        //        {
+        //            "Title": "implementing a cache-aligned tuple",
+        //            "Text": "180_blog_2016_md/24_cache_aligned_tuple.md",
+        //            "Date": "XXX march 2018"
+        //        }
+        //    },
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "cpp20_lambdas_compiletime_for",
-            "tags": ["c++", "c++20", "lambda", "tutorial"],
-            "expand":
-            {
-                "Title": "TODO",
+            "tags": [
+                "c++",
+                "c++20",
+                "lambda",
+                "tutorial"
+            ],
+            "expand": {
+                "Title": "compile-time iteration with C++20 lambdas",
                 "Text": "180_blog_2016_md/24_cpp20_lambdas_compiletime_for.md",
-                "Date": "XX april 2018"
+                "Date": "16 april 2018"
             }
-        }//,
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "mar18_iso_meeting_report",
-    //        "tags": ["c++", "c++20", "ISO", "meeting"],
-    //        "expand":
-    //        {
-    //            "Title": "trip report: first ISO C++ meeting experience",
-    //            "Text": "180_blog_2016_md/23_mar18_iso_meeting_report.md",
-    //            "Date": "19 march 2018"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "adts_over_exceptions",
-    //        "tags": ["c++", "c++17", "exception", "safety", "monad"],
-    //        "expand":
-    //        {
-    //            "Title": "why choose sum types over exceptions?",
-    //            "Text": "180_blog_2016_md/22_adts_over_exceptions.md",
-    //            "Date": "3 december 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "compile_time_repeat_noexcept_correctness",
-    //        "tags": ["c++", "c++17", "lambda", "library", "noexcept"],
-    //        "expand":
-    //        {
-    //            "Title": "compile-time `repeat` & `noexcept`-correctness",
-    //            "Text": "180_blog_2016_md/21_compile_time_repeat_noexcept_correctness.md",
-    //            "Date": "13 november 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "abstraction_design_implementation_repeat",
-    //        "tags": ["c++", "c++17", "lambda", "library", "noexcept"],
-    //        "expand":
-    //        {
-    //            "Title": "abstraction design and implementation: `repeat`",
-    //            "Text": "180_blog_2016_md/20_abstraction_design_implementation_repeat.md",
-    //            "Date": "7 november 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "programming_slides_with_js",
-    //        "tags": ["slides", "javascript", "marp", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "programming slides with javascript",
-    //            "Text": "180_blog_2016_md/19_programming_slides_with_js.md",
-    //            "Date": "09 october 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "zeroalloc_continuations_p2",
-    //        "tags": ["c++", "future", "continuations", "tutorial", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "zero allocation continuations - part 3",
-    //            "Text": "180_blog_2016_md/18_zeroalloc_continuations_p2.md",
-    //            "Date": "16 july 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "zeroalloc_continuations_p1",
-    //        "tags": ["c++", "future", "continuations", "tutorial", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "zero allocation continuations - part 2",
-    //            "Text": "180_blog_2016_md/17_zeroalloc_continuations_p1.md",
-    //            "Date": "11 july 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "zeroalloc_continuations_p0",
-    //        "tags": ["c++", "future", "continuations", "tutorial", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "zero allocation continuations - part 1",
-    //            "Text": "180_blog_2016_md/16_zeroalloc_continuations_p0.md",
-    //            "Date": "10 july 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cppnow2017_tripreport_pt2",
-    //        "tags": ["c++now", "c++", "conference", "talk", "experience", "report"],
-    //        "expand":
-    //        {
-    //            "Title": "c++now 2017 trip report - part 2/2",
-    //            "Text": "180_blog_2016_md/15_cppnow2017_p1.md",
-    //            "Date": "29 may 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cppnow2017_tripreport_pt1",
-    //        "tags": ["c++now", "c++", "conference", "talk", "experience", "report"],
-    //        "expand":
-    //        {
-    //            "Title": "c++now 2017 trip report - part 1/2",
-    //            "Text": "180_blog_2016_md/14_cppnow2017_p0.md",
-    //            "Date": "27 may 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "variants_lambdas_part_3",
-    //        "tags": ["c++", "c++14", "c++17", "variant", "lambda", "rambling"],
-    //        "expand":
-    //        {
-    //            "Title": "visiting variants using lambdas - part 3",
-    //            "Text": "180_blog_2016_md/13_variants3.md",
-    //            "Date": "12 may 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "accu2017_trip_report",
-    //        "tags": ["accu", "c++", "conference", "talk", "experience", "report"],
-    //        "expand":
-    //        {
-    //            "Title": "trip report: ACCU 2017",
-    //            "Text": "180_blog_2016_md/12_accu2017_trip_report.md",
-    //            "Date": "30 april 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cpp17_curry",
-    //        "tags": ["c++", "c++17", "lambda", "functional", "curry", "partial"],
-    //        "expand":
-    //        {
-    //            "Title": "zero-overhead C++17 currying & partial application",
-    //            "Text": "180_blog_2016_md/11_cpp17_curry.md",
-    //            "Date": "23 january 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "passing_functions_to_functions",
-    //        "tags": ["c++", "c++14", "c++17", "lambda", "function", "performance"],
-    //        "expand":
-    //        {
-    //            "Title": "passing functions to functions",
-    //            "Text": "180_blog_2016_md/10_passing_functions.md",
-    //            "Date": "06 january 2017"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "capturing_perfectly_forwarded_objects_in_lambdas",
-    //        "tags": ["c++", "c++14", "c++17", "lambda", "capture", "forward"],
-    //        "expand":
-    //        {
-    //            "Title": "capturing perfectly-forwarded objects in lambdas",
-    //            "Text": "180_blog_2016_md/9_fwd_capture.md",
-    //            "Date": "11 december 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "checking_expression_validity_in_place",
-    //        "tags": ["c++", "c++14", "c++17", "lambda", "constexpr", "SFINAE"],
-    //        "expand":
-    //        {
-    //            "Title": "checking expression validity in-place with C++17",
-    //            "Text": "180_blog_2016_md/8_in_place_expr_validity.md",
-    //            "Date": "03 november 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "on_lambda_vs_iterator_paper",
-    //        "tags": ["c++", "c++11", "lambda"],
-    //        "expand":
-    //        {
-    //            "Title": "on the recent 'lambda vs iterator' paper",
-    //            "Text": "180_blog_2016_md/7_lambdas_paper.md",
-    //            "Date": "22 october 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "variants_lambdas_part_2",
-    //        "tags": ["c++", "c++14", "c++17", "boost", "variant", "lambda", "tutorial"],
-    //        "expand":
-    //        {
-    //            "Title": "visiting variants using lambdas - part 2",
-    //            "Text": "180_blog_2016_md/6_variants0.md",
-    //            "Date": "18 october 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "variants_lambdas_part_1",
-    //        "tags": ["c++", "c++14", "c++17", "boost", "variant", "lambda", "tutorial"],
-    //        "expand":
-    //        {
-    //            "Title": "visiting variants using lambdas - part 1",
-    //            "Text": "180_blog_2016_md/5_variants0.md",
-    //            "Date": "08 october 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cppcon_2016_talk_video_available",
-    //        "tags": ["c++", "c++14", "cppcon", "cppcon2016", "conference", "talk", "video"],
-    //        "expand":
-    //        {
-    //            "Title": "video of my CppCon 2016 talk available",
-    //            "Text": "180_blog_2016_md/4_cppcon_2016_talk_video_available.md",
-    //            "Date": "01 october 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "2016_camomilla_released",
-    //        "tags": ["c++", "c++14", "python", "script", "error", "templates", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "camomilla: C++ error simplification script",
-    //            "Text": "180_blog_2016_md/3_camomilla_release.md",
-    //            "Date": "28 september 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "cppcon2016_trip_report",
-    //        "tags": ["cppcon", "c++", "conference", "talk", "tutorial", "experience", "report"],
-    //        "expand":
-    //        {
-    //            "Title": "trip report - CppCon 2016",
-    //            "Text": "180_blog_2016_md/2_cppcon2016_report.md",
-    //            "Date": "25 september 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "2016_cpp_library_configuration_api",
-    //        "tags": ["c++", "c++14", "library", "cmake", "api", "tutorial", "article"],
-    //        "expand":
-    //        {
-    //            "Title": "opt-in header-only libraries",
-    //            "Text": "180_blog_2016_md/1_library_conf.md",
-    //            "Date": "6 august 2016"
-    //        }
-    //    },
-    //    {
-    //        "template": "templates/entries/blog.tpl",
-    //        "link_name": "new_website_generator_2016",
-    //        "tags": ["c++", "c++14", "website", "article", "pandoc", "json"],
-    //        "expand":
-    //        {
-    //            "Title": "new website generator",
-    //            "Text": "180_blog_2016_md/0_new_website_generator.md",
-    //            "Date": "4 august 2016"
-    //        }
-    //    }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "mar18_iso_meeting_report",
+            "tags": [
+                "c++",
+                "c++20",
+                "ISO",
+                "meeting"
+            ],
+            "expand": {
+                "Title": "trip report: first ISO C++ meeting experience",
+                "Text": "180_blog_2016_md/23_mar18_iso_meeting_report.md",
+                "Date": "19 march 2018"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "adts_over_exceptions",
+            "tags": [
+                "c++",
+                "c++17",
+                "exception",
+                "safety",
+                "monad"
+            ],
+            "expand": {
+                "Title": "why choose sum types over exceptions?",
+                "Text": "180_blog_2016_md/22_adts_over_exceptions.md",
+                "Date": "3 december 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "compile_time_repeat_noexcept_correctness",
+            "tags": [
+                "c++",
+                "c++17",
+                "lambda",
+                "library",
+                "noexcept"
+            ],
+            "expand": {
+                "Title": "compile-time `repeat` & `noexcept`-correctness",
+                "Text": "180_blog_2016_md/21_compile_time_repeat_noexcept_correctness.md",
+                "Date": "13 november 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "abstraction_design_implementation_repeat",
+            "tags": [
+                "c++",
+                "c++17",
+                "lambda",
+                "library",
+                "noexcept"
+            ],
+            "expand": {
+                "Title": "abstraction design and implementation: `repeat`",
+                "Text": "180_blog_2016_md/20_abstraction_design_implementation_repeat.md",
+                "Date": "7 november 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "programming_slides_with_js",
+            "tags": [
+                "slides",
+                "javascript",
+                "marp",
+                "article"
+            ],
+            "expand": {
+                "Title": "programming slides with javascript",
+                "Text": "180_blog_2016_md/19_programming_slides_with_js.md",
+                "Date": "09 october 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "zeroalloc_continuations_p2",
+            "tags": [
+                "c++",
+                "future",
+                "continuations",
+                "tutorial",
+                "article"
+            ],
+            "expand": {
+                "Title": "zero allocation continuations - part 3",
+                "Text": "180_blog_2016_md/18_zeroalloc_continuations_p2.md",
+                "Date": "16 july 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "zeroalloc_continuations_p1",
+            "tags": [
+                "c++",
+                "future",
+                "continuations",
+                "tutorial",
+                "article"
+            ],
+            "expand": {
+                "Title": "zero allocation continuations - part 2",
+                "Text": "180_blog_2016_md/17_zeroalloc_continuations_p1.md",
+                "Date": "11 july 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "zeroalloc_continuations_p0",
+            "tags": [
+                "c++",
+                "future",
+                "continuations",
+                "tutorial",
+                "article"
+            ],
+            "expand": {
+                "Title": "zero allocation continuations - part 1",
+                "Text": "180_blog_2016_md/16_zeroalloc_continuations_p0.md",
+                "Date": "10 july 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2017_tripreport_pt2",
+            "tags": [
+                "c++now",
+                "c++",
+                "conference",
+                "talk",
+                "experience",
+                "report"
+            ],
+            "expand": {
+                "Title": "c++now 2017 trip report - part 2/2",
+                "Text": "180_blog_2016_md/15_cppnow2017_p1.md",
+                "Date": "29 may 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2017_tripreport_pt1",
+            "tags": [
+                "c++now",
+                "c++",
+                "conference",
+                "talk",
+                "experience",
+                "report"
+            ],
+            "expand": {
+                "Title": "c++now 2017 trip report - part 1/2",
+                "Text": "180_blog_2016_md/14_cppnow2017_p0.md",
+                "Date": "27 may 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "variants_lambdas_part_3",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "variant",
+                "lambda",
+                "rambling"
+            ],
+            "expand": {
+                "Title": "visiting variants using lambdas - part 3",
+                "Text": "180_blog_2016_md/13_variants3.md",
+                "Date": "12 may 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "accu2017_trip_report",
+            "tags": [
+                "accu",
+                "c++",
+                "conference",
+                "talk",
+                "experience",
+                "report"
+            ],
+            "expand": {
+                "Title": "trip report: ACCU 2017",
+                "Text": "180_blog_2016_md/12_accu2017_trip_report.md",
+                "Date": "30 april 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cpp17_curry",
+            "tags": [
+                "c++",
+                "c++17",
+                "lambda",
+                "functional",
+                "curry",
+                "partial"
+            ],
+            "expand": {
+                "Title": "zero-overhead C++17 currying & partial application",
+                "Text": "180_blog_2016_md/11_cpp17_curry.md",
+                "Date": "23 january 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "passing_functions_to_functions",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "lambda",
+                "function",
+                "performance"
+            ],
+            "expand": {
+                "Title": "passing functions to functions",
+                "Text": "180_blog_2016_md/10_passing_functions.md",
+                "Date": "06 january 2017"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "capturing_perfectly_forwarded_objects_in_lambdas",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "lambda",
+                "capture",
+                "forward"
+            ],
+            "expand": {
+                "Title": "capturing perfectly-forwarded objects in lambdas",
+                "Text": "180_blog_2016_md/9_fwd_capture.md",
+                "Date": "11 december 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "checking_expression_validity_in_place",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "lambda",
+                "constexpr",
+                "SFINAE"
+            ],
+            "expand": {
+                "Title": "checking expression validity in-place with C++17",
+                "Text": "180_blog_2016_md/8_in_place_expr_validity.md",
+                "Date": "03 november 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "on_lambda_vs_iterator_paper",
+            "tags": [
+                "c++",
+                "c++11",
+                "lambda"
+            ],
+            "expand": {
+                "Title": "on the recent 'lambda vs iterator' paper",
+                "Text": "180_blog_2016_md/7_lambdas_paper.md",
+                "Date": "22 october 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "variants_lambdas_part_2",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "boost",
+                "variant",
+                "lambda",
+                "tutorial"
+            ],
+            "expand": {
+                "Title": "visiting variants using lambdas - part 2",
+                "Text": "180_blog_2016_md/6_variants0.md",
+                "Date": "18 october 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "variants_lambdas_part_1",
+            "tags": [
+                "c++",
+                "c++14",
+                "c++17",
+                "boost",
+                "variant",
+                "lambda",
+                "tutorial"
+            ],
+            "expand": {
+                "Title": "visiting variants using lambdas - part 1",
+                "Text": "180_blog_2016_md/5_variants0.md",
+                "Date": "08 october 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppcon_2016_talk_video_available",
+            "tags": [
+                "c++",
+                "c++14",
+                "cppcon",
+                "cppcon2016",
+                "conference",
+                "talk",
+                "video"
+            ],
+            "expand": {
+                "Title": "video of my CppCon 2016 talk available",
+                "Text": "180_blog_2016_md/4_cppcon_2016_talk_video_available.md",
+                "Date": "01 october 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "2016_camomilla_released",
+            "tags": [
+                "c++",
+                "c++14",
+                "python",
+                "script",
+                "error",
+                "templates",
+                "article"
+            ],
+            "expand": {
+                "Title": "camomilla: C++ error simplification script",
+                "Text": "180_blog_2016_md/3_camomilla_release.md",
+                "Date": "28 september 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "cppcon2016_trip_report",
+            "tags": [
+                "cppcon",
+                "c++",
+                "conference",
+                "talk",
+                "tutorial",
+                "experience",
+                "report"
+            ],
+            "expand": {
+                "Title": "trip report - CppCon 2016",
+                "Text": "180_blog_2016_md/2_cppcon2016_report.md",
+                "Date": "25 september 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "2016_cpp_library_configuration_api",
+            "tags": [
+                "c++",
+                "c++14",
+                "library",
+                "cmake",
+                "api",
+                "tutorial",
+                "article"
+            ],
+            "expand": {
+                "Title": "opt-in header-only libraries",
+                "Text": "180_blog_2016_md/1_library_conf.md",
+                "Date": "6 august 2016"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
+            "link_name": "new_website_generator_2016",
+            "tags": [
+                "c++",
+                "c++14",
+                "website",
+                "article",
+                "pandoc",
+                "json"
+            ],
+            "expand": {
+                "Title": "new website generator",
+                "Text": "180_blog_2016_md/0_new_website_generator.md",
+                "Date": "4 august 2016"
+            }
+        }
     ]
 }

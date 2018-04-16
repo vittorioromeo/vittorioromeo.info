@@ -35,9 +35,9 @@ If you squint, this is a very limited form of compile-time iteration. When writi
 
 * enumerate a compile-time list of types `Ts...` (i.e. iteration alongside an index).
 
-In this article I'm going to show you how to implement the above constructs, using a new nifty addition to C++20 lambdas: [**P0428**: "Familiar template syntax for generic lambdas"](http://wg21.link/P0428), by [Louis Dionne](https://twitter.com/LouisDionne).
+In this article I'm going to show you how to implement the above constructs, relying on a new nifty addition to C++20 lambdas: [**P0428**: "Familiar template syntax for generic lambdas"](http://wg21.link/P0428), by [Louis Dionne](https://twitter.com/LouisDionne).
 
- This is currently available in [`g++` v.**8**](https://gcc.gnu.org/projects/cxx-status.html).
+This feature is currently available in [`g++` **8.x**](https://gcc.gnu.org/projects/cxx-status.html).
 
 
 
@@ -108,7 +108,7 @@ for_types<int, float, char>([]<typename T>()
 });
 ```
 
-The code above prints `"ifc"`. I like to read it as: *"for the types `int`, `float`, and `char`, please execute the following action"*.
+The code above prints `"ifc"`. I like to read it as: *"for the types `int`, `float`, and `char`, please execute the following action"*. (The *"please"* is not mandatory.)
 
 The implementation of `for_types` is as follows:
 
@@ -254,3 +254,10 @@ constexpr void enumerate_types(F&& f)
 
 As with `for_range`, a C++20 generic lambda is being used to create and consume a `std::index_sequence` on the spot.
 
+
+
+### conclusion
+
+The new "familiar template syntax" for lambdas introduced in C++20 makes constructs such as `for_types` and `for_range` viable and way more readable compared to C++17 alternatives.
+
+Being able to expand a sequence on the spot without having to create an extra `detail` function is also a great advantage brought from this new feature.
