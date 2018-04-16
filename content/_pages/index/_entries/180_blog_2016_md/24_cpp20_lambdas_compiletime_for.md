@@ -10,7 +10,7 @@
 }
 </style>
 
-In one of my previous articles, [""compile-time `repeat` & `noexcept`-correctness"](https://vittorioromeo.info/index/blog/compile_time_repeat_noexcept_correctness.html), I have covered the design and implementation of a simple `repeat<n>(f)` function that expanded to `n` calls to `f` during compilation time. E.g.
+In one of my previous articles, ["compile-time `repeat` & `noexcept`-correctness"](https://vittorioromeo.info/index/blog/compile_time_repeat_noexcept_correctness.html), I have covered the design and implementation of a simple `repeat<n>(f)` function that, when invoked, expands to `n` calls to `f` during compilation. E.g.
 
 ```cpp
 repeat<4>([]{ std::cout << "hello\n"; });
@@ -25,7 +25,7 @@ repeat<4>([]{ std::cout << "hello\n"; });
 []{ std::cout << "hello\n"; }();
 ```
 
-If you squint, this is a very limited form of compile-time iteration. When writing generic code, I've often needed similar constructs in order to express the following actions:
+If you squint, this is a very limited form of *compile-time iteration*. When writing generic code, I've often needed similar constructs in order to express the following actions:
 
 * iterate over a compile-time list of types `Ts...`;
 
