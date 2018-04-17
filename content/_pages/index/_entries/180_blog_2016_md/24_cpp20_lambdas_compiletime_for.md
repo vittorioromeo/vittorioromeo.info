@@ -120,13 +120,13 @@ constexpr void for_types(F&& f)
 }
 ```
 
-The body of `for_types` is a C++17 [*fold expression*](TODO) over the [*comma operator*](TODO) invoking `F::operator()<T>` for each `T` in `Ts...`. Some other interesting details:
+The body of `for_types` is a C++17 [*fold expression*](http://en.cppreference.com/w/cpp/language/fold) over the [*comma operator*](http://en.cppreference.com/w/cpp/language/operator_other) invoking `F::operator()<T>` for each `T` in `Ts...`. Some other interesting details:
 
 * the `Ts...` parameter pack cannot be deduced, and is explicitly provided by the user;
 
 * `F` is deduced;
 
-* the closure is taken as a [*forwarding reference*](TODO), in order to accept non-`const` temporaries (e.g. `mutable` lambdas);
+* the closure is taken as a [*forwarding reference*](http://en.cppreference.com/w/cpp/language/reference#Forwarding_references), in order to accept non-`const` temporaries (e.g. `mutable` lambdas);
 
 * `f` is not perfectly-forwarded inside the body of the function as it could be invoked multiple times;
 
@@ -239,7 +239,7 @@ This prints out:
 >
 > 2: c
 
-The idea is as follows: we'll accept a template parameter pack `Ts...` containing the types from the user, and then generate an index pack of equal length using `std::make_index_sequence`. Finally, both packs will be expanded at the same time with a *fold expression*.
+The idea is as follows: we'll accept a template parameter pack `Ts...` containing the types from the user, and then generate an index pack of equal length using `std::index_sequence_for`. Finally, both packs will be expanded at the same time with a *fold expression*.
 
 ```cpp
 template <typename... Ts, typename F>
@@ -248,7 +248,7 @@ constexpr void enumerate_types(F&& f)
     [&f]<auto... Is>(std::index_sequence<Is...>)
     {
         (f.template operator()<Ts, Is>(), ...);
-    }(std::make_index_sequence<sizeof...(Ts)>{});
+    }(std::index_sequence_for<Ts...>{});
 }
 ```
 
