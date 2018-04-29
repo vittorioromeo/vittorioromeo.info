@@ -357,7 +357,7 @@ auto initiate(Fs&&... fs)
 }
 ```
 
-Before diving into `when_all::execute`, let's take a look at an usage example:
+Before diving into `when_all::execute`, let's take a look at a usage example:
 
 ```cpp
 auto f = initiate([]{ std::puts("A0"); return 1; },

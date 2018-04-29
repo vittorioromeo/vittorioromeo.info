@@ -99,7 +99,7 @@ The C++20 example shows how `T` is easily accessible in the body of the lambda a
 
 ### iteration over a type list
 
-The first construct we're going to implement is a simple "loop" over a list of user-provided types. Here's an usage example:
+The first construct we're going to implement is a simple "loop" over a list of user-provided types. Here's a usage example:
 
 ```cpp
 for_types<int, float, char>([]<typename T>()
@@ -147,7 +147,7 @@ The body of `for_types` is a C++17 [*fold expression*](http://en.cppreference.co
 
 ### iteration over a compile-time list of values
 
-Let's begin with an usage example:
+Let's begin with a usage example:
 
 ```cpp
 for_values<2, 8, 16>([]<auto X>()
@@ -173,7 +173,7 @@ constexpr void for_values(F&& f)
 
 ### iteration over a range
 
-As always, let's start with an usage example:
+As always, let's start with a usage example:
 
 ```cpp
 for_range<(-5), 5>([]<auto X>()
