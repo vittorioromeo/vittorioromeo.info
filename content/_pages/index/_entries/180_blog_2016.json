@@ -14,6 +14,22 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "cppnow2018_tripreport",
+            "tags": [
+                "c++",
+                "c++now",
+                "conference",
+                "trip",
+                "cppnow"
+            ],
+            "expand": {
+                "Title": "c++now 2018 trip report",
+                "Text": "180_blog_2016_md/25_cppnow2018_tripreport.md",
+                "Date": "TODO may 2018"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "cpp20_lambdas_compiletime_for",
             "tags": [
                 "c++",
