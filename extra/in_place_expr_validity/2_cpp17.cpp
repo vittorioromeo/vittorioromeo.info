@@ -8,17 +8,17 @@
 template <typename... Ts, typename TF>
 static constexpr auto is_valid(TF)
 {
-    return std::is_callable<std::decay_t<TF>(Ts...)>{};
+    return std::is_invocable<TF, Ts...>{};
 }
 
 #define IS_VALID_EXPANDER_BEGIN(count)                    \
     [](VRM_PP_REPEAT_INC(count, IS_VALID_EXPANDER_MIDDLE, \
-        _)) constexpr->decltype IS_VALID_EXPANDER_END
+        _)) constexpr IS_VALID_EXPANDER_END
 
 #define IS_VALID_EXPANDER_MIDDLE(idx, _) VRM_PP_COMMA_IF(idx) auto _##idx
 
 #define IS_VALID_EXPANDER_END(...) \
-    (__VA_ARGS__){})
+    -> decltype(void(__VA_ARGS__)){})
 
 #define IS_VALID(...)                              \
     is_valid<__VA_ARGS__>(IS_VALID_EXPANDER_BEGIN( \
