@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Higher-order functions and 'function_ref'",
+                "Text": "Most modern languages treat functions as first-class citizens, and Modern C++ is no different. The introduction of lambda expressions and utilities such as std::function enable countless functional programming patterns that can increase the flexibility and safety of APIs, and help reduce code repetition on the implementation side. In this talk we're going to see examples of how higher-order functions can be used in practice to increase the quality of production code and the productivity of developers. A new abstraction proposed to the Standard Library for C++20, function_ref, will also be covered and compared to other techniques for the implementation of higher-order functions. function_ref aims to be a lightweight wrapper over any Callable with a given signature that is easy for the compiler to optimize and inline."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++ On Sea 2019",
+                        "Link": "https://www.youtube.com/watch?v=TxhOTj_ynUM"
+                    }
+                ]
+            }
+        }
+    ]
+}
