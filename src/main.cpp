@@ -978,7 +978,7 @@ void process_entries_ellipsis_and_permalink(archetype::entry& ae)
     auto atag_href =
         ssvu::getReplaced(ae._output_path, constant::folder::path::result, "");
 
-    auto atag_link = "<a href='" + atag_href + "'>";
+    auto atag_link = "<a href='/" + atag_href + "'>";
 
     auto atag_link_styled =
         "<a style='color: black; text-decoration: "
