@@ -6,43 +6,31 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <vrm/core/static_if.hpp>
 #include <vrm/core/strong_typedef.hpp>
 
 constexpr bool verbose{true};
 
-// "DRY? nope" -gcc
 auto& lo_verbose()
 {
-    using namespace vrm::core;
+    if(verbose)
+    {
+        return ssvu::lo();
+    }
 
-    return static_if(bool_v<verbose>)
-        .then([]() -> auto&
-            {
-                return ssvu::lo();
-            })
-        .else_([]() -> auto&
-            {
-                static auto ln = ssvu::loNull();
-                return ln;
-            })();
+    static auto ln = ssvu::loNull();
+    return ln;
 }
 
 template <typename... Ts>
 auto& lo_verbose(Ts&&... xs)
 {
-    using namespace vrm::core;
+    if(verbose)
+    {
+        return ssvu::lo(FWD(ys)...);
+    }
 
-    return static_if(bool_v<verbose>)
-        .then([](auto&&... ys) -> auto&
-            {
-                return ssvu::lo(FWD(ys)...);
-            })
-        .else_([](auto&&...) -> auto&
-            {
-                static auto ln = ssvu::loNull();
-                return ln;
-            })(FWD(xs)...);
+    static auto ln = ssvu::loNull();
+    return ln;
 }
 
 namespace std
