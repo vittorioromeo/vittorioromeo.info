@@ -28,6 +28,7 @@
                 "Text": "180_blog_2016_md/24_cpp20_lambdas_compiletime_for.md",
                 "Date": "16 april 2018"
             }
+        },
         {
             "template": "templates/entries/blog.tpl",
             "link_name": "cpp20_lambdas_compiletime_for",
