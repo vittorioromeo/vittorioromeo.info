@@ -14,28 +14,18 @@
                     {
                         "Title": "C++ On Sea 2019",
                         "Link": "https://www.youtube.com/watch?v=TxhOTj_ynUM"
-                    }
-                ]
-            }
-        },
-        {
-            "template": "templates/entries/talk_menu.tpl",
-            "expand": {
-                "MenuItems": [
+                    },
                     {
                         "Title": "ACCU 2019",
                         "Link": "https://www.youtube.com/watch?v=WHRao43ab3I"
-                    }
-                ]
-            }
-        },
-        {
-            "template": "templates/entries/talk_menu.tpl",
-            "expand": {
-                "MenuItems": [
+                    },
                     {
                         "Title": "C++Now 2019",
                         "Link": "https://www.youtube.com/watch?v=5V74RPUEu5s"
+                    },
+                    {
+                        "Title": "C++ Russia 2019",
+                        "Link": "https://www.youtube.com/watch?v=HYENjkZvsrM"
                     }
                 ]
             }

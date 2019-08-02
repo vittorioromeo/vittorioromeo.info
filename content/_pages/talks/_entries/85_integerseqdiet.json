@@ -1,0 +1,22 @@
+{
+    "elements": [
+        {
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Putting 'integer_sequence' on a diet",
+                "Text": "(Lightning talk) Using 'integer_sequence' to iterate over a sequence of compile-time integers always requires one layer of indirection. How can the boilerplate code be minimized? Could we do better in C++20?"
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [
+                    {
+                        "Title": "C++Now 2019",
+                        "Link": "https://www.youtube.com/watch?v=BlAlWYBR_-8"
+                    }
+                ]
+            }
+        }
+    ]
+}
