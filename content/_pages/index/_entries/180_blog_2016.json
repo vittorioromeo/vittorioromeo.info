@@ -14,6 +14,22 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "TODO_cpp_epochs",
+            "tags": [
+                "c++",
+                "rust",
+                "ISO",
+                "epochs",
+                "evolution"
+            ],
+            "expand": {
+                "Title": "TODO_cpp_epochs",
+                "Text": "180_blog_2016_md/26_cpp_epochs.md",
+                "Date": "TODO"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "what_ive_been_up_to_2018_2019",
             "tags": [
                 "blog",
