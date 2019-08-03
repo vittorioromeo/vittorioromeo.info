@@ -138,23 +138,23 @@ There are three main reasons why we are not pursuing this path:
 
 * > Module-level switches would lead to community fragmentation.
 
-  Similarly to the point above, this is again a misunderstanding of the proposal. The "fragmentation" would not be any worse than what we have today *(i.e. some people can use C++14, some can use C++17, some are not allowed to use exceptions and some others are)*. Adding epochs would not change that situation. If every Standard introduces a single new epoch, then people will have to opt-in to the new Standard or not, which is exactly what happens today.
+    Similarly to the point above, this is again a misunderstanding of the proposal. The "fragmentation" would not be any worse than what we have today *(i.e. some people can use C++14, some can use C++17, some are not allowed to use exceptions and some others are)*. Adding epochs would not change that situation. If every Standard introduces a single new epoch, then people will have to opt-in to the new Standard or not, which is exactly what happens today.
 
-  Finally, epochs are not going to radically change what C++ is. An epoch might introduce small syntactical changes and safer defaults, but it would not be a different language by any means.
+    Finally, epochs are not going to radically change what C++ is. An epoch might introduce small syntactical changes and safer defaults, but it would not be a different language by any means.
 
 * > Module-level switches would make the language more complicated.
 
-  False. In fact, it's exactly the opposite! Language rules could be greatly simplified in newer epochs, and many obsolete/dangerous constructs could be completely removed. The Standard would get bigger, and possibly divided by epochs. However, the committee could focus on the latest epoch, while only supporting previous ones with bug fixes.
+    False. In fact, it's exactly the opposite! Language rules could be greatly simplified in newer epochs, and many obsolete/dangerous constructs could be completely removed. The Standard would get bigger, and possibly divided by epochs. However, the committee could focus on the latest epoch, while only supporting previous ones with bug fixes.
 
-  Over time, WG21's work would become easier as the language becomes slimmer and saner.
+    Over time, WG21's work would become easier as the language becomes slimmer and saner.
 
 * > Module-level switches would make the lives of compiler developers even harder.
 
-  There is some truth here. However, in one way or another, all remarkable features make the lives of compiler developers harder. If anything, thanks to Rust's experience, we have proof that module-level switches **can be implemented** and that **they work**.
+    There is some truth here. However, in one way or another, all remarkable features make the lives of compiler developers harder. If anything, thanks to Rust's experience, we have proof that module-level switches **can be implemented** and that **they work**.
 
 * > Introducing module-level switches would create a schism similar to Python 2 and Python 3.
 
-  Again, a misunderstanding. Python 2 code is **not compatible** with Python 3 code. Code written in a previous C++ epoch would be compatible with code written in a newer one.
+    Again, a misunderstanding. Python 2 code is **not compatible** with Python 3 code. Code written in a previous C++ epoch would be compatible with code written in a newer one.
 
 Lastly, I want to make this claim: **if the Standard committee doesn't do this, someone else will.** It might start as a hobby project of some compiler enthusiast experimenting with modules. They will figure out: *"hey, I can change C++'s syntax to something I prefer here by adding a module-level switch"*. Then it will grow, and more people will use it, and... that's how the community will be split.
 
