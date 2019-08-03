@@ -86,7 +86,9 @@ This would allow users to select what epoch to use. To avoid creating a plethora
 
 ![](resources/img/blog/cpp_epochs/d1.png)
 
-#### what we could change
+
+
+### what we could change
 
 We could finally improve the safety and expressiveness of the language, and fix many constructs that cause frustration and bugs. For example:
 
@@ -118,7 +120,9 @@ More drastic changes could also be considered:
 
 * Get rid of dangerous constructs that only exist to maintain C compatibility, or introduce `unsafe` blocks where they are required to live.
 
-#### why are we not doing it?
+
+
+### why are we not doing it?
 
 There are three main reasons why we are not pursuing this path:
 
@@ -128,13 +132,13 @@ There are three main reasons why we are not pursuing this path:
 
 3. Many veterans in the committee are opposed to the idea.
 
-(1) and (2) are non-issues - time will resolve them. Let me elaborate on (3) a little big: I informally floated the idea of epochs around in the WG21 Jacksonville 2018 meeting and was met with heavy resistance. I will list the concerns I have received and reply to them.
+The first two points are non-issues - time will resolve them. Let me elaborate on (3) a little big: I informally floated the idea of epochs around in the WG21 Jacksonville 2018 meeting and was met with heavy resistance. I will list the concerns I have received and reply to them.
 
 * > Introducing module-level syntax switches would lead to the creation of many dialects.
 
-  This is a **complete misunderstanding** of what I am proposing here. First of all, there would be a single switch, not many coexisting knobs. The switch would allow people to choose between language epochs that are **linearly ordered chronologically** - no forks or branches. The Standard committee would still be in charge of deciding when to create a new epoch and in charge of its contents. "Breaking" changes would not be made lightly.
+    This is a **complete misunderstanding** of what I am proposing here. First of all, there would be a single switch, not many coexisting knobs. The switch would allow people to choose between language epochs that are **linearly ordered chronologically** - no forks or branches. The Standard committee would still be in charge of deciding when to create a new epoch and in charge of its contents. "Breaking" changes would not be made lightly.
 
-  There absolutely is zero risk of creating many different dialects here.
+    There absolutely is zero risk of creating many different dialects here.
 
 * > Module-level switches would lead to community fragmentation.
 
@@ -158,7 +162,15 @@ There are three main reasons why we are not pursuing this path:
 
 Lastly, I want to make this claim: **if the Standard committee doesn't do this, someone else will.** It might start as a hobby project of some compiler enthusiast experimenting with modules. They will figure out: *"hey, I can change C++'s syntax to something I prefer here by adding a module-level switch"*. Then it will grow, and more people will use it, and... that's how the community will be split.
 
+
+
+### what next?
+
 **We have an opportunity to fix, simplify, and evolve C++, and I believe we should take it.**
+
+I am happy to spend time to write a proposal, provided that the feedback to this idea is mostly positive. I would also like to hear the thoughts of Modules experts, compiler developers, and WG21 veterans before I start working on a paper.
+
+Feel free to comment below, on Reddit, or to contact me directly.
 
 
 
