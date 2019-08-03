@@ -14,7 +14,7 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
-            "link_name": "TODO_cpp_epochs",
+            "link_name": "fixing_cpp_with_epochs",
             "tags": [
                 "c++",
                 "rust",
@@ -23,9 +23,9 @@
                 "evolution"
             ],
             "expand": {
-                "Title": "TODO_cpp_epochs",
+                "Title": "fixing c++ with epochs",
                 "Text": "180_blog_2016_md/26_cpp_epochs.md",
-                "Date": "TODO"
+                "Date": "03 august 2019"
             }
         },
         {
