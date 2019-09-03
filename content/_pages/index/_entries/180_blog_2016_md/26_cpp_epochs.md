@@ -172,6 +172,8 @@ I am happy to spend time to write a proposal, provided that the feedback to this
 
 Feel free to comment below, on Reddit, or to contact me directly.
 
+TODO: link to follow-up post here
+
 
 
 ### additional resources
