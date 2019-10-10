@@ -1,6 +1,5 @@
 {
-    "elements": [
-        {
+    "elements": [{
             "template": "templates/entries/talk_text.tpl",
             "expand": {
                 "Title": "Higher-order functions and 'function_ref'",
@@ -10,8 +9,7 @@
         {
             "template": "templates/entries/talk_menu.tpl",
             "expand": {
-                "MenuItems": [
-                    {
+                "MenuItems": [{
                         "Title": "C++ On Sea 2019",
                         "Link": "https://www.youtube.com/watch?v=TxhOTj_ynUM"
                     },
@@ -26,6 +24,10 @@
                     {
                         "Title": "C++ Russia 2019",
                         "Link": "https://www.youtube.com/watch?v=HYENjkZvsrM"
+                    },
+                    {
+                        "Title": "CppCon 2019",
+                        "Link": "https://www.youtube.com/watch?v=eYEPsMZZ2LY"
                     }
                 ]
             }
