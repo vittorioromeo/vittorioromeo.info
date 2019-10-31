@@ -1,0 +1,19 @@
+{
+    "elements": [{
+            "template": "templates/entries/talk_text.tpl",
+            "expand": {
+                "Title": "Making sense of terrible template errors with 'camomilla'",
+                "Text": "(Lightning talk) Brief look at 'camomilla', a tool I developed to post-process heavily-templated C++ compiler errors and make them easier to read."
+            }
+        },
+        {
+            "template": "templates/entries/talk_menu.tpl",
+            "expand": {
+                "MenuItems": [{
+                    "Title": "CppCon 2019",
+                    "Link": "https://www.youtube.com/watch?v=3dUZn3eloWE"
+                }]
+            }
+        }
+    ]
+}
