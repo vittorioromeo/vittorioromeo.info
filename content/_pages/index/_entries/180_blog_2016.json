@@ -14,6 +14,22 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "epochs_in_prague_what_went_wrong",
+            "tags": [
+                "c++",
+                "rust",
+                "ISO",
+                "epochs",
+                "evolution"
+            ],
+            "expand": {
+                "Title": "epochs in prague - what went wrong?",
+                "Text": "180_blog_2016_md/27_epochs_prague.md",
+                "Date": "XX february 2020"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "fixing_cpp_with_epochs",
             "tags": [
                 "c++",
