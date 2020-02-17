@@ -1,4 +1,7 @@
-
+https://old.reddit.com/r/cpp/comments/f47x4o/202002_prague_iso_c_committee_trip_report_c20_is/fhslry8/?context=10000
+https://old.reddit.com/r/cpp/comments/f47x4o/202002_prague_iso_c_committee_trip_report_c20_is/fhslzp6/?context=10000
+https://twitter.com/Guriwesu/status/1228815932216283143
+http://wiki.edg.com/bin/view/Wg21prague/P1881R1SG17
 
 <style>
 .inline-link
