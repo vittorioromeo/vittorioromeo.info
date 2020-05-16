@@ -166,21 +166,23 @@ I could show many absurd and tasteless tweets I was sent, but that's not the poi
 
 ### requirements and misconceptions
 
-Hidden throughout the barrage of braindead insults or `r/iamverysmart` observations on how Modern C++ is a cancer for the programming industry, there were some really good points raised by the game developer community. They have very specific requirements that the C++ standardization committee is not prioritizing for (and in my opinion, rightfully so).
+Hidden throughout the barrage of snarky remarks or self-righteous observations on how Modern C++ is a cancer for the programming industry, there were some really good points raised as well. Many game develoeprs have very specific requirements that the C++ standardization committee is not prioritizing for.
 
 #### debuggability
 
-The most common one, *debuggability*, is of tremendous importance for many game developers. There are two ways in which the use of Modern C++ hinders the ability to debug code. It all stems from how Modern C++ encourages the use of "zero-cost abstractions":
+The most common requirement, *debuggability*, is of tremendous importance. There are two ways in which the use of Modern C++ hinders the ability to debug code. It all stems from how Modern C++ encourages the use of "zero-cost abstractions":
 
 1. Such abstractions are only zero-cost (at run-time) when compiler optimizations are enabled. When running an application in debug mode, the performance can be hundreds of times worse compared to release mode, which can make a game literally unplayable.
 
-2. The way such abstractions are often implemented is by leveraging a layered architecture and code reuse. These are valuable software engineering principles that allow large projects to scale and grow, but they also tend to cause deep call stacks due to multiple layers of indirection: such depth can make it hard to understand what is going on during debugging. This problem is particularly evident when using standard library facilities, which are notoriously known for having very complicated and deeply-nested implementation details.
+2. The way such abstractions are often implemented is by leveraging layered architecture and code reuse. These are valuable software engineering principles that allow large projects to scale and grow, but they also tend to cause deep call stacks due to multiple levels of indirection: such depth can make it hard to understand what is going on during debugging. This problem is particularly evident when using standard library facilities, which are notoriously known for having very complicated and deeply-nested implementation details.
 
-These points are fair. The solution that most game developers approach in order to mitigate these points is to simply avoid abstractions as much as possible, including seemingly extreme decisions such as not using the standard library at all, or using `std::vector<T>::data() + N` instead of `std::vector<T>::operator[](N)` (or not using containers at all).
+These points are fair. The solution that most game developers reach towards in order to mitigate these points is to simply avoid abstractions as much as possible, including making extreme decisions such as not using the standard library at all, or using `std::vector<T>::data() + N` instead of `std::vector<T>::operator[](N)` (or even not using containers at all).
 
-However, there is an aspect of those solutions that it is often overlooked. Let's (reasonably) assume that, apart from situations where you just want to explore a codebase interactively, the frequency of having to debug is linearly proportional to the number of bugs in your program. Let's also (again, reasonably) assume that the use of battle-tested abstractions reduces the chance of bugs in your program.
+However, there is an aspect of those solutions that it is often overlooked. Let's (reasonably) assume that, apart from situations where you just want to explore a codebase interactively, the frequency of having to debug is linearly proportional to the number of bugs in your program. Let's also (again, reasonably) assume that the use of battle-tested abstractions designed to improve safety reduces the chance of bugs in your program.
 
-Do you see the conundrum? Of course you're going to have to debug more if you write error-prone C-like code and avoid utilities that have been refined over decades to help you avoid mistakes. I am sure there is a balance - obviously not every line of your code should be buried under 20 layers of abstractions, however proper use of the standard library (or custom-made types and functions) would reduce the times debugging is required, as mistakes would be prevented during compilation. Dan Saks gave an excellent talk at CppCon 2016 (which I had the pleasure to attend in person) which touches on this topic a bit - highly recommended:
+Do you see the conundrum? Of course you're going to have to debug more if you write error-prone C-like code and avoid utilities that have been refined over decades to help you avoid mistakes.
+
+I am sure there is a balance - not every line of your code should be buried under 20 layers of abstractions, however proper use of the standard library (or custom-made types and functions) would reduce the times debugging is required, as mistakes would be prevented during compilation. Dan Saks gave an excellent talk at CppCon 2016 (which I had the pleasure to attend in person) which touches on this topic a bit - highly recommended:
 
 <center>
 
@@ -194,7 +196,7 @@ I think that both sides should converge on this matter:
 
 * Game developers (and people generally skeptical of Modern C++) should give a chance to a more balanced coding style where carefully chosen abstractions are used to avoid bugs at compile-time whenever possible.
 
-I can also see another interesting opportunity in the space of debugging tools development to mitigate factors that can make one's debugging experience sub-optimal. As an example, a user-friendly way to mark some layers of the call stack as "unimportant" (and remember that information between debugging sessions) could be a good starting point.
+I can also see another interesting opportunity in the space of debugging tools development to mitigate factors that can make one's debugging experience suboptimal. As an example, a user-friendly way to mark some layers of the call stack as "unimportant" (and remember that information between debugging sessions) could be a good starting point.
 
 However, I am sure of one thing: completely abandoning the safety, readability, flexbility, and expressivity provided by Modern C++ features and abstractions is an extreme and unwise reaction to this problem.
 
@@ -202,29 +204,35 @@ However, I am sure of one thing: completely abandoning the safety, readability, 
 
 #### compilation times
 
-Another issue that was brought up multiple times was one that has been covered many and many times before: compilation times. C++ has a notoriously bad reputation for slow compilation times which, in my opinion, was justified when we didn't have modern language features. Prior to C++11, any metaprogramming required heavy use of templates, including recursive template instantiations to - for example - simulate type lists. Furthermore, libraries that achieved incredible feats given the limitations of C++03 (such as Boost) had to resort to arcane techniques that ultimately led to very slow compilation times.
+Another issue that was brought up multiple times was one that has been covered many and many times before: compilation times. C++ has a notoriously bad reputation for slow compilation times which, in my opinion, was very justified when we didn't have modern language features. Prior to C++11, any metaprogramming required heavy use of templates, including recursive template instantiations to - for example - simulate type lists. Furthermore, libraries that achieved incredible feats given the limitations of C++03 (such as Boost) while keeping portability with thousands of compiler/platform combinations had to resort to arcane techniques that ultimately led to very slow compilation times.
 
 It is not surprising that, game developers who had poor experiences back in the day, still shudder from the idea of introducing any template or abstraction in their codebase, failing to realize that things are much better nowadays.
 
-It also seems that one of the biggest misconceptions I've been exposed to countless times is that "Modern C++" equals "Standard Library". That is completely false. Standard library implementations are not optimized for compilation time or debuggability - they need to be (1) general-purpose, (2) easy to maintain and extend, (3) efficient at run-time, (4) compliant to the standard and all its nuances.
+One of the biggest misconceptions I've been exposed to countless times is that "Modern C++" equals "Standard Library". That is completely false. Standard library implementations are not optimized for compilation time or debuggability - they need to be (1) general-purpose, (2) easy to maintain and extend, (3) efficient at run-time, (4) compliant to the standard and all its nuances.
 
-This thread on [`r/cpp` (*"unique_ptr - seven calls to dereference - why is this needed?"*)](https://old.reddit.com/r/cpp/comments/b0sq6p/unique_ptr_seven_calls_to_dereference_why_is_this/) is incredibly telling. The author calls themselves a *"modern C++ skeptic"*, and feels (rightfully) justified in their skepticism by the fact that a simple `std::unique_ptr` dereference requires 7 layers of indirection in the call stack.
+This thread on [`r/cpp` (*"unique_ptr - seven calls to dereference - why is this needed?"*)](https://old.reddit.com/r/cpp/comments/b0sq6p/unique_ptr_seven_calls_to_dereference_why_is_this/) is very telling. The author calls themselves a *"modern C++ skeptic"*, and feels (rightfully) justified in their skepticism by the fact that a simple `std::unique_ptr` dereference requires 7 layers of indirection in the call stack.
 
-A more compelling resource is the [*"Lightweight but still STL-compatible unique pointer"*](https://blog.magnum.graphics/backstage/lightweight-stl-compatible-unique-pointer/) article by the author of the excellent [Magnum](https://magnum.graphics/) graphics engine. The article observes that including the `<memory>` header in a project drastically increases compilation times. The author also tested the implementation of modules at the time, and it didn't help much. The author, instead of becoming a crusader against Modern C++, realizes that the problem lies in the implementation of `std::unique_ptr`, and that the latest standards of the language provide the necessary feature for the creation of a lightweight alternative to `std::unique_ptr` which is good enough for Magnum's requirements. This leads to the creation of [`CorradePointer.h`](https://github.com/mosra/magnum-singles/blob/master/CorradePointer.h), a single-header implementation of unique heap-allocated object ownership that has minimal impact on compilation times.
+A more compelling resource is the [*"Lightweight but still STL-compatible unique pointer"*](https://blog.magnum.graphics/backstage/lightweight-stl-compatible-unique-pointer/) article by the author of the excellent [Magnum](https://magnum.graphics/) graphics engine.
 
-The point I'm trying to make here is that most of the language features offered by Modern C++ can be used without depending on the standard library. I'm also admitting that the standard library is far from perfect, but that's understandable as it is a general-purpose tool that needs satisfy an incredible amount of use cases.
+The article observes that including the `<memory>` header in a project drastically increases compilation times. The author also tested the implementation of modules at the time, and it didn't help much. The author, instead of becoming a crusader against Modern C++, realizes that the problem lies in the implementation of `std::unique_ptr`, and that the latest standards of the language provide the necessary features for the creation of a lightweight alternative to `std::unique_ptr` (which is good enough for Magnum's requirements). This thought process leads to the creation of [`CorradePointer.h`](https://github.com/mosra/magnum-singles/blob/master/CorradePointer.h), a single-header implementation of unique heap-allocated object ownership that has minimal impact on compilation times.
 
-This is the misconception that bothers me the most. If `<memory>` is too expensive for your compilation times, why would you ever abandon the safety, convenience, and readability improvements of `std::unique_ptr` when you can implement something similar in about 20 lines of code?
+The point I'm trying to make here is that most of the language features offered by Modern C++ can be used without depending on the standard library. I'm also admitting that the standard library is far from perfect, but that's understandable as it is a general-purpose tool that needs to satisfy an incredible amount of use cases.
+
+What I just discussed is the misconception that bothers me the most. If `<memory>` is too expensive for your compilation times, why would you ever abandon the safety, convenience, and readability improvements of `std::unique_ptr` when you can implement something similar in about 20 lines of code?
 
 This point can be applied to pretty much every standard library component (except very low level ones like `<type_traits>`, which do not impact compilation times significantly).
 
-When you abandon Modern C++ as a whole and become a Twitter keyboard warrior, there are real and important benefits ou are missing out that C++ provides.
+When you rashly abandon Modern C++ as a whole and become a Twitter keyboard warrior, there are real and important benefits you are missing out that C++ provides.
 
 
 
 #### features matter
 
-In the context of game development, I would not be able to live without many features introduced in C++11/14/17. Some of them are simple quality-of-life improvements that have *zero impact* on compilation time or debuggability and yet provide an immense amount of value. I made a list of features which I think are simple yet valuable below. Let's get started...
+In the context of game development, I would not be able to live without many features introduced in C++11/14/17. Some of them are simple quality-of-life improvements that have *zero impact* on compilation time or debuggability and yet provide an immense amount of value.
+
+I made a list of features which I think (1) are simple, (2) have minimal impact on debuggability and compilation times, and (3) are still extremely valuable.
+
+Let's get started...
 
 ##### c++11
 
@@ -264,10 +272,10 @@ In the context of game development, I would not be able to live without many fea
 
 ### conclusion
 
-I believe that both sides can learn a lot from each other, and that the negativity and toxicity I've experienced for a tweet that was just a personal observation regarding a Modern C++ feature shows how sad the situation is.
+I believe that both sides can learn a lot from each other, and that the negativity and toxicity I've experienced for a tweet (that was just a personal observation regarding a Modern C++ feature) shows how sad the situation is.
 
-I also strongly believe that every game developer who is skeptical of Modern C++ should stop erroneously thinking of the "Standard Library" as "Modern C++" and should give a try to all the features I listed above. I promise that they will not impact your compilation times, not even by a millisecond, but they will have a positive impact on the quality, readability, and safety of your code.
+I also strongly believe that every game developer who is skeptical of Modern C++ should stop erroneously thinking of the "Standard Library" as "Modern C++" and should give a try to all the features I listed above. I promise that they will not impact your compilation times, and they will very likely have a positive impact on the quality, readability, and safety of your code.
 
-Finally, my hope is that this post will bring both sides closer together rather than create a new shitstorm - that is not my intention. I enjoy some rivalry, and I do enjoy some arguing... but sometimes it is too much, and the fun we have shouting our opinions at each other should always at least give both sides something to think about, to make each party grow either on a technical or human level.
+Finally, my hope is that this post will bring both sides closer together rather than create a new shitstorm - that is not my intention. I enjoy some rivalry, and I do enjoy some arguing... but sometimes it is too much, and the "fun" we have by shouting our opinions at each other should always at least give both sides something to think about, to make each party grow either on a technical or human level.
 
 Peace.
