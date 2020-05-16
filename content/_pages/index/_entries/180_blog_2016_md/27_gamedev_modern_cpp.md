@@ -10,7 +10,7 @@
 }
 </style>
 
-The past few days have been "interesting". My Twitter has been raided by the part of the online gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. Except this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
+The past few days have been "interesting". My Twitter has been raided by the part of the gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. Except this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
 
 This article (1) tells the story of the heated discussions one of my tweets spawned, (2) analyzes some common requirements and misconceptions game developers have, and (3) provides a list of Modern C++ features which *every* game developer should use.
 
@@ -20,7 +20,7 @@ Enjoy.
 
 ### background
 
-I am working on a virtual reality mod for Quake. Well, calling it a "mod" is a bit diminishing: not only I have spent a considerable amount of time working on [my fork of the QuakeSpasm engine](https://github.com/SuperV1234/quakevr) to add VR support, but I've also changed pretty much every game mechanic to turn the game into a first-class virtual reality experience:
+I am working on a virtual reality mod for Quake. Actually, calling it a "mod" is a bit diminishing: not only I have spent a considerable amount of time working on [my fork of the QuakeSpasm engine](https://github.com/SuperV1234/quakevr) to add VR support, but I've also changed pretty much every game mechanic to turn the classic into a first-class virtual reality experience:
 
 <center>
 
@@ -28,11 +28,11 @@ I am working on a virtual reality mod for Quake. Well, calling it a "mod" is a b
 
 </center>
 
-This project is a great source of fun and a fantastic learning experience for me. I am getting in a very intimate relationship with Quake's codebase (and all its quirks and weirdness), getting accustomed to [OpenVR](https://github.com/ValveSoftware/openvr), and dabbling in OpenGL graphics programming that I had never done before (e.g. geometry shaders).
+The [**Quake VR** project]((https://vittorioromeo.info/quakevr)) has been a great source of fun and a fantastic learning experience for me. I am getting in a very intimate relationship with Quake's codebase (including all its quirks and weirdnesses), getting accustomed to [OpenVR](https://github.com/ValveSoftware/openvr), and dabbling in OpenGL graphics programming that I had never done before (e.g. geometry shaders).
 
-I am also using this project as an opportunity to experiment with C++17 features, and to generally have fun with Modern C++. One of my favorite additions to the 2017 standard of the language is [*"fold expressions"*](https://en.cppreference.com/w/cpp/language/fold). A fold expression basically reduces a [*parameter pack*](https://en.cppreference.com/w/cpp/language/parameter_pack) into a single result, but can also be used to arbitrarily generate code for every element in the pack.
+I am also using this project as an opportunity to experiment with C++17 features, and to generally enjoy myself with Modern C++. One of my favorite additions to the 2017 standard of the language is [*"fold expressions"*](https://en.cppreference.com/w/cpp/language/fold). A fold expression basically reduces a [*parameter pack*](https://en.cppreference.com/w/cpp/language/parameter_pack) into a single result, but can also be used to arbitrarily generate code for every element in the pack.
 
-When I was rewriting Quake's particle system from scratch, to add textured particles and remove the overhead of [immediate mode OpenGL](https://stackoverflow.com/questions/6733934/what-does-immediate-mode-mean-in-opengl), I found myself needing to stitch together some images to create a [texture atlas](https://en.wikipedia.org/wiki/Texture_atlas), in order to avoid unnecessary texture binding. In my particular scenario, all the particle texture file paths are hardcoded, as I have no interest in implementing custom textures for particles, and it is just not necessary at this point in time. Therefore, I decided to experiment with fold expressions:
+In order to add textured particles and remove the overhead of [immediate mode OpenGL](https://stackoverflow.com/questions/6733934/what-does-immediate-mode-mean-in-opengl), I rewrote Quake's particle system from scratch. Doing that, I found myself needing to stitch together some images to create a [texture atlas](https://en.wikipedia.org/wiki/Texture_atlas), in order to avoid unnecessarily binding and unbinding textures. In my particular scenario, all the texture file paths are hardcoded, as I have no interest or need to implement custom particle textures. Therefore, I decided to experiment with fold expressions:
 
 <center>
 
@@ -55,7 +55,7 @@ TextureAtlas stitchImages(const Images&... images)
     // ...
 ```
 
-Focus on the definition of `width` and `height`: using a fold expression allows to very concisely and unambigiously express the intention of (1) summing all the images' widths together and (2) finding the maximum height between all the images. Furthermore, this approach allows both variables to be `const`-qualified, avoiding accidental mutation and decreasing cognitive overhead for a reader thanks to the fact that those two variables are guaranteed to not change their value throughout their lifetime, thus allowing the reader to focus on the "moving parts" of the function body.
+Focus on the definition of `width` and `height`: using a fold expression allows to very concisely and unambigiously express the intention of (1) summing all the images' widths together and (2) finding the maximum height between all the images. Furthermore, this approach allows both variables to be `const`-qualified, avoiding accidental mutation and decreasing cognitive overhead for readers. Cognitive overhead is reduced thanks to the fact that those two variables are guaranteed to not change their value throughout their lifetime, thus allowing a reader to focus their attention on the "moving parts" of the function body.
 
 Compare the above definitions to a loop-based run-time version:
 
@@ -77,9 +77,9 @@ TextureAtlas stitchImages(const std::vector<Image>& images)
     // ...
 ```
 
-I believe the above solution is, honestly speaking, terrible. First of all, we are using `std::size_t`, but it is not guaranteed that type matches the type of `Image::width`. To be correct, we should use `decltype(std::declval<const Image&>().width)`, which is quite verbose. Regardless, the code is unnecessarily verbose - the amount of syntactic noise makes me question whether the code is correct or not when I look at it, as there are more places where a mistake could have been made. Finally, we lose `const`-correctness and its safety and cognition-related benefits.
+I believe the above solution is, honestly speaking, terrible. First of all, we are using `std::size_t`, which is not guaranteed to match the type of `Image::width`. To be (pendantically) correct, `decltype(std::declval<const Image&>().width)` should be used, which is verbose. Regardless, the code is still unnecessarily verbose - the amount of syntactic noise makes me wonder if the code is correct when I look at it, as there are more places where a defect could have been introduced. Finally, we lose `const`-correctness, including its safety and readability benefits.
 
-Obviously, `<algorithm>` comes to the rescue! Right...? Well...
+Obviously, `<algorithm>` comes to the rescue! ...right? Well, you be the judge:
 
 ```cpp
 TextureAtlas stitchImages(const std::vector<Image>& images)
@@ -99,7 +99,7 @@ TextureAtlas stitchImages(const std::vector<Image>& images)
     // ...
 ```
 
-Yep. It sucks. We get `const`-correctness and avoid accidental type mismatches, but there is an unbeliavble amount of noise and boilerplate for a very simple task. Not a fan. Think about how you would perform this task in other languages - take Python as an example:
+It sucks. We get `const`-correctness and avoid accidental type mismatches, but there is an unbelievable amount of noise and boilerplate for a very simple task. In contrast, think about how you would perform this task in other languages such as Python:
 
 ```cpp
 def stitchImages(images):
@@ -109,7 +109,7 @@ def stitchImages(images):
     # ...
 ```
 
-Concise, simple, and self-explanatory. And, guess what - fold expressions are remarkably similar, if not better:
+Concise, simple, and self-explanatory. Fold expressions are remarkably similar, if not better:
 
 ```cpp
 template <typename... Images>
@@ -125,11 +125,11 @@ I really like the above code snippet, and I would strongly encourage people to w
 
 > The more I use #cpp packs and fold expressions, the more I wish they were available at run-time. They are a very elegant and convenient way of expressing some operations. ([\@seanbax](https://twitter.com/seanbax) had the right idea!)
 
-The discussion I was trying to spark was on whether we could get a syntax similar to fold expressions that also worked at run-time, because I believe it is a valuable addition to the language to improve readability, conciseness, and safety all at the same time.
+The discussion I was trying to spark was on whether or not C++ could get a syntax similar to fold expressions that also worked at run-time, because I believe it is a valuable addition to the language to improve readability, conciseness, and safety all at once.
 
-I tagged [Sean Baxter](https://twitter.com/seanbax) in the original tweet, who is working on an amazing language called [Circle](https://www.circle-lang.org/). In a nutshell, it's an extension of C++ adding a new metaprogramming paradigm and many new features to improve productivity. Definitely worth a look into.
+I tagged [Sean Baxter](https://twitter.com/seanbax) in the original tweet, who created an amazing language called [Circle](https://www.circle-lang.org/). In a nutshell, it's an extension of C++ adding a new powerful metaprogramming paradigm and many new features to improve productivity. Definitely worth a look into.
 
-Anyway, Circle supports [*"list comprehensions, slices, ranges, for-expressions, functional folds and expansion expressions"*](https://github.com/seanbaxter/circle/blob/master/comprehension/comprehension.md), even at run-time. In fact, you are able to write `stitchImages` in Circle with run-time data in a way that's very close to the variadic template version:
+Circle supports [*"list comprehensions, slices, ranges, for-expressions, functional folds and expansion expressions"*](https://github.com/seanbaxter/circle/blob/master/comprehension/comprehension.md), even at run-time. In fact, you are able to write `stitchImages` in Circle (using run-time data) in a way that's very close to the variadic template version:
 
 ```cpp
 TextureAtlas stitchImages(const std::vector<Image>& images)
@@ -140,15 +140,15 @@ TextureAtlas stitchImages(const std::vector<Image>& images)
     // ...
 ```
 
-Basically, `[:]` is compiler magic that allows you to treat the elements of the vector as they were a parameter pack. It's all syntactic sugar for regular run-time operations that you would perform using a loop. I find it extremely valuable and I think that is the right direction forward for C++ - would love to see a paper proposed for standardization.
+`[:]` is basically compiler magic that allows you to treat the elements of the vector as if they were a parameter pack. It's all syntactic sugar for regular run-time operations that you would perform using a loop. I find it extremely valuable and I think that is the right direction forward for C++ - would love to see a paper proposed for standardization.
 
 
 
 ### outrage
 
-Of course, an observation I made regarding the gap between compile-time and run-time features in C++ in the context of a personal hobby gamedev project attracted the attention of the Twitter gamedev community, whose first reaction was naturally to either (1) mockingly retweet my original code snippet, showing one's followers how stupid those C++ programmers are, or (2) comment on how the code was "retarded" and how my tweet was setting a negative example for young developers and should be shunned.
+Of course, an observation I made regarding the gap between compile-time and run-time features in C++ in the context of a personal hobby gamedev project attracted the attention of part of the Twitter gamedev community, whose first reaction was naturally to either (1) mockingly retweet my original code snippet, showing one's followers how "stupid those C++ programmers are", or (2) comment on how the code was "retarded" and how my tweet was setting a negative example for young developers and should be shunned.
 
-While sad, I was very disappointed to see that some people whose work I truly admire also had something very disheartening to tell me:
+While that's already sad, I even more disappointed by seeing that some people whose work I truly admire also had something very disheartening to tell me:
 
 <center>
 
@@ -156,11 +156,11 @@ While sad, I was very disappointed to see that some people whose work I truly ad
 
 </center>
 
-Thankfully, I have faced enough hardships in my life so that this kind of bullshit doesn't phase me anymore. However, imagine a young developer's idol getting this kind of response to one of their experiments they were eager to share: that would be soul crushing.
+Thankfully, I have faced enough hardships in my life so that this kind of bullshit doesn't phase me (much) anymore. However, imagine a young developer getting this kind of response from one of their idols, to one of their experiments they were eager to share: that would be soul-crushing.
 
-Even if the author of that tweet was (very generously) generalizing, those kind of generalization are what's hurting our community and industry. Somebody experimenting on their personal project and sharing some thoughts to a specific subset of the C++ community isn't.
+Even if the author of that tweet was generalizing, those kinds of generalization are  hurting our community and industry. Somebody experimenting on their personal project and sharing some thoughts to a specific subset of the C++ community isn't hurting anyone.
 
-I could show many absurd and tasteless tweets I received, but that's not the point of this post. I want to discuss misconceptions regarding Modern C++ in the game development industry.
+I could show many absurd and tasteless tweets I was sent, but that's not the point of this post. I want to discuss misconceptions regarding Modern C++ in the game development industry.
 
 
 
