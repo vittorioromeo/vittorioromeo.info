@@ -10,7 +10,7 @@
 }
 </style>
 
-The past few days have been "interesting". My Twitter has been raided by the gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. Except this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
+The past few days have been "interesting". My Twitter has been raided by the part of the online gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. Except this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
 
 This article (1) tells the story of the heated discussions one of my tweets spawned, (2) analyzes some common requirements and misconceptions game developers have, and (3) provides a list of Modern C++ features which *every* game developer should use.
 
@@ -20,7 +20,7 @@ Enjoy.
 
 ### background
 
-I am working on a virtual reality mod for Quake. Well, calling it a "mod" is a bit diminishing: not only I have spent a considerable amount of time on [my fork of the QuakeSpasm engine](https://github.com/SuperV1234/quakevr) to add VR support, but I've also changed pretty much every game mechanic to turn the game into a first-class virtual reality experience:
+I am working on a virtual reality mod for Quake. Well, calling it a "mod" is a bit diminishing: not only I have spent a considerable amount of time working on [my fork of the QuakeSpasm engine](https://github.com/SuperV1234/quakevr) to add VR support, but I've also changed pretty much every game mechanic to turn the game into a first-class virtual reality experience:
 
 <center>
 
