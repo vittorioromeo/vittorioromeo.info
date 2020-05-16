@@ -84,10 +84,10 @@ Obviously, `<algorithm>` comes to the rescue! ...right? Well, you be the judge:
 ```cpp
 TextureAtlas stitchImages(const std::vector<Image>& images)
 {
-    const auto width = std::accumulate(images.begin(), images.end(),
-        [](const Image& img)
+    const auto width = std::accumulate(images.begin(), images.end(), 0
+        [](const std::size_t acc, const Image& img)
         {
-            return img.width;
+            return acc + img.width;
         });
 
     const auto height = std::max_element(images.begin(), images.end(),
@@ -99,7 +99,7 @@ TextureAtlas stitchImages(const std::vector<Image>& images)
     // ...
 ```
 
-It sucks. We get `const`-correctness and avoid accidental type mismatches, but there is an unbelievable amount of noise and boilerplate for a very simple task. In contrast, think about how you would perform this task in other languages such as Python:
+It sucks. We get `const`-correctness and avoid accidental type mismatches for `height`, but there is an unbelievable amount of noise and boilerplate for a very simple task. In contrast, think about how you would perform this task in other languages such as Python:
 
 ```cpp
 def stitchImages(images):
