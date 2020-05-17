@@ -10,7 +10,7 @@
 }
 </style>
 
-The past few days have been "interesting". My Twitter has been raided by the part of the gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. Except this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
+The past few days have been "interesting". My Twitter has been raided by the part of the gamedev community that doesn't see much value in Modern C++ and prefers writing code with a very low level of abstraction. However, this time I didn't start it, unlike [a while ago](https://twitter.com/supahvee1234/status/994618273013510145)...
 
 This article (1) tells the story of the heated discussions one of my tweets spawned, (2) analyzes some common requirements and misconceptions game developers have, and (3) provides a list of Modern C++ features which *every* game developer should use.
 
@@ -40,7 +40,7 @@ In order to add textured particles and remove the overhead of [immediate mode Op
 
 </center>
 
-As you can see from my tweet, I am using a parameter pack to pass all the images to stitch together to the `stitchImages` variadic template function. This is obviously not necessary, as a run-time container would also work, but - suprisingly - it leads to some really *elegant code*[^elegant_code]:
+As you can see from my tweet, I am using a parameter pack to pass all the images to stitch together to the `stitchImages` variadic template function. This is obviously not necessary, as a run-time container would also work, but - surprisingly - it leads to some really *elegant code*[^elegant_code]:
 
 
 [^elegant_code]: "Elegance" is an objective measurement of the beauty of piece of code. *Elegant code* is code that scores high according to the official standards of code beauty (OSOCB). You can verify whether your code is elegant or not by running it through `clang-tidy -checks='beauty-standards-code-elegance'`.
@@ -55,7 +55,7 @@ TextureAtlas stitchImages(const Images&... images)
     // ...
 ```
 
-Focus on the definition of `width` and `height`: using a fold expression allows to very concisely and unambigiously express the intention of (1) summing all the images' widths together and (2) finding the maximum height between all the images. Furthermore, this approach allows both variables to be `const`-qualified, avoiding accidental mutation and decreasing cognitive overhead for readers. Cognitive overhead is reduced thanks to the fact that those two variables are guaranteed to not change their value throughout their lifetime, thus allowing a reader to focus their attention on the "moving parts" of the function body.
+Focus on the definition of `width` and `height`: using a fold expression allows to very concisely and unambiguously express the intention of (1) summing all the images' widths together and (2) finding the maximum height between all the images. Furthermore, this approach allows both variables to be `const`-qualified, avoiding accidental mutation and decreasing cognitive overhead for readers. Cognitive overhead is reduced thanks to the fact that those two variables are guaranteed to not change their value throughout their lifetime, thus allowing a reader to focus their attention on the "moving parts" of the function body.
 
 Compare the above definitions to a loop-based run-time version:
 
@@ -77,7 +77,7 @@ TextureAtlas stitchImages(const std::vector<Image>& images)
     // ...
 ```
 
-I believe the above solution is, honestly speaking, terrible. First of all, we are using `std::size_t`, which is not guaranteed to match the type of `Image::width`. To be (pendantically) correct, `decltype(std::declval<const Image&>().width)` should be used, which is verbose. Regardless, the code is still unnecessarily verbose - the amount of syntactic noise makes me wonder if the code is correct when I look at it, as there are more places where a defect could have been introduced. Finally, we lose `const`-correctness, including its safety and readability benefits.
+I believe the above solution is, honestly speaking, terrible. First of all, we are using `std::size_t`, which is not guaranteed to match the type of `Image::width`. To be (pedantically) correct, `decltype(std::declval<const Image&>().width)` should be used, which is verbose. Regardless, the code is still unnecessarily verbose - the amount of syntactic noise makes me wonder if the code is correct when I look at it, as there are more places where a defect could have been introduced. Finally, we lose `const`-correctness, including its safety and readability benefits.
 
 Obviously, `<algorithm>` comes to the rescue! ...right? Well, you be the judge:
 
@@ -158,7 +158,7 @@ While that's already sad, I even more disappointed by seeing that some people wh
 
 Thankfully, I have faced enough hardships in my life so that this kind of bullshit doesn't phase me (much) anymore. However, imagine a young developer getting this kind of response from one of their idols, to one of their experiments they were eager to share: that would be soul-crushing.
 
-Even if the author of that tweet was generalizing, those kinds of generalization are  hurting our community and industry. Somebody experimenting on their personal project and sharing some thoughts to a specific subset of the C++ community isn't hurting anyone.
+Even if the author of that tweet was generalizing, those kinds of generalization are hurting our community and industry. Somebody experimenting on their personal project and sharing some thoughts to a specific subset of the C++ community isn't hurting anyone.
 
 I could show many absurd and tasteless tweets I was sent, but that's not the point of this post. I want to discuss misconceptions regarding Modern C++ in the game development industry.
 
@@ -166,7 +166,7 @@ I could show many absurd and tasteless tweets I was sent, but that's not the poi
 
 ### requirements and misconceptions
 
-Hidden throughout the barrage of snarky remarks or self-righteous observations on how Modern C++ is a cancer for the programming industry, there were some really good points raised as well. Many game develoeprs have very specific requirements that the C++ standardization committee is not prioritizing for.
+Hidden throughout the barrage of snarky remarks or self-righteous observations on how Modern C++ is cancer for the programming industry, there were some really good points raised as well. Many game developers have very specific requirements that the C++ standardization committee is not prioritizing for.
 
 #### debuggability
 
@@ -198,7 +198,7 @@ I think that both sides should converge on this matter:
 
 I can also see another interesting opportunity in the space of debugging tools development to mitigate factors that can make one's debugging experience suboptimal. As an example, a user-friendly way to mark some layers of the call stack as "unimportant" (and remember that information between debugging sessions) could be a good starting point.
 
-However, I am sure of one thing: completely abandoning the safety, readability, flexbility, and expressivity provided by Modern C++ features and abstractions is an extreme and unwise reaction to this problem.
+However, I am sure of one thing: completely abandoning the safety, readability, flexibility, and expressivity provided by Modern C++ features and abstractions is an extreme and unwise reaction to this problem.
 
 
 
@@ -220,7 +220,7 @@ The point I'm trying to make here is that most of the language features offered 
 
 What I just discussed is the misconception that bothers me the most. If `<memory>` is too expensive for your compilation times, why would you ever abandon the safety, convenience, and readability improvements of `std::unique_ptr` when you can implement something similar in about 20 lines of code?
 
-This point can be applied to pretty much every standard library component (except very low level ones like `<type_traits>`, which do not impact compilation times significantly).
+This point can be applied to pretty much every standard library component (except very low-level ones like `<type_traits>`, which do not impact compilation times significantly).
 
 When you rashly abandon Modern C++ as a whole and become a Twitter keyboard warrior, there are real and important benefits you are missing out that C++ provides.
 
@@ -244,7 +244,7 @@ Let's get started...
 
 * **Lambda expressions** - useful to compartmentalize your code by introducing local functions that bundle related logic together, or to express asynchronous operations more cleanly.
 
-* **`override`** - sometimes `virtual` polymorphism is useful for games, and `override` helps avoid mistakes and increase readability. Of course, I am not suggesting your should have an `Entity` class with a `virtual` update member function (even though that's entirely reasonable for smaller games), but any sort of auxiliary system (e.g. scene manager) can benefit from polymorphism.
+* **`override`** - sometimes `virtual` polymorphism is useful for games, and `override` helps avoid mistakes and increase readability. Of course, I am not suggesting you should have an `Entity` class with a `virtual` update member function (even though that's entirely reasonable for smaller games), but any sort of auxiliary system (e.g. scene manager) can benefit from polymorphism.
 
 * **`nullptr`**.
 
@@ -254,7 +254,7 @@ Let's get started...
 
 ##### c++14
 
-* **Binary literals** - say goodbye to bit masks which require mental gymnastics. Just show what your mask is supposed to look like in binary, making it extremely clear which bits are going to be affected.
+* **Binary literals** - say goodbye to bitmasks which require mental gymnastics. Just show what your mask is supposed to look like in binary, making it extremely clear which bits are going to be affected.
 
 * **Digit separators** - games are full of hardcoded constants. "Max particles". "Max entities". And so on. Make them more readable with a simple `'` character - it will be extremely easy to distinguish a `100'000` from `1'000'000`.
 
@@ -264,7 +264,7 @@ Let's get started...
 
 * **`[[fallthrough]]`** - best thing since sliced bread, especially because I know you game developers love `switch` statements. This attribute allows you to be explicit about your intention to fall through, avoiding bugs and increasing readability.
 
-* **`[[nodiscard]]`** - I lied. This is the best thing since sliced bread, especially because I know you game developers hate to use exceptions. Any function returning a value which shouldn't be ignored (e.g. an error code) can now be decorated with this attribute, causing the compiler to complain if you forget to check an important return value. I use this feature all the time, both at work and in my personal projects. It is a life saver.
+* **`[[nodiscard]]`** - I lied. This is the best thing since sliced bread, especially because I know you game developers hate to use exceptions. Any function returning a value that shouldn't be ignored (e.g. an error code) can now be decorated with this attribute, causing the compiler to complain if you forget to check an important return value. I use this feature all the time, both at work and in my personal projects. It is a lifesaver.
 
 * **Structured bindings** - I also know you like plain and flat `struct` types. I do too. They're fast, simple, and easy to work with. C++17 makes them even better as you can now destructure their members and give them individual names.
 
