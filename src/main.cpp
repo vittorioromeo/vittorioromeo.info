@@ -6,43 +6,38 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <vrm/core/static_if.hpp>
 #include <vrm/core/strong_typedef.hpp>
 
-constexpr bool verbose{true};
+inline constexpr bool verbose{true};
+
+using namespace std::string_literals;
 
 // "DRY? nope" -gcc
 auto& lo_verbose()
 {
-    using namespace vrm::core;
-
-    return static_if(bool_v<verbose>)
-        .then([]() -> auto&
-            {
-                return ssvu::lo();
-            })
-        .else_([]() -> auto&
-            {
-                static auto ln = ssvu::loNull();
-                return ln;
-            })();
+    if constexpr(verbose)
+    {
+        return ssvu::lo();
+    }
+    else
+    {
+        static auto ln = ssvu::loNull();
+        return ln;
+    }
 }
 
 template <typename... Ts>
 auto& lo_verbose(Ts&&... xs)
 {
-    using namespace vrm::core;
-
-    return static_if(bool_v<verbose>)
-        .then([](auto&&... ys) -> auto&
-            {
-                return ssvu::lo(FWD(ys)...);
-            })
-        .else_([](auto&&...) -> auto&
-            {
-                static auto ln = ssvu::loNull();
-                return ln;
-            })(FWD(xs)...);
+    if constexpr(verbose)
+    {
+        return ssvu::lo(FWD(xs)...);
+    }
+    else
+    {
+        static auto ln = ssvu::loNull();
+        return ln;
+    }
 }
 
 namespace std
@@ -70,7 +65,7 @@ namespace constant
             std::string resources{"resources"};
             std::string result{"result"};
             std::string temp{"temp"};
-        }
+        } // namespace name
 
         namespace path
         {
@@ -79,14 +74,14 @@ namespace constant
             std::string result{folder::name::result + "/"};
             std::string temp{folder::name::temp + "/"};
             std::string resources{"/" + folder::name::resources};
-        }
-    }
+        } // namespace path
+    }     // namespace folder
 
     namespace file
     {
         std::string page_json{"_page.json"};
         std::string main_menu_json{"_menu.json"};
-    }
+    } // namespace file
 
     namespace url
     {
@@ -94,8 +89,8 @@ namespace constant
         {
             std::string website{"https://vittorioromeo.info/"};
         }
-    }
-}
+    } // namespace url
+} // namespace constant
 
 
 namespace utils
@@ -129,7 +124,8 @@ namespace utils
 
         iss >> d >> month >> y;
 
-        return std::to_string(d) + " " + get_pubdate_mo(month) + " " + std::to_string(y) + " 00:00:00 GMT";
+        return std::to_string(d) + " " + get_pubdate_mo(month) + " " +
+               std::to_string(y) + " 00:00:00 GMT";
     }
 
     template <typename T>
@@ -149,8 +145,15 @@ namespace utils
     template <typename T>
     void exec_cmd(T&& x)
     {
+#ifndef WIN32
         std::string cmd(FWD(x));
         system(cmd.c_str());
+#else
+        std::string cmd =
+            "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c '" + FWD(x) + "'";
+
+        system(cmd.c_str());
+#endif
     }
 
     namespace impl
@@ -161,7 +164,8 @@ namespace utils
 
             {
                 std::ostringstream oss;
-                #if 1
+#if 1
+#ifndef WIN32
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
                     << "/usr/local/bin/pp -en " << p << " > " << tempf
@@ -169,7 +173,16 @@ namespace utils
                     << "pandoc --mathjax --highlight-style=pygments " << tempf
                     << "x.md"
                     << " -o " << tempf << "temp.html";
-                #else
+#else
+                oss << "mkdir -p " << tempf << " ; touch " << tempf
+                    << "temp.html ; chmod 777 " << tempf << "temp.html ; "
+                    << "/c/OHWorkspace/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
+                    << "x.md ; "
+                    << "pandoc --mathjax --highlight-style=pygments " << tempf
+                    << "x.md"
+                    << " -o " << tempf << "temp.html";
+#endif
+#else
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
                     << "/usr/local/bin/pp -en " << p << " > " << tempf
@@ -178,7 +191,7 @@ namespace utils
                        "--highlight-style pygments "
                     << tempf << "x.md"
                     << " -o " << tempf << "temp.html";
-                #endif
+#endif
 
                 utils::exec_cmd(oss.str());
             }
@@ -206,7 +219,7 @@ namespace utils
 
             return p;
         }
-    }
+    } // namespace impl
 
     ssvu::TemplateSystem::Dictionary expand_to_dictionary(
         const ssvufs::Path& working_directory, const ssvj::Val& mVal)
@@ -297,7 +310,7 @@ namespace utils
         return ssvu::getReplaced(
             x, constant::folder::path::result, constant::url::path::website);
     }
-}
+} // namespace utils
 
 
 
@@ -326,7 +339,7 @@ namespace archetype
             ssvufs::Path _output_path;
             page_id _parent_page;
         };
-    }
+    } // namespace impl
 
     struct aside : public impl::element
     {
@@ -349,7 +362,7 @@ namespace archetype
         std::vector<entry_id> _entries;
         std::vector<aside_id> _asides;
     };
-}
+} // namespace archetype
 
 namespace structure
 {
@@ -384,12 +397,12 @@ namespace structure
                 }
             }
         };
-    }
+    } // namespace impl
 
     using aside_mapping = impl::mapping<aside_id, archetype::aside>;
     using entry_mapping = impl::mapping<entry_id, archetype::entry>;
     using page_mapping = impl::mapping<page_id, archetype::page>;
-}
+} // namespace structure
 
 using namespace ssvu::FileSystem;
 using namespace ssvu::TemplateSystem;
@@ -478,7 +491,7 @@ namespace impl
                 }
             });
     }
-}
+} // namespace impl
 
 template <typename TF>
 void for_all_entry_json_files(const ssvufs::Path& page_path, TF&& f)
@@ -721,9 +734,9 @@ struct page_expansion
         {
             const auto& s = _subpages[i];
 
-            utils::write_to_file(s._link,
-                s.produce_result(false, ctx, ap, _subpages, Path{s._link},
-                    _expanded_asides));
+            utils::write_to_file(
+                s._link, s.produce_result(false, ctx, ap, _subpages,
+                             Path{s._link}, _expanded_asides));
         }
     }
 };
