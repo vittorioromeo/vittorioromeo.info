@@ -147,11 +147,13 @@ namespace utils
     {
 #ifndef WIN32
         std::string cmd(FWD(x));
+        ssvu::lo("system") << cmd << '\n';
         system(cmd.c_str());
 #else
         std::string cmd =
             "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c '" + FWD(x) + "'";
 
+        ssvu::lo("system") << cmd << '\n';
         system(cmd.c_str());
 #endif
     }
@@ -176,7 +178,7 @@ namespace utils
 #else
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
-                    << "/c/OHWorkspace/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
+                    << "/c/sync/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
                     << "x.md ; "
                     << "pandoc --mathjax --highlight-style=pygments " << tempf
                     << "x.md"
