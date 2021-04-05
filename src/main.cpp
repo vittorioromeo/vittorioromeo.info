@@ -178,7 +178,7 @@ namespace utils
 #else
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
-                    << "/c/sync/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
+                    << "/c/OHWorkspace/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
                     << "x.md ; "
                     << "pandoc --mathjax --highlight-style=pygments " << tempf
                     << "x.md"
