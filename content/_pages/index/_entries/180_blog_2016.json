@@ -14,6 +14,20 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "oh_secure_leaderboards",
+            "tags": [
+                "c++",
+                "gamedev",
+                "open hexagon"
+            ],
+            "expand": {
+                "Title": "implementing secure leaderboards for my game",
+                "Text": "180_blog_2016_md/30_oh_secure_leaderboards.md",
+                "Date": "6 november 2021"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "oh_leaderboard_devlog_1",
             "tags": [
                 "c++",

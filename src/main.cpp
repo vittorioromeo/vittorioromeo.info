@@ -21,7 +21,7 @@ auto& lo_verbose()
     }
     else
     {
-        static auto ln = ssvu::loNull();
+        [[maybe_unused]] static auto ln = ssvu::loNull();
         return ln;
     }
 }
@@ -35,7 +35,7 @@ auto& lo_verbose(Ts&&... xs)
     }
     else
     {
-        static auto ln = ssvu::loNull();
+        [[maybe_unused]] static auto ln = ssvu::loNull();
         return ln;
     }
 }
@@ -178,10 +178,11 @@ namespace utils
 #else
                 oss << "mkdir -p " << tempf << " ; touch " << tempf
                     << "temp.html ; chmod 777 " << tempf << "temp.html ; "
-                    << "/c/OHWorkspace/vittorioromeo.info/pp.exe -en " << p << " > " << tempf
-                    << "x.md ; "
-                    << "pandoc --mathjax --highlight-style=pygments " << tempf
-                    << "x.md"
+                    << "/c/OHWorkspace/vittorioromeo.info/pp.exe -en " << p
+                    << " > " << tempf << "x.md ; "
+                    << "/c/OHWorkspace/vittorioromeo.info/pandoc.exe --mathjax "
+                       "--highlight-style=pygments "
+                    << tempf << "x.md"
                     << " -o " << tempf << "temp.html";
 #endif
 #else
@@ -413,6 +414,9 @@ using namespace ssvu::Json;
 template <typename TF>
 void for_all_page_json_files(TF&& f)
 {
+    lo_verbose("for_all_page_json_files")
+        << "scanning directory '" << constant::folder::path::pages << "'\n";
+
     std::vector<Path> page_json_paths{
         getScan<Mode::Recurse, Type::File, Pick::ByName>(
             constant::folder::path::pages, constant::file::page_json)};
@@ -420,15 +424,20 @@ void for_all_page_json_files(TF&& f)
     for(auto& p : page_json_paths)
     {
         const auto& path = p;
+        lo_verbose("for_all_page_json_files") << "path '" << path << "'\n";
 
         // Name of the folder containing "_page.json".
         const auto& name = p.getParent().getFolderName();
+        lo_verbose("for_all_page_json_files") << "name '" << name << "'\n";
 
         // Remove "_pages" and right-trim until first "/".
         const auto& full_name =
             ssvu::getTrimR(ssvu::getReplaced(p.getParent().getStr(),
                                constant::folder::path::pages, ""),
                 [](char c) { return c == '/'; });
+
+        lo_verbose("for_all_page_json_files")
+            << "full_name '" << full_name << "'\n";
 
         const auto& json_val = ssvj::fromFile(path);
         f(path, name, full_name, json_val);
@@ -450,6 +459,9 @@ namespace impl
         {
             return;
         }
+
+        lo_verbose("for_all_page_element_files")
+            << "scanning directory '" << elements_path << "'\n";
 
         std::vector<Path> json_files{
             getScan<Mode::Recurse, Type::File, Pick::ByExt>(
@@ -477,8 +489,8 @@ namespace impl
         const ssvufs::Path& page_path, TF&& f)
     {
         for_all_page_element_files(element_folder_name, page_path,
-            [&f](
-                auto path, auto name, auto full_name, const Val& element_json) {
+            [&f](auto path, auto name, auto full_name, const Val& element_json)
+            {
                 // Force link/output name of a group of entries.
                 if(element_json.has("link_name"))
                 {
@@ -746,104 +758,111 @@ struct page_expansion
 void process_page_entries(context& ctx, const Path& output_path,
     const Path& path, page_id pid, archetype::page& ap)
 {
-    for_all_entries(path, [&ctx, &output_path, &pid, &ap](auto e_path,
-                              auto e_name, auto e_full_name,
-                              const Val& e_contents) {
-        ctx._entry_mapping.create([&](auto eid, auto& ae) {
-            lo_verbose("Entry|parent_page") << pid << "\n";
-            lo_verbose("Entry|path") << e_path << " [" << eid << "]\n";
-            lo_verbose("Entry|name") << e_name << "/" << eid << "\n";
-            lo_verbose("Entry|full_name") << e_full_name << "/" << eid << "\n";
-
-
-
-            auto e_template_path = e_contents["template"].as<Str>();
-            auto e_expand_data = e_contents["expand"].as<Val>();
-            auto wd = e_path.getParent();
-            auto dic = utils::expand_to_dictionary(wd, e_expand_data);
-
-            auto e_output_path =
-                Path{ssvu::getReplaced(output_path, ".html", "")} + "/" +
-                e_full_name;
-
-            // Register entry.
-            ap._entries.emplace_back(eid);
-
-
-            if(e_contents.has("link_name"))
-            {
-                auto link_name = e_contents["link_name"].as<Str>();
-                ae._link_name = link_name;
-                e_output_path += "/" + link_name + ".html";
-            }
-            else
-            {
-                e_output_path += "/" + std::to_string(eid) + ".html";
-            }
-
-            if(e_contents.has("tags"))
-            {
-                for(const auto& t : e_contents["tags"].forArrAs<Str>())
+    for_all_entries(path,
+        [&ctx, &output_path, &pid, &ap](
+            auto e_path, auto e_name, auto e_full_name, const Val& e_contents)
+        {
+            ctx._entry_mapping.create(
+                [&](auto eid, auto& ae)
                 {
-                    ae._tags.emplace_back(t);
-                }
-            }
-            else
-            {
-                ae._tags.emplace_back("untagged");
-            }
+                    lo_verbose("Entry|parent_page") << pid << "\n";
+                    lo_verbose("Entry|path") << e_path << " [" << eid << "]\n";
+                    lo_verbose("Entry|name") << e_name << "/" << eid << "\n";
+                    lo_verbose("Entry|full_name")
+                        << e_full_name << "/" << eid << "\n";
 
 
 
-            ae._template_path = e_template_path;
-            ae._expand = dic;
-            ae._output_path = e_output_path;
-            ae._parent_page = pid;
+                    auto e_template_path = e_contents["template"].as<Str>();
+                    auto e_expand_data = e_contents["expand"].as<Val>();
+                    auto wd = e_path.getParent();
+                    auto dic = utils::expand_to_dictionary(wd, e_expand_data);
+
+                    auto e_output_path =
+                        Path{ssvu::getReplaced(output_path, ".html", "")} +
+                        "/" + e_full_name;
+
+                    // Register entry.
+                    ap._entries.emplace_back(eid);
 
 
-            lo_verbose("Entry|output_path") << e_output_path << "\n";
-            lo_verbose("Entry|template") << e_template_path << "\n";
-            // lo_verbose("Entry|expand") << e_expand_data << "\n";
-            lo_verbose() << "\n";
+                    if(e_contents.has("link_name"))
+                    {
+                        auto link_name = e_contents["link_name"].as<Str>();
+                        ae._link_name = link_name;
+                        e_output_path += "/" + link_name + ".html";
+                    }
+                    else
+                    {
+                        e_output_path += "/" + std::to_string(eid) + ".html";
+                    }
+
+                    if(e_contents.has("tags"))
+                    {
+                        for(const auto& t : e_contents["tags"].forArrAs<Str>())
+                        {
+                            ae._tags.emplace_back(t);
+                        }
+                    }
+                    else
+                    {
+                        ae._tags.emplace_back("untagged");
+                    }
+
+
+
+                    ae._template_path = e_template_path;
+                    ae._expand = dic;
+                    ae._output_path = e_output_path;
+                    ae._parent_page = pid;
+
+
+                    lo_verbose("Entry|output_path") << e_output_path << "\n";
+                    lo_verbose("Entry|template") << e_template_path << "\n";
+                    // lo_verbose("Entry|expand") << e_expand_data << "\n";
+                    lo_verbose() << "\n";
+                });
         });
-    });
 }
 
 void process_page_asides(context& ctx, const Path& output_path,
     const Path& path, page_id pid, archetype::page& ap)
 {
-    for_all_asides(
-        path, [&ctx, &pid, &ap, &output_path](auto a_path, auto a_name,
-                  auto a_full_name, const Val& a_contents) {
-            ctx._aside_mapping.create([&](auto aid, auto& aa) {
-                lo_verbose("Aside|parent_page") << pid << "\n";
-                lo_verbose("Aside|path") << a_path << "\n";
-                lo_verbose("Aside|name") << a_name << "\n";
-                lo_verbose("Aside|full_name") << a_full_name << "\n";
+    for_all_asides(path,
+        [&ctx, &pid, &ap, &output_path](
+            auto a_path, auto a_name, auto a_full_name, const Val& a_contents)
+        {
+            ctx._aside_mapping.create(
+                [&](auto aid, auto& aa)
+                {
+                    lo_verbose("Aside|parent_page") << pid << "\n";
+                    lo_verbose("Aside|path") << a_path << "\n";
+                    lo_verbose("Aside|name") << a_name << "\n";
+                    lo_verbose("Aside|full_name") << a_full_name << "\n";
 
-                auto template_path = a_contents["template"].as<Str>();
-                auto a_expand_data = a_contents["expand"].as<Val>();
+                    auto template_path = a_contents["template"].as<Str>();
+                    auto a_expand_data = a_contents["expand"].as<Val>();
 
-                auto a_output_path =
-                    Path{ssvu::getReplaced(output_path, ".html", "")} + "/" +
-                    a_full_name;
+                    auto a_output_path =
+                        Path{ssvu::getReplaced(output_path, ".html", "")} +
+                        "/" + a_full_name;
 
-                auto wd = a_path.getParent();
-                auto dict = utils::expand_to_dictionary(wd, a_expand_data);
-
-
-                // Register aside.
-                ap._asides.emplace_back(aid);
-
-                aa._parent_page = pid;
-                aa._template_path = template_path;
-                aa._output_path = a_output_path;
-                aa._expand = dict;
+                    auto wd = a_path.getParent();
+                    auto dict = utils::expand_to_dictionary(wd, a_expand_data);
 
 
-                // Increment unique aside id.
-                lo_verbose() << "\n";
-            });
+                    // Register aside.
+                    ap._asides.emplace_back(aid);
+
+                    aa._parent_page = pid;
+                    aa._template_path = template_path;
+                    aa._output_path = a_output_path;
+                    aa._expand = dict;
+
+
+                    // Increment unique aside id.
+                    lo_verbose() << "\n";
+                });
         });
 }
 
@@ -885,42 +904,46 @@ void load_main_menu_data(context& ctx)
 void load_page_data(context& ctx)
 {
     for_all_page_json_files(
-        [&ctx](auto path, auto name, auto full_name, Val contents) {
+        [&ctx](auto path, auto name, auto full_name, Val contents)
+        {
             // Register page.
-            ctx._page_mapping.create([&](auto pid, auto& ap) {
-                auto output_path = std::string{constant::folder::path::result} +
-                                   full_name + ".html";
-
-                // Log data about page.
-                lo_verbose("Page|id") << pid << "\n";
-                lo_verbose("Page|path") << path << "\n";
-                lo_verbose("Page|name") << name << "\n";
-                lo_verbose("Page|full_name") << full_name << "\n";
-                lo_verbose("Page|output_path") << output_path << "\n";
-
-                ap._name = name;
-                ap._path = path;
-                ap._full_name = full_name;
-                ap._output_path = output_path;
-
-                // Check for subpaging options.
-                if(contents.has("subpaging"))
+            ctx._page_mapping.create(
+                [&](auto pid, auto& ap)
                 {
-                    auto eps =
-                        contents["subpaging"]["entries_per_subpage"].as<IntU>();
-                    ap._subpaging = eps;
-                    lo_verbose("Page|eps") << eps << "\n";
-                }
+                    auto output_path =
+                        std::string{constant::folder::path::result} +
+                        full_name + ".html";
 
-                // Check for RSS options.
-                if(contents.has("rss"))
-                {
-                    ap._rss = contents["rss"]["output"].as<Str>();
-                }
+                    // Log data about page.
+                    lo_verbose("Page|id") << pid << "\n";
+                    lo_verbose("Page|path") << path << "\n";
+                    lo_verbose("Page|name") << name << "\n";
+                    lo_verbose("Page|full_name") << full_name << "\n";
+                    lo_verbose("Page|output_path") << output_path << "\n";
 
-                process_page_entries(ctx, output_path, path, pid, ap);
-                process_page_asides(ctx, output_path, path, pid, ap);
-            });
+                    ap._name = name;
+                    ap._path = path;
+                    ap._full_name = full_name;
+                    ap._output_path = output_path;
+
+                    // Check for subpaging options.
+                    if(contents.has("subpaging"))
+                    {
+                        auto eps = contents["subpaging"]["entries_per_subpage"]
+                                       .as<IntU>();
+                        ap._subpaging = eps;
+                        lo_verbose("Page|eps") << eps << "\n";
+                    }
+
+                    // Check for RSS options.
+                    if(contents.has("rss"))
+                    {
+                        ap._rss = contents["rss"]["output"].as<Str>();
+                    }
+
+                    process_page_entries(ctx, output_path, path, pid, ap);
+                    process_page_asides(ctx, output_path, path, pid, ap);
+                });
         });
 }
 
@@ -1020,72 +1043,83 @@ void process_entries_ellipsis_and_permalink(archetype::entry& ae)
 
 void process_pages(context& ctx)
 {
-    ctx._page_mapping.for_all([&ctx](auto, const archetype::page& ap) {
-        const auto& entry_ids = ap._entries;
-        if(entry_ids.empty())
+    ctx._page_mapping.for_all(
+        [&ctx](auto, const archetype::page& ap)
         {
-            return;
-        }
-
-        page_expansion pe;
-
-
-        // Expand permalinks (single-article pages)
-        for(auto eid : entry_ids)
-        {
-            process_pages_permalink(ctx, ap, eid);
-        }
-
-
-
-        auto make_subpage = [&](auto i_begin, auto i_end) {
-            pe._subpages.emplace_back();
-            auto& subpage = pe._subpages.back();
-
-            for(sz_t ei(i_begin); ei < i_end; ++ei)
+            const auto& entry_ids = ap._entries;
+            if(entry_ids.empty())
             {
-                entry_id eid = entry_ids[ei];
-                auto ae = ctx._entry_mapping.get(eid);
-                process_entries_ellipsis_and_permalink(ae);
-
-                build_tag_expansion(ae);
-                auto e_expanded =
-                    utils::expand_to_str(ae._expand, ae._template_path);
-
-                subpage._expanded_entry_ids.emplace_back(eid);
-                subpage._expanded_entries.emplace_back(e_expanded);
+                return;
             }
-        };
 
-        // Create subpages
-        if(ap._subpaging)
-        {
-            auto entries_per_subpage = ap._subpaging.value();
-            auto subpage_count =
-                std::max(sz_t(1), entry_ids.size() / entries_per_subpage);
+            page_expansion pe;
 
-            utils::segmented_for(subpage_count, entries_per_subpage,
-                entry_ids.size(), [&](auto, auto i_begin, auto i_end) {
-                    make_subpage(i_begin, i_end);
-                });
-        }
-        else
-        {
-            make_subpage(0, entry_ids.size());
-        }
 
-        pe.produce_result(ctx, ap, ap._output_path);
-    });
+            // Expand permalinks (single-article pages)
+            for(auto eid : entry_ids)
+            {
+                process_pages_permalink(ctx, ap, eid);
+            }
+
+
+
+            auto make_subpage = [&](auto i_begin, auto i_end)
+            {
+                pe._subpages.emplace_back();
+                auto& subpage = pe._subpages.back();
+
+                for(sz_t ei(i_begin); ei < i_end; ++ei)
+                {
+                    entry_id eid = entry_ids[ei];
+                    auto ae = ctx._entry_mapping.get(eid);
+                    process_entries_ellipsis_and_permalink(ae);
+
+                    build_tag_expansion(ae);
+                    auto e_expanded =
+                        utils::expand_to_str(ae._expand, ae._template_path);
+
+                    subpage._expanded_entry_ids.emplace_back(eid);
+                    subpage._expanded_entries.emplace_back(e_expanded);
+                }
+            };
+
+            // Create subpages
+            if(ap._subpaging)
+            {
+                auto entries_per_subpage = ap._subpaging.value();
+                auto subpage_count =
+                    std::max(sz_t(1), entry_ids.size() / entries_per_subpage);
+
+                utils::segmented_for(subpage_count, entries_per_subpage,
+                    entry_ids.size(),
+                    [&](auto, auto i_begin, auto i_end)
+                    { make_subpage(i_begin, i_end); });
+            }
+            else
+            {
+                make_subpage(0, entry_ids.size());
+            }
+
+            pe.produce_result(ctx, ap, ap._output_path);
+        });
 }
 
 int main()
 {
+    lo_verbose("main") << "cleaning and re-creating result folder\n";
     clean_and_recreate_result_folder();
 
     context ctx;
+
+    lo_verbose("main") << "loading main menu data\n";
     load_main_menu_data(ctx);
+
+    lo_verbose("main") << "loading page data\n";
     load_page_data(ctx);
+
+    lo_verbose("main") << "processing pages\n";
     process_pages(ctx);
 
+    lo_verbose("main") << "done\n";
     return 0;
 }
