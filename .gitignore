@@ -9,3 +9,4 @@ CMakeLists.txt.user
 *.swp
 *.swo
 *.swn
+.cache/clangd/index/main.cpp.4832A8FA5634BC51.idx
