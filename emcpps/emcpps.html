@@ -1,4 +1,17 @@
+<!doctype html>
+<html lang="en">
+
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <script src="https://kit.fontawesome.com/3c05f7f91a.js" crossorigin="anonymous"></script>
+
+    <title>Embracing Modern C++ Safely</title>
+
     <style>
         html,
         body {
@@ -25,28 +38,148 @@
         .flex-item {
             color: white;
             font-weight: bold;
-            font-size: 2em;
             text-align: center;
         }
     </style>
 </head>
 
 <body>
-
-    <div class="flex-container">
+    <div class="container" style="width: 100%; height: 100%; padding: 2vw;">
         <div class="row">
-            <div class="flex-item">
-                <div
-                    style="color: black; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size:larger">
-                    Embracing Modern C++ Safely</div>
-                <div
-                    style="color: #121212; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size: 25px; font-weight: lighter; padding-top:10px">
-                    Coming Soon!</div>
-                <div
-                    style="color: #121212; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size: smaller; font-weight: lighter; padding-top:100px; font-style: italic;">
-                    For updates, follow <a href="https://twitter.com/supahvee1234">@supahvee1234</a> on Twitter.</div>
+            <div class="col xxl">
+                <div class="flex-item">
+                    <img style="box-shadow: 8px 9px 31px 1px rgba(0,0,0,0.44);
+                    -webkit-box-shadow: 8px 9px 31px 1px rgba(0,0,0,0.44);
+                    -moz-box-shadow: 8px 9px 31px 1px rgba(0,0,0,0.44);" src="cover.jpg" class="img-fluid" alt="Embracing Modern C++ Safely Book Cover">
+                </div>
+            </div>
+            <div class="col xxl"
+                style="display: flex; align-items: center; flex-direction: column; justify-content: center;">
+
+                <div class="flex-item">
+                    <div class="fs-1"
+                        style="color: black; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+                        Embracing Modern C++ <i>Safely</i></div>
+
+                    <div class="fs-5"
+                        style="font-family: 'Gill Sans'; font-style: italic; font-weight:lighter; color: #444444; padding-left: 17px; padding-right: 17px; line-height: 115%;">
+                        <span style="font-size: 84%;">
+                            EMC++S shows you how to make effective use of the new and enhanced
+                            language features of modern C++ without falling victim to their potential pitfalls. <a
+                                data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+                                aria-controls="collapseExample" style="font-style: normal; font-size: 80%;">
+                                [...more...]
+                            </a>
+                        </span>
+                    </div>
+
+                    <div class="collapse" id="collapseExample">
+                        <div class="card card-body">
+                            <div class="fs-5"
+                                style="font-family: 'Gill Sans'; font-style: normal; font-weight:lighter; color: #222222; padding-left: 25px; padding-right: 25px; line-height: 115%; text-align: justify;">
+                                <span style="font-size: 90%;">
+                                    <p>Based on their years of experience with large, mission-critical projects, four
+                                        leading C++ authorities divide C++11/14 language features into three categories:
+                                        Safe, Conditionally Safe, and Unsafe.
+                                    </p>
+                                    <p>
+                                    <ul>
+                                        <li><i>Safe features</i> offer compelling value, are
+                                        easy to use productively, and are relatively difficult to misuse. </li>
+                                        <li><i>Conditionally
+                                        Safe</i> features offer significant value but come with risks that require
+                                        significant expertise and familiarity before use. </li>
+                                        <li><i>Unsafe features</i> have an
+                                        especially poor risk/reward ratio, are easy to misuse, and are beneficial in
+                                        only the most specialized circumstances.</li>
+                                    </ul></p>
+
+                                    <p>
+                                        This book distills the C++ community's years of experience applying C++11 and
+                                        C++14 features and will help you make effective and safe design decisions that
+                                        reflect real-world, economic engineering tradeoffs in a large-scale, diverse
+                                        software development environment. The book uses examples derived from real code
+                                        bases to illustrate every finding objectively and to illuminate key issues. The
+                                        authors identify the sound use cases, hidden pitfalls, and shortcomings of each
+                                        language feature.</p>
+                                    <p> After reading this book, you will:
+                                    </p>
+
+                                    <p>
+                                    <ul>
+                                        <li>Understand what each C++11/14 feature does and where it works best</li>
+                                        <li>Recognize how to work around show-stopping pitfalls and annoying corner
+                                            cases</li>
+                                        <li>Know which features demand additional training, experience, and peer
+                                            review</li>
+                                        <li>Gain insights for preparing coding standards and style guides that suit
+                                            your organization's needs</li>
+                                        <li>Be equipped to introduce modern C++ incrementally and judiciously into
+                                            established code bases</li>
+                                    </ul>
+                                    </p>
+                                    <p>
+                                        Seasoned C++ developers, team leads, and technical managers who want to improve
+                                        productivity, code quality, and maintainability will find the insights in this
+                                        modular, meticulously organized reference indispensable.
+                                    </p>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fs-2"
+                        style="margin-top: 40px; color: #121212; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight: lighter; padding-top:10px">
+                        Pre-order now!</div>
+
+                </div>
+
+                <div class="flex-item" style="margin-top: 10px">
+                    <div class="row">
+                        <a href="https://www.informit.com/store/embracing-modern-c-plus-plus-safely-9780137380350" target="_blank"  type="button" class="btn btn-primary"
+                            style="font-weight: bold; width: 150px; margin-right: 10px;"><i class="fas fa-star"
+                                style="padding-right: 10px; "></i>InformIT</a>
+                        <a href="https://www.waterstones.com/book/embracing-modern-c-safely/john-lakos/vittorio-romeo/9780137380350" target="_blank" type="button" class="btn btn-secondary"
+                            style="width: 150px; margin-right: 10px;">Waterstones</a>
+                        <a href="https://blackwells.co.uk/bookshop/product/Embracing-Modern-C-Safely-by-John-Lakos-author-Vittorio-Romeo-author-Rostislav-Khlebnikov-author-Alisdair-Meredith-author/9780137380350" target="_blank" type="button" class="btn btn-secondary" style="width: 150px;">Blackwell's</a>
+                    </div>
+                    <div class="row" style="padding-top: 10px">
+                        <a href="https://www.amazon.com/Embracing-Modern-Safely-John-Lakos/dp/0137380356" target="_blank" type="button" class="btn btn-warning" style="width: 150px; margin-right: 10px;"><i
+                                class="fab fa-amazon" style="padding-right: 10px"></i>Amazon US</a>
+                        <a href="https://www.amazon.co.uk/Embracing-Modern-Safely-John-Lakos/dp/0137380356" target="_blank" type="button" class="btn btn-warning" style="width: 150px; margin-right: 10px;"><i
+                                class="fab fa-amazon" style="padding-right: 10px"></i>Amazon UK</a>
+                        <a href="https://www.amazon.it/Embracing-Modern-Safely-John-Lakos/dp/0137380356" target="_blank" type="button" class="btn btn-warning" style="width: 150px;"><i class="fab fa-amazon"
+                                style="padding-right: 10px"></i>Amazon IT</a>
+                    </div>
+                    <div class="row" style="padding-top: 10px">
+                        <a href="https://www.whsmith.co.uk/products/embracing-modern-c-safely/john-lakos/vittorio-romeo/paperback/9780137380350.html" target="_blank" type="button" class="btn btn-secondary"
+                            style="width: 150px; margin-right: 10px;">WHSmith</a>
+                        <a href="https://bookshop.org/books/embracing-modern-c-safely/9780137380350" target="_blank" type="button" class="btn btn-secondary"
+                            style="width: 150px; margin-right: 10px;">Bookshop.org</a>
+                        <a href="https://tales.as/embracing-modern-c-safely_john-lakos_9780137380350" target="_blank" type="button" class="btn btn-secondary" style="width: 150px;">Tales</a>
+                    </div>
+                    <div class="row" style="padding-top: 10px">
+                        <a href="https://www.thriftbooks.com/w/embracing-modern-c-safely_john-lakos_vittorio-romeo/27382044/#edition=58563408&idiq=46278065" target="_blank" type="button" class="btn btn-secondary"
+                            style="width: 150px; margin-right: 10px;">Thriftbooks</a>
+                        <a href="https://www.ibs.it/embracing-modern-c-safely-libro-inglese-vari/e/9780137380350" target="_blank" type="button" class="btn btn-secondary"
+                            style="width: 150px; margin-right: 10px;">ibs.it</a>
+                        <a href="https://www.bokus.com/bok/9780137380350/embracing-modern-c-safely/" target="_blank" type="button" class="btn btn-secondary" style="width: 150px;">bokus</a>
+                    </div>
+
+                </div>
+
+                <div class="flex-item">
+                    <div class="fs-5"
+                        style="color: #121212; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;  font-weight: lighter; padding-top:100px; font-style: italic;">
+                        For updates, follow <a href="https://twitter.com/supahvee1234">@supahvee1234</a> on Twitter.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
+
+</html>
