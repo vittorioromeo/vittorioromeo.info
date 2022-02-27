@@ -206,4 +206,4 @@ Now, for some shameless self-promotion:
 
     - Open Hexagon is a spiritual successor to the critically acclaimed Super Hexagon by Terry Cavanagh. [Terry fully supports my project!](https://twitter.com/terrycavanagh/status/1397372432877379587) Thanks!
 
-- I offer 1-1 C++ mentoring and consulting sessions in my spare time. If it's something you are interested in, feel free to reach out at `mail (at) vittorioromeo (dot) com` or on Twitter ([@supahvee1234](https://twitter.com/supahvee1234)).
+- I offer 1-1 C++ mentoring and consulting sessions in my spare time. If it's something you are interested in, feel free to reach out at `mail (at) vittorioromeo (dot) com` or [on Twitter](https://twitter.com/supahvee1234).
