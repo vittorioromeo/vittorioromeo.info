@@ -24,7 +24,11 @@ I am working on a virtual reality mod for Quake. Actually, calling it a "mod" is
 
 <center>
 
+<div class="video-container">
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/c_ctxSqs6gA?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+</div>
 
 </center>
 
@@ -186,7 +190,11 @@ I am sure there is a balance - not every line of your code should be buried unde
 
 <center>
 
+<div class="video-container">
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/D7Sd8A6_fYU?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+</div>
 
 </center>
 
