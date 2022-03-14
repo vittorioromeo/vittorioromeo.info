@@ -490,3 +490,32 @@ code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Infor
 .video-container { position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden; }
 
 .video-container iframe, .video-container object, .video-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+blockquote > pre > code { overflow-x: scroll; }
+
+@media only screen and (max-width: 400px) {
+  .mainMenu
+  {
+    zoom: 65%
+  }
+
+  .header-container{ zoom: 65% }
+}
+
+@media only screen and (min-width: 400px) {
+  .mainMenu
+  {
+    zoom: 75%
+  }
+
+  .header-container{ zoom: 75% }
+}
+
+@media only screen and (min-width: 768px) {
+  .mainMenu
+  {
+    zoom: 100%
+  }
+
+  .header-container{ zoom: 100% }
+}

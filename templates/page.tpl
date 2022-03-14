@@ -16,24 +16,7 @@
         <link rel="stylesheet" href="{{ResourcesPath}}/css/main.css">
         <link rel="stylesheet" href="{{ResourcesPath}}/css/utils.css">
 
-        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({
-                google_ad_client: "ca-pub-2318296776122737",
-                enable_page_level_ads: true
-            });
-        </script>
-
         <script src="{{ResourcesPath}}/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-
-
-<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({
-    google_ad_client: "ca-pub-2318296776122737",
-    enable_page_level_ads: true
-  });
-</script>
 
         <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
@@ -127,7 +110,7 @@
 
         <div class="footer-container">
             <footer class="wrapper">
-                <p>vittorio romeo 2012 - 2020</p>
+                <p>vittorio romeo 2012 - 2022</p>
 
 
 
