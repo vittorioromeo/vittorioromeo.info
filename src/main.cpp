@@ -124,15 +124,13 @@ namespace utils
     {
 #ifndef WIN32
         std::string cmd(FWD(x));
-        ssvu::lo("system") << cmd << '\n';
-        system(cmd.c_str());
 #else
         const std::string cmd =
             "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c '" + FWD(x) + "'";
+#endif
 
         ssvu::lo("system") << cmd << '\n';
         system(cmd.c_str());
-#endif
     }
 
     namespace impl
