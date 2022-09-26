@@ -14,6 +14,21 @@
         //    },
         {
             "template": "templates/entries/blog.tpl",
+            "link_name": "debug_performance_cpp",
+            "tags": [
+                "c++",
+                "c++20",
+                "gamedev",
+                "debug"
+            ],
+            "expand": {
+                "Title": "the sad state of debug performance in c++",
+                "Text": "180_blog_2016_md/32_debug_performance_cpp.md",
+                "Date": "26 september 2022"
+            }
+        },
+        {
+            "template": "templates/entries/blog.tpl",
             "link_name": "wordlexpr",
             "tags": [
                 "c++",
