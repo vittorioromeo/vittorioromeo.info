@@ -84,7 +84,7 @@ The consequences of these inefficiencies are *devastating* for the reputation an
 
 Every time a seasoned C++ programmer proposes the use of a safer, harder to misuse abstraction to a game developer, they will not listen -- they cannot afford to do so. Therefore people working in other domains will see game developers as primitive life forms that have not yet discovered abstractions and that like to play with fire by juggling pointers and using macros, completely failing to see the reasons that led them to those techniques.
 
-On the other hand, game developers will laugh at and shun C++ developers who embrace high-level abstractions and type safety, because they fail to realize that debug performance and compilation speeds might not be as important as cleaner, safer, and more maintanable code. It sucks.
+On the other hand, game developers will laugh at and shun C++ developers who embrace high-level abstractions and type safety, because they fail to realize that debug performance and compilation speeds might not be as important as cleaner, safer, and more maintainable code. It sucks.
 
 I also don't have any proof of this, but I suspect that writing low-level code with the desire of optimizing the debugging experience ironically ends up increasing the frequency of debugging.
 
@@ -120,9 +120,9 @@ There are a few areas where improvements could be made: (1) the *language* itsel
 
 2. Compilers could be a lot smarter about the way they handle these functions. And they are becoming so!
 
-    GCC 12.x introduced a new `-ffold-simple-inlines` flag as a result of [my #104719 bug report](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=1047199), which permits the C++ fronted to fold calls to `std::move`, `std::forward`, `std::addressof`, and `std::as_const`. The [documentation](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html) mentions that it should be enabled by default, but I couldn't get the compiler to perform the folding unless I manually specified the flag -- see an example [on Compiler Explorer](https://gcc.godbolt.org/z/KPGe3YYsG).
+    GCC 12.x introduced a new `-ffold-simple-inlines` flag as a result of [my #104719 bug report](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104719), which permits the C++ frontend to fold calls to `std::move`, `std::forward`, `std::addressof`, and `std::as_const`. The [documentation](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html) mentions that it should be enabled by default, but I couldn't get the compiler to perform the folding unless I manually specified the flag -- see an example [on Compiler Explorer](https://gcc.godbolt.org/z/KPGe3YYsG).
 
-    Clang 15.x, also motivated by [my #53689 issue](https://github.com/llvm/llvm-project/issues/53689), also introduced a similar folding pass for the same functions chosen by GCC (plus `std::move_if_noexcept`, which I assume GCC maintainers forgot about). This one seems to be enabled by default -- see a comparison between Clang 14.x and Clang 15.x [on Compiler Explorer](-std=c++20).
+    Clang 15.x, also motivated by [my #53689 issue](https://github.com/llvm/llvm-project/issues/53689), also introduced a similar folding pass for the same functions chosen by GCC (plus `std::move_if_noexcept`, which I assume GCC maintainers forgot about). This one seems to be enabled by default -- see a comparison between Clang 14.x and Clang 15.x [on Compiler Explorer]([-std=c++20](https://gcc.godbolt.org/z/7MjM53h7G)).
 
     MSVC has not yet provided any improvement in this area.
 
@@ -160,7 +160,7 @@ There are a few areas where improvements could be made: (1) the *language* itsel
 
 ### conclusion
 
-I hope you have found this exploration of C++ debug performance interesting and enlightning, and I also hope to have inspired you to contribute in this area. Feel free to reach out via [email](mailto:mail@vittorioromeo.com) or [on Twitter](https://twitter.com/supahvee1234). to ask any question or provide your feedback/criticism!
+I hope you have found this exploration of C++ debug performance interesting and enlightening, and I also hope to have inspired you to contribute in this area. Feel free to reach out via [email](mailto:mail@vittorioromeo.com) or [on Twitter](https://twitter.com/supahvee1234). to ask any question or provide your feedback/criticism!
 
 Shameless self-promotion time!
 
@@ -172,9 +172,9 @@ Shameless self-promotion time!
 
 - If you are a fan of fast-paced open-source arcade games that allow user-created content, check out [**Open Hexagon**](https://store.steampowered.com/app/1358090/Open_Hexagon/), my first fully-released game [available on Steam](https://store.steampowered.com/app/1358090/Open_Hexagon/) and [on itch.io](https://itch.io/t/1758441/open-hexagon-my-spiritual-successor-to-super-hexagon).
 
-    - Open Hexagon is a spiritual successor to the critically acclaimed Super Hexagon by Terry Cavanagh. [Terry fully supports my projec!](https://twitter.com/terrycavanagh/status/1397372432877379587) -- thank you!
+    - Open Hexagon is a spiritual successor to the critically acclaimed Super Hexagon by Terry Cavanagh. [Terry fully supports my project!](https://twitter.com/terrycavanagh/status/1397372432877379587) -- thank you!
 
-- Got a VR headset and want to experience Quake, the timeless classic from 1996, as a first-class virtual reality experience? Check out [Quake VR](https://quakepcvr.com/), my "labor of love" one-man project that turns Quake into an experience with many VR-only features and interactions.
+- Got a VR headset and want to experience Quake, the timeless classic from 1996, as a first-class virtual reality experience? Check out [Quake VR](https://quakepcvr.com/), my "labour of love" one-man project that turns Quake into an experience with many VR-only features and interactions.
 
   A video is worth a thousand words: [YouTube: **Quake VR - Release Trailer (v0.0.5)**](https://www.youtube.com/watch?v=MBoI16z8Nxg).
 
