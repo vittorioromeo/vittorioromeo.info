@@ -124,7 +124,7 @@ There are a few areas where improvements could be made: (1) the *language* itsel
 
     Clang 15.x, also motivated by [my #53689 issue](https://github.com/llvm/llvm-project/issues/53689), also introduced a similar folding pass for the same functions chosen by GCC (plus `std::move_if_noexcept`, which I assume GCC maintainers forgot about). This one seems to be enabled by default -- see a comparison between Clang 14.x and Clang 15.x [on Compiler Explorer]([-std=c++20](https://gcc.godbolt.org/z/7MjM53h7G)).
 
-    MSVC has not yet provided any improvement in this area.
+    ~~MSVC has not yet provided any improvement in this area.~~ The MSVC developer team has reached out after this article was published, and was very keen to improve the situation. In fact, they wrote a blog post about their improvements [here](https://devblogs.microsoft.com/cppblog/improving-the-state-of-debug-performance-in-c/). Thank you so much!
 
     I have to mention how happy I am to see GCC and Clang maintainers stepping up to improve the debug performance situation and I deeply thank them for that. Kudos!
 
